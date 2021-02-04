@@ -4,11 +4,12 @@
 //var colors = ["#FF0000", "#0000FF", "#00FF00", "#000000"];
 var colors = ["#FF0000","#0000FF", "#00FF00", "#7E7E7E", "#8A2BE2",  "#FFFF00", "#15E2CB", "#FF007F", "#FF8300", "#000000"];
 
+var numberOfPages;
 var numberOfPagesStart = window.localStorage.getItem("numberOfPages");
 if (numberOfPagesStart == null) {
   window.localStorage.setItem("numberOfPages", 4);
 }
-var numberOfPages = parseInt(window.localStorage.getItem("numberOfPages"));
+numberOfPages = parseInt(window.localStorage.getItem("numberOfPages"));
 
 function addDefaultColor() {
    if (colors.length < numberOfPages) {

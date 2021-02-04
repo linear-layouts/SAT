@@ -60,15 +60,24 @@ function disablePages() {
 	var numberOfPages = parseInt(window.localStorage.getItem("numberOfPages"));
 	for (var j = 1; j <= numberOfPages; j++) {
 		if (document.getElementById("page"+j).checked) {
-			checkedPages += 1;
+			//checkedPages += 1;
+			$("#page" + j).checkboxradio({
+				disabled: false
+			})
+			var k = j+1;
+			if (k <= numberOfPages) {
+				$("#page" + k).checkboxradio({
+					disabled: false
+				})
+			}
+		} else {
+			var s = j+1;
+			if (s <= numberOfPages) {
+				$("#page" + s).checkboxradio({
+					disabled: true
+				})
+			}
 		}
-	}
-	let i;
-	for (i = checkedPages+2; i<= numberOfPages; i++) {
-		$("#page" + i).checkboxradio({
-			disabled: true
-		})
-
 	}
 }
 
@@ -353,7 +362,7 @@ function fillAssignDialogForNodes(graphComponent) {
 
 function fillAssignDialog() {
 	var avPages = [1];
-
+	var numberOfPages = parseInt(window.localStorage.getItem("numberOfPages"));
 	let k;
 	for(k=2; k<=numberOfPages; k++) {
 		if ($("#page" + k).prop("checked")) {
@@ -467,6 +476,19 @@ $( function() {
 		resizable: false,
 		width: 250,
 		modal: true,open: function( event, ui ) {
+			$("#greyDiv").show()
+		},
+		beforeClose: function( event, ui ) {
+			$("#greyDiv").hide();
+		}
+	});
+
+	$("#deletePageDialog").dialog( {
+		autoOpen: false,
+		resizable: false,
+		width: 250,
+		modal: true,
+		open: function( event, ui ) {
 			$("#greyDiv").show()
 		},
 		beforeClose: function( event, ui ) {

@@ -38,7 +38,7 @@ require([
 	var standardServer = "http://alice.informatik.uni-tuebingen.de:5555/embeddings"
 	//var standardServer = "http://0.0.0.0:5555/embeddings"
 
-	var numberOfPages = window.localStorage.getItem("numberOfPages");
+	var numberOfPages = parseInt(window.localStorage.getItem("numberOfPages"));
 
 	let gridInfo = null;
 	let grid = null;
@@ -47,6 +47,7 @@ require([
 	var numberOfCopiedNodes = 0;
 	var numberOfCopiedEdges = 0;
 
+	var lqnBool = true;
 	var nodesStableSize = true;
 	var allowDoubleEdges = false;
 	var treatEdgesAsDirected = false;
@@ -1826,6 +1827,128 @@ require([
 
 
 		/* Tools Tab */
+		document.querySelector("#localPageNumber").addEventListener("click", () => {
+			setLocalPageNumberValuesFromStorage();
+			$("#enableLocalPageNumber").dialog("open")
+		})
+
+		document.querySelector("#yesApply").addEventListener("click", () => {
+			//remove old constraint tag
+			for (var s = 0; s < constraintsArray.length; s++) {
+				if (constraintsArray[s].type == "LOCAL_PAGE_NUMBER") {
+					var con = new LocalPageNumber(window.localStorage.getItem("nrLocalPage"));
+					$("#constraintTags").tagit("removeTagByLabel", con.getPrintable())
+				}
+			}
+			//fill storage with new values
+			if (document.getElementById("yesEnable").checked == true) {
+				lqnBool = false;
+				window.localStorage.setItem("enableLocalPage", true);
+				var nrLocalPage = document.getElementById("numberLocalPage").value;
+				window.localStorage.setItem("nrLocalPage", nrLocalPage);
+			} else if (document.getElementById("yesEnable").checked == false) {
+				lqnBool = true;
+				window.localStorage.setItem("enableLocalPage", false);
+				//window.localStorage.setItem("numberLocalPage", 0);
+			}
+			//create constraint
+			if (!lqnBool) {
+				var con = new LocalPageNumber(window.localStorage.getItem("nrLocalPage"));
+				constraintsArray.push(con);
+				$("#constraintTags").tagit("createTag", con.getPrintable())
+
+				$("#constraintTags").tagit({
+					afterTagRemoved: function (event, ui) {
+						if (ui.tagLabel == "LocalPages(" + window.localStorage.getItem("nrLocalPage") + ")") {
+							lqnBool = true;
+							document.getElementById("localPageNumber").checked = lqnBool;
+						}
+						window.localStorage.setItem("enableLocalPage", false);
+						//window.localStorage.setItem("nrLocalPage", 0);
+					}
+				});
+			}
+			/*
+			else {
+				var con = new LocalPageNumber(window.localStorage.getItem("nrLocalPage"));
+				var newConstraintsArray = []
+				let t;
+				for (t = 0; t < constraintsArray.length; t++) {
+					if (constraintsArray[t].type != "LOCAL_PAGE_NUMBER") {
+						newConstraintsArray.push(constraintsArray[t])
+					}
+				}
+				constraintsArray = newConstraintsArray
+				try {
+					$("#constraintTags").tagit("removeTagByLabel", con.getPrintable())
+					lqnBool = true;
+				}
+				catch (error) {
+					//removedTagManuall = false;
+				}
+			}
+			*/
+			document.getElementById("localPageNumber").checked = lqnBool;
+			$("#enableLocalPageNumber").dialog("close")
+		})
+
+		document.querySelector("#noDontApply").addEventListener("click", () => {
+			document.getElementById("localPageNumber").checked = lqnBool;
+			$("#enableLocalPageNumber").dialog("close")
+		})
+
+		$("#enableLocalPageNumber").dialog( {
+			autoOpen: false,
+			resizable: false,
+			width: 250,
+			modal: true,
+			open: function( event, ui ) {
+				$("#greyDiv").show()
+			},
+			beforeClose: function( event, ui ) {
+				lqnBool = false;
+				document.getElementById("localPageNumber").checked = lqnBool;
+				$("#greyDiv").hide();
+			}
+		});
+
+		function setLocalPageNumberValuesFromStorage() {
+			var enableLocalPageStorage = window.localStorage.getItem("enableLocalPage");
+			if (enableLocalPageStorage != null) {
+				if (enableLocalPageStorage == "true") {
+					//document.getElementById("noEnable").checked = false;
+					document.getElementById("yesEnable").checked = true;
+				} else if (enableLocalPageStorage == "false") {
+					document.getElementById("noEnable").checked = true;
+					//document.getElementById("yesEnable").checked = false;
+				}
+			} else {
+				document.getElementById("noEnable").checked = true;
+				//document.getElementById("yesEnable").checked = false;
+			}
+			var nrOfLocalPage = parseInt(window.localStorage.getItem("nrLocalPage"));
+			if (window.localStorage.getItem("nrLocalPage") != null) {
+				document.getElementById("numberLocalPage").value = nrOfLocalPage;
+			} else {
+				document.getElementById("numberLocalPage").value = 0;
+			}
+			enableInputPageNumber();
+		}
+
+		function enableInputPageNumber() {
+			var enable = document.getElementById("yesEnable").checked;
+			if (enable == true) {
+				document.getElementById("allowedLocalPageNumber").hidden = false;
+			}
+			else if (enable == false) {
+				document.getElementById("allowedLocalPageNumber").hidden = true;
+			}
+		}
+
+		document.getElementById("enableLocalPageNumber").onchange = function() {
+			enableInputPageNumber();
+		}
+
 		document.querySelector("#resizableNodes").addEventListener("click", () => {
 			nodesStableSize = !nodesStableSize;
 
@@ -2197,16 +2320,109 @@ require([
 			}
 		}
 
-		//if the selection of chekboxes change, remove their constraints
-		document.getElementById("pages").onchange = function() {
+		//if the selection of checkboxes change, remove their constraints
+		document.getElementById("pages").addEventListener("change", function() {
 			var nrOfPages = parseInt(window.localStorage.getItem("numberOfPages"));
 			for (var i = 1; i <= nrOfPages; i++) {
 				var checked = document.getElementById("page"+i).checked;
 				if (!checked) {
-					deleteRelatedConstraintsDeluxe("P" + i);
+					var temp = findRelatedConstraintsDeluxe("P" + i);
+					if (temp.length > 0) {
+						$("#deselectPageDialog").dialog("open");
+					}
+				}
+			}
+		})
+
+
+		document.querySelector("#yesDeselectPage").addEventListener("click", () => {
+			var nrOfPages = parseInt(window.localStorage.getItem("numberOfPages"));
+			for (var i = 1; i <= nrOfPages; i++) {
+				var checked = document.getElementById("page"+i).checked;
+				if (!checked) {
+					var temp = findRelatedConstraintsDeluxe("P" + i);
+					if (temp.length > 0) {
+						deleteRelatedConstraintsDeluxe("P" + i);
+						$("#deselectPageDialog").dialog("close");
+					}
+				}
+			}
+		})
+
+		function cancelSelectPage() {
+			var nrOfPages = parseInt(window.localStorage.getItem("numberOfPages"));
+			for (var i = 1; i <= nrOfPages; i++) {
+				var p = document.getElementById("page"+i);
+				var checked = p.checked;
+				if (!checked) {
+					var temp = findRelatedConstraintsDeluxe("P" + i);
+					if (temp.length > 0) {
+						for (var k = i; k > 0; k--) {
+							document.getElementById("page"+k).checked = true;
+							$("#page" + k).button("refresh");
+							$("#page" + k).checkboxradio({
+								disabled: false
+							})
+							$("#typeP" + k).selectmenu({
+								disabled: false
+							})
+							var type = document.getElementById("typeP"+k).value;
+							$("#typeP" + k).val(type)
+							$("#typeP" + k).selectmenu("refresh")
+							$("#layoutP" + k).selectmenu({
+								disabled: false
+							})
+							var layout = document.getElementById("layoutP"+k).value;
+							$("#layoutP" + k).val(layout)
+							$("#layoutP" + k).selectmenu("refresh")
+						}
+
+						p.checked = true;
+						$("#page" + i).button("refresh");
+						$("#page" + i).checkboxradio({
+							disabled: false
+						})
+						var j = i+1;
+						if (j <= nrOfPages) {
+							$("#page" + j).checkboxradio({
+								disabled: false
+							})
+						}
+						$("#typeP" + i).selectmenu({
+							disabled: false
+						})
+						var type = document.getElementById("typeP"+i).value;
+						$("#typeP" + i).val(type)
+						$("#typeP" + i).selectmenu("refresh")
+						$("#layoutP" + i).selectmenu({
+							disabled: false
+						})
+						var layout = document.getElementById("layoutP"+i).value;
+						$("#layoutP" + i).val(layout)
+						$("#layoutP" + i).selectmenu("refresh")
+						$("#deselectPageDialog").dialog("close");
+					}
 				}
 			}
 		}
+
+		document.querySelector("#noDontDeselectPage").addEventListener("click", () => {
+			cancelSelectPage();
+		})
+
+		$("#deselectPageDialog").dialog( {
+			autoOpen: false,
+			resizable: false,
+			width: 250,
+			modal: true,
+			open: function( event, ui ) {
+				$("#greyDiv").show()
+			},
+			beforeClose: function( event, ui ) {
+				cancelSelectPage();
+				$("#greyDiv").hide();
+			}
+		});
 
 
 
@@ -2429,18 +2645,38 @@ require([
 	//Remove Page
 	document.querySelector("#RemovePage").addEventListener("click", () => {
 		var currentNOP = parseInt(window.localStorage.getItem("numberOfPages"));
+		var temp = findRelatedConstraintsDeluxe("P" + currentNOP);
+		if (temp.length > 0) {
+			$("#deletePageDialog").dialog("open");
+		} else {
+			$("#labelP"+currentNOP).remove();
+			$("#page"+currentNOP).remove();
+			$("#typeP"+currentNOP).remove();
+			$("#layoutP"+currentNOP).remove();
+			numberOfPages = currentNOP-1;
+			window.localStorage.setItem("numberOfPages", numberOfPages);
+		}
+	})
+
+	document.querySelector("#yesDeletePage").addEventListener("click", () => {
+		var currentNOP = parseInt(window.localStorage.getItem("numberOfPages"));
+		deleteRelatedConstraintsDeluxe("P" + currentNOP);
 		var removePage = document.getElementById("page"+numberOfPages);
 		var label = document.getElementById("labelP"+numberOfPages);
 		$("#labelP"+currentNOP).remove();
 	  $("#page"+currentNOP).remove();
 		$("#typeP"+currentNOP).remove();
 		$("#layoutP"+currentNOP).remove();
-
 		numberOfPages = currentNOP-1;
 		window.localStorage.setItem("numberOfPages", numberOfPages);
-
-		deleteRelatedConstraintsDeluxe("P" + currentNOP);
+		$("#deletePageDialog").dialog("close");
 	})
+
+	document.querySelector("#noDontDeletePage").addEventListener("click", () => {
+		$("#deletePageDialog").dialog("close");
+	})
+
+
 
 	/*Create random graphs functions*/
 	//returns the coordinates of a new random vertex
@@ -2749,6 +2985,7 @@ require([
 			})
 			graphComponent.graph.addLabel(edges[j], getNextLabel("edge").toString());
 		}
+		graphComponent.morphLayout(new yfiles.organic.OrganicLayout());
 		//zoom to see all vertices and edges
 		graphComponent.fitGraphBounds();
 	}
@@ -2778,7 +3015,7 @@ require([
 				graph.addLabel(edgesArrayGraph[i], i.toString());
 			}
 		} else {
-			alert("Kein Planarer Graph möglich!");
+			alert("There is no possible planar graph with these properties!");
 		}
 
 		//zoom to see all vertices and edges

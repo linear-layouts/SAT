@@ -45,8 +45,8 @@ require([
 		Global Variables
 	----------------------------------------------------------------------------------------------
 	*/
-  	var numberOfPages = parseInt(window.localStorage.getItem("numberOfPages"));
-		console.log(numberOfPages);
+
+		var numberOfPages = parseInt(window.localStorage.getItem("numberOfPages"));
 
     let pagesArray = [];
 
@@ -1528,6 +1528,11 @@ addDefaultColor();*/
 					}
 					else {
 						respondedObject = response;
+						if (respondedObject.pages.length != numberOfPages) {
+							window.localStorage.setItem("numberOfPages", respondedObject.pages.length)
+							numberOfPages = parseInt(window.localStorage.getItem("numberOfPages"));
+							dynamicPagesArray();
+						}
 						run();
 					}
 

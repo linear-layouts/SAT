@@ -144,6 +144,7 @@
 					<label for="radialLayoutButton">Radial</label>
 				</div>
 				<div id="tools">
+					<input type="checkbox" id="localPageNumber" checked><label for="localPageNumber" title="Local Page Number"><img src="style/icons/ic_lqn_24px.svg"></label><span></span>
 					<input type="checkbox" id="resizableNodes" checked><label for="resizableNodes" title="Resisable nodes"><img src="style/icons/ic_resizableNodes_24px.svg"></label><span></span>
 					<input type="checkbox" id="doubleEdges" checked><label for="doubleEdges" title="Allow double edges?"><img src="style/icons/ic_doubleEdges_24px.svg"></label><span></span>
                     <input type="checkbox" id="directedEdges" checked><label for="directedEdges" title="Treat edges as directed"><img src="style/icons/ic_directedEdges_24px.svg"></label><span></span>
@@ -209,9 +210,33 @@
 		<button class="ui-button ui-widget ui-corner-all" id="noDontDelete">Cancel</button>
 	</div>
 
+	<div id="deletePageDialog" title="Delete?">
+		Deleting this page might affect your constraints.<br><br>
+		<button class="ui-button ui-widget ui-corner-all" id="yesDeletePage">Delete</button>
+		<button class="ui-button ui-widget ui-corner-all" id="noDontDeletePage">Cancel</button>
+	</div>
+
+	<div id="deselectPageDialog" title="Deselect?">
+		Deselecting this page might affect your constraints.<br><br>
+		<button class="ui-button ui-widget ui-corner-all" id="yesDeselectPage">Deselect</button>
+		<button class="ui-button ui-widget ui-corner-all" id="noDontDeselectPage">Cancel</button>
+	</div>
+
 	<div id="cancelledNotificationDialog" title="Notice">
 	<p id="infoMessage"> </p>
 <!--	<p><button class="ui-button ui-widget ui-corner-all" id="messageAck">Okay</button>-->
+	</div>
+
+	<div id="enableLocalPageNumber" title="Local page number">
+		Do you want to enable the local page number?<br><br>
+		<input type="radio" name="localPageNumber" id="yesEnable" value="yesEnable"><label for="yesEnable">Yes</label><br>
+		<input type="radio" name="localPageNumber" id="noEnable" value="noEnable"><label for="noEnable">No</label><br><br>
+		<div id="allowedLocalPageNumber" title="Specify local page number" hidden>
+			Specify the allowed local pages per vertex: <br><br>
+			<input type="number" id="numberLocalPage"><br><br>
+		</div>
+		<button class="ui-button ui-widget ui-corner-all" id="yesApply">Apply</button>
+		<button class="ui-button ui-widget ui-corner-all" id="noDontApply">Cancel</button>
 	</div>
 
 	<div id="unselectPagesDialog" title="Unselect?">

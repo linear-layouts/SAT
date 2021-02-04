@@ -1,11 +1,11 @@
 /**
  * Class Constraints
- * 
- * Attributes: 
+ *
+ * Attributes:
  * Type
  * Objects
  * Printable
- * 
+ *
  */
 
 class Constraint {
@@ -55,6 +55,17 @@ class Predecessor extends Constraint {
 		this.printable = "predecessor(" + this.objects.toString() + ")"
 	}
 
+}
+
+class LocalPageNumber extends Constraint {
+  constructor(_objects) {
+    super("LOCAL_PAGE_NUMBER",_objects)
+    this.printable = "LocalPages("+ this.objects.toString() + ")"
+  }
+
+  updatePrintable() {
+    this.printable = "LocalPages("+ this.objects.toString() + ")"
+  }
 }
 
 class TreatGraphDirected extends Constraint {
@@ -231,11 +242,11 @@ class RequirePartialOrder extends Constraint {
 	constructor(_objects) {
 		super("NODES_REQUIRE_PARTIAL_ORDER", _objects)
 
-		this.printable = "requirePartialOrder(" + this.objects.toString() + ")" 
+		this.printable = "requirePartialOrder(" + this.objects.toString() + ")"
 	}
 
 	updatePrintable() {
-		this.printable = "requirePartialOrder(" + this.objects.toString() + ")" 
+		this.printable = "requirePartialOrder(" + this.objects.toString() + ")"
 
 	}
 }
@@ -261,11 +272,11 @@ class RestrictEdgesFrom extends Constraint {
 
 		this.printable = "restrictEdgesFrom(" + this.objects[0].toString() + " | " + this.objects[1].toString() + ")"
 	}
-	
+
 	updatePrintable() {
 		this.printable = "restrictEdgesFrom(" + this.objects[0].toString() + " | " + this.objects[1].toString() + ")"
 	}
-	
+
 	serialize() {
 		var edges = this.objects[0];
 
@@ -285,11 +296,11 @@ class RestrictEdgesToArc extends Constraint {
 
 		this.printable = "restrictEdgesToArc(" + this.objects[0].toString() + " | " + this.objects[1].toString() + ")"
 	}
-	
+
 	updatePrintable() {
 		this.printable = "restrictEdgesToArc(" + this.objects[0].toString() + " | " + this.objects[1].toString() + ")"
 	}
-	
+
 	serialize() {
 		var edges = this.objects[0];
 
@@ -302,5 +313,3 @@ class RestrictEdgesToArc extends Constraint {
 		return "\t\t<constraint>\r\n\t\t\t<type>" + this.type + "</type>\r\n\t\t\t<objects>\r\n\t\t\t\t<objectsA>"+ tags.toString()+"</objectsA>\r\n\t\t\t\t<objectsB>" + this.objects[1]+ "</objectsB>\r\n\t\t\t</objects>\r\n\t\t</constraint>"
 	}
 }
-
-
