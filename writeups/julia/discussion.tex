@@ -1,0 +1,15 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Diskussion und Ausblick
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Discussion and Outlook}
+  \label{Discussion}
+
+All in all, the project fulfilled the expectations. The objective was to develop a graph editor that is easy to use and allows the user to impose constraints on the linear layout. The resulting framework is intuitively operable, well structured and performs satisfactorily. Furthermore it proved its worth as it could be used in giving partial answers in research-driven questions, as described in \autoref{POC}.\\
+On the other hand, the limitations of the framework appear on large graphs, as it was more or less expected by the use of the SAT solving technique.\\
+One of the deficiencies was that stellating the faces of a graph (a process that yields several separating triangles in the graph and thus makes the graph 'more difficult') turned out to be very cumbersome, considering one had to add a node to each face and then connect this new node to each node delimiting the face. This insight lead to the implementation of the stellation buttons within the tools submenu (see \autoref{toolsSub}).\\
+The other big issue concerns the creation of constraints. Big graphs usually come with a considerable amount of constraints, due to their structure. E.g. we know that a graph that contains a K4 cannot be embedded in a book with a single page (since it cannot be outerplanar). Creating those constraints by hand is cumbersome and time consuming and demands a more efficient solution.\\
+One considered option was to add the constraints to the copy and paste commands, so when a set of elements is pasted all corresponding constraints should be copied as well. While this is certainly possible, it might turn out to be rather hindering than helpful. The other idea on this behalf was to allow text input to the constraints field, which is actually supported by the \textit{Tag-It} plug-in used for this feature. This, with added auto completion, would make the creation of constraints faster. However, we left this feature as a direction for future work. \\
+In summary, while the framework has all desired features and works as planned, there is still room for improvement in user friendliness. Additionally, as the subject of research will change over the course of time, the framework will change further due to changing demands.\\
+
+

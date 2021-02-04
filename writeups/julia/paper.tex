@@ -1,0 +1,223 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% LaTeX-Rahmen fuer das Erstellen von Masterarbeiten
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% allgemeine Einstellungen
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[twoside,12pt,a4paper]{report}
+%\usepackage{reportpage}
+\usepackage{epsf}
+\usepackage{graphics, graphicx}
+\usepackage{latexsym}
+\usepackage[margin=10pt,font=small,labelfont=bf]{caption}
+\usepackage[utf8]{inputenc}
+\usepackage[toc,page]{appendix}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{xcolor}
+\usepackage{cite}
+\usepackage{listings}
+\usepackage[xindy]{imakeidx}
+\usepackage{hyperref}
+\renewcommand{\sectionautorefname}{Section}\renewcommand{\subsectionautorefname}{Subsection}
+\renewcommand{\chapterautorefname}{Chapter}
+
+
+\textwidth 14cm
+\textheight 22cm
+\topmargin 0.0cm
+\evensidemargin 1cm
+\oddsidemargin 1cm
+%\footskip 2cm
+\parskip0.5explus0.1exminus0.1ex
+
+% Kann von Student auch nach pers\"onlichem Geschmack ver\"andert werden.
+\pagestyle{headings}
+
+\sloppy
+\makeindex
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% hier steht die neue Titelseite 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+\begin{titlepage}
+ \begin{center}
+  {\LARGE Eberhard Karls Universit\"at T\"ubingen}\\
+  {\large Mathematisch-Naturwissenschaftliche Fakult\"at \\
+Wilhelm-Schickard-Institut f\"ur Informatik\\[4cm]}
+  {\huge Bachelor Thesis Computer Science\\[2cm]}
+  {\Large\bf  Implementation of an online framework to
+compute linear layouts of a graph\\[1.5cm]}
+ {\large Julia M\"annecke}\\[0.5cm]
+Datum\\[3cm]
+{\small\bf Reviewer}\\[0.3cm]
+{\large Prof. Dr. Michael Kaufmann}\\
+  {\footnotesize Algorithms Research Group\\
+	Universität Tübingen}\\[0.5cm]	
+	
+
+{\small\bf Advisor}\\[0.3cm]
+{\large Dr. Michalis Bekos}\\
+  {\footnotesize Algorithms Research Group\\
+	Universität Tübingen}\end{center}
+	
+  
+\end{titlepage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Titelr"uckseite: Bibliographische Angaben
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\thispagestyle{empty}
+\vspace*{\fill}
+\begin{minipage}{11.2cm}
+\textbf{M\"annecke, Julia:}\\
+\emph{Implementation of an online framework to
+compute linear layouts of a graph}\\ Bachelor Thesis Computer Science\\
+Eberhard Karls Universit\"at T\"ubingen\\
+Thesis period: 16.05 - 15.09.19
+\end{minipage}
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\pagenumbering{roman}
+\setcounter{page}{1}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Seite I: Zusammenfassug, Danksagung
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\section*{Abstract}
+In theoretical Computer Science graph theory is an essential subject of research, and even for real-world problems graphs are of great importance as they provide the basis of many things such as electricity grids and the simulation of neuronal networks.\\
+Within graph theory the subject of linear layouts offers many possibilities for research.\\
+A linear layout is defined by the order of vertices in which those lay on the spine of the graph, as well as a subdivision of the edges to a number of subsets. These subsets stand for half planes arranged around the spine, on which the corresponding edges reside. The question to be answered is, in how many of these half planes a graph can be embedded under certain circumstances.\\
+This thesis describes the development of an online framework to create graphs and compute linear layouts of those.
+
+\newpage
+\section*{Zusammenfassung}
+In der theoretischen Informatik stellt die Graphentheorie einen essentiellen Teil der Forschung, und für viele Probleme des Alltags sind Graphen von großer Wichtigkeit, da sie die Basis für Dinge wie Stromnetze und die Simulation von Neuronalen Netzen bieten.\\
+Innerhalb der Graphentheorie bietet das Feld der linearen Layouts ein dankbares Forschungsthema.\\
+Ein lineares Layout definiert sich durch die Ordnung der Knoten des Graphen, in der diese auf der zentralen Gerade des Graphen liegen, sowie die Zuordnung der Kanten des Graphen zu einer Anzahl von Teilmengen. Diese Teilmengen stehen für die Halbebenen, welche um die Zentralachse angeordnet sind und auf welchen sich die entsprechenden Kanten befinden. Die Frage, die es zu beantworten gilt, ist auf wie vielen dieser Halbebenen ein Graph dargestellt werden kann, wenn bestimmte Voraussetzungen eingehalten werden sollen.\\
+Diese Arbeit beschreibt die Entwicklung einer webbasierten Benutzeroberfläche um eben Graphen zu erstellen und zugehörige lineare Layouts zu berechnen.
+\newpage
+\section*{Acknowledgements}
+
+\cleardoublepage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Table of Contents
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\renewcommand{\baselinestretch}{1.3}
+\small\normalsize
+
+\tableofcontents
+
+\renewcommand{\baselinestretch}{1}
+\small\normalsize
+
+\cleardoublepage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% List of Figures
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\renewcommand{\baselinestretch}{1.3}
+\small\normalsize
+
+\addcontentsline{toc}{chapter}{List of Figures}
+\listoffigures
+
+\renewcommand{\baselinestretch}{1}
+\small\normalsize
+
+\cleardoublepage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Der Haupttext, ab hier mit arabischer Numerierung
+%%% Mit \input{dateiname} werden die Datei `dateiname' eingebunden
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+%% Introduction
+\input{intro}
+\cleardoublepage
+
+%% grapgh theory
+\input{graphtheory}
+\cleardoublepage
+
+%% technologies
+\input{technologies}
+
+%% implementation
+\input{implementation}
+\cleardoublepage
+
+%% experiments 
+\input{poc}
+\cleardoublepage
+
+%% outlook and discussion
+\input{discussion}
+\cleardoublepage
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Appendix
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\appendix
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Index
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% can be removed
+\addcontentsline{toc}{chapter}{Index}
+\indexprologue{\noindent Explanations for used terms}
+\printindex
+\cleardoublepage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Bibliographie
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\addcontentsline{toc}{chapter}{Bibliography}
+
+\bibliographystyle{unsrt}
+\bibliography{mylit}
+%% Obige Anweisung legt fest, dass BibTeX-Datei `mylit.bib' verwendet
+%% wird. Hier koennen mehrere Dateinamen mit Kommata getrennt aufgelistet
+%% werden.
+
+\cleardoublepage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Erklaerung
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\thispagestyle{empty}
+\section*{Selbst\"andigkeitserkl\"arung}
+
+Hiermit versichere ich, dass ich die vorliegende Bachelorarbeit 
+selbst\"andig und nur mit den angegebenen Hilfsmitteln angefertigt habe und dass alle Stellen, die dem Wortlaut oder dem 
+Sinne nach anderen Werken entnommen sind, durch Angaben von Quellen als 
+Entlehnung kenntlich gemacht worden sind. 
+Diese Masterarbeit wurde in gleicher oder \"ahnlicher Form in keinem anderen 
+Studiengang als Pr\"ufungsleistung vorgelegt. 
+
+\vskip 3cm
+
+Ort, Datum	\hfill Unterschrift \hfill 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Ende
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
+

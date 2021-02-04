@@ -1,0 +1,23 @@
+body {
+	background-color: #FFFFFF;
+	font-family: arial;
+}
+
+.contents {
+	font-size: 20pt;
+	height: 80%;
+	text-align: center;
+}
+
+#headline {
+	font-size: 5em;
+}
+
+#headline:hover {
+	color: red;
+}
+
+.contents>form {
+	border: 1px solid blue;
+}
+

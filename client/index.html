@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="icon" type="image/x-icon" href="style/icons/ic_title2_24px.svg" />
+<title>Linear Layouts Of Graphs</title>
+
+<meta charset="utf8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+<!--  STYLE -->
+<link type="text/css" rel="stylesheet" href="style/stylesheet.css">
+<link type="text/css" rel="stylesheet" href="javascript/yFiles/lib/yfiles.css">
+<link type="text/css" rel="stylesheet" href="javascript/jquery/jquery-ui.css">
+<link type="text/css" rel="stylesheet" href="javascript/tags/css/jquery.tagit.css">
+
+
+</head>
+<body>
+<div id="greyDiv">
+	</div>
+<div id="loadingDiv">
+		<div id="progressbar"></div>
+</div>
+	<div class="container-0">
+		<div class="container-1">
+			<div class="toolbar">
+				<div id="leftTools">
+					<div class="extraButton">
+						<button id="fileSettings"></button>
+						<label for="fileSettings">File</label><span class="wtf"></span>
+					</div>
+					<div class="extraButton">
+						<button id="editSettings"></button>
+						<label for="editSettings">Edit</label><span></span>
+					</div>
+					<div class="extraButton">
+						<button id="viewSettings"></button>
+						<label for="viewSettings">View</label><span></span>
+					</div>
+					<div class="extraButton">
+						<button id="layoutSettings"></button>
+						<label for="layoutSettings">Layout</label><span></span>
+					</div>
+					<div class="extraButton">
+						<button id="toolsSettings"></button>
+						<label for="toolsSettings">Tools</label><span></span>
+					</div>
+					<div class="extraButton">
+						<button id="about"></button>
+						<label for="about">About</label><span></span>
+					</div>
+					<div class="extraButton">
+						<button id="graphSettings"></button>
+						<label for="graphSettings"><img src="style/icons/ic_tune_24px.svg"></label>
+					</div>
+				</div>
+				<div id="file">
+					<button id="NewButton"></button>
+					<label for="NewButton" title="New Graph"> <img
+						src="style/icons/new_graph_24px.svg"></label> <span></span>
+						<input type="file" id="OpenButton"> <label for="OpenButton"
+						title="Load Graph"><img
+						src="style/icons/ic_file_upload_24px.svg"></label><span></span>
+					<button id="SaveDialogButton"></button>
+					<label for="SaveDialogButton" title="Save Graph"><img
+						src="style/icons/ic_file_download_24px.svg"></label><span></span>
+					<button id="ExportButton"></button>
+					<label for="ExportButton" title="Export Graph as...">
+						<img src="style/icons/ic_exit_to_app_24px.svg"></label><span></span>
+					<button id="ServerButton"></button>
+					<label for="ServerButton" title="Change Server"><img src="style/icons/ic_laptop_windows_24px.svg"></label>
+				</div>
+				<div id="edit">
+					<button id="UndoButton"></button>
+					<label for="UndoButton" title="Undo"><img
+						src="style/icons/ic_undo_24px.svg"></label><span></span>
+					<button id="RedoButton"></button>
+					<label for="RedoButton" title="Redo"><img
+						src="style/icons/ic_redo_24px.svg"></label><span></span>
+					<button id="CopyButton"></button>
+					<label for="CopyButton" title="Copy"><img
+						src="style/icons/ic_content_copy_24px.svg"></label><span></span>
+					<button id="PasteButton"></button>
+					<label for="PasteButton" title="Paste"><img
+						src="style/icons/ic_content_paste_24px.svg"></label><span></span>
+					<button id="CutButton"></button>
+					<label for="CutButton" title="Cut"><img
+						src="style/icons/ic_content_cut_24px.svg"></label><span></span>
+					<button id="SelectAllButton"></button>
+					<label for="SelectAllButton" title="Select All"><img
+						src="style/icons/ic_select_all_24px.svg"></label><span></span>
+					<button id="DeleteButton"></button>
+					<label for="DeleteButton" title="Delete Selection"><img
+						src="style/icons/ic_clear_24px.svg"></label><span
+						style="width: 25px"></span> <input type="radio"
+						name="marqueeSelection" id="marqueeAll" value="marqueeAll" checked>
+					<label for="marqueeAll"
+						title="All elements are selectable via marquee selection">
+						<img src="style/icons/marquee_all_24px.svg">
+					</label><span></span> <input type="radio" name="marqueeSelection"
+						id="marqueeNodes" value="marqueeNodes"> <label
+						for="marqueeNodes"
+						title="Only nodes are selectable via marquee selection"> <img
+						src="style/icons/marquee_nodes_24px.svg"></label><span></span> <input
+						type="radio" name="marqueeSelection" id="marqueeEdges"
+						value="marqueeEdges"> <label for="marqueeEdges"
+						title="Only edges are selectable via marquee selection"> <img
+						src="style/icons/marquee_edges_24px.svg"></label>
+				</div>
+				<div id="view">
+					<button id="AddPage"></button>
+					<label for="AddPage" title="Add Page"> <img
+						src="style/icons/ic_note_add_24px.svg"></label><span></span>
+					<button id="RemovePage"></button>
+					<label for="RemovePage" title="Remove Page"> <img
+						src="style/icons/ic_note_remove_24px.svg"></label><span></span>
+					<button id="ZoomInButton"></button>
+					<label for="ZoomInButton" title="Zoom In"><img
+						src="style/icons/ic_control_zoomin_24px.svg"></label><span></span>
+					<button id="ZoomOutButton"></button>
+					<label for="ZoomOutButton" title="Zoom Out"><img
+						src="style/icons/ic_control_zoomout_24px.svg"></label><span></span>
+					<button id="FitButton"></button>
+					<label for="FitButton" title="Fit Content"><img
+						src="style/icons/ic_center_focus_strong_24px.svg"></label><span></span>
+					<input type="checkbox" id="GridButton"> <label
+						for="GridButton" title="Toggle Grid"><img
+						src="style/icons/ic_grid_on_24px.svg"></label><span></span>
+				</div>
+				<div id="layout">
+					<button id="hierLayoutButton"></button>
+					<label for="hierLayoutButton">Hierarchic</label><span></span>
+					<button id="organicLayoutButton"></button>
+					<label for="organicLayoutButton">Organic</label><span></span>
+					<button id="orthoLayoutButton"></button>
+					<label for="orthoLayoutButton">Orthogonal</label><span></span>
+					<button id="circLayoutButton"></button>
+					<label for="circLayoutButton">Circular</label><span></span>
+					<button id="treeLayoutButton"></button>
+					<label for="treeLayoutButton">Tree</label><span></span>
+					<button id="balloonLayoutButton"></button>
+					<label for="balloonLayoutButton">Balloon</label><span></span>
+					<button id="radialLayoutButton"></button>
+					<label for="radialLayoutButton">Radial</label>
+				</div>
+				<div id="tools">
+					<input type="checkbox" id="resizableNodes" checked><label for="resizableNodes" title="Resisable nodes"><img src="style/icons/ic_resizableNodes_24px.svg"></label><span></span>
+					<input type="checkbox" id="doubleEdges" checked><label for="doubleEdges" title="Allow double edges?"><img src="style/icons/ic_doubleEdges_24px.svg"></label><span></span>
+                    <input type="checkbox" id="directedEdges" checked><label for="directedEdges" title="Treat edges as directed"><img src="style/icons/ic_directedEdges_24px.svg"></label><span></span>
+					<button id="stellation"></button>
+					<label for="stellation" title="Stellation"><img src="style/icons/ic_oneStellation_24px.svg"></label><span></span>
+					<button id="threeStellation"></button>
+					<label for="threeStellation" title="Octo stellation"><img src="style/icons/ic_threeStellation_24px.svg"></label><span></span>
+					<button id="edgeStellation"></button>
+					<label for="edgeStellation" title="Vertex stacking"><img src="style/icons/ic_edgeStellation_24px.svg"></label><span></span>
+
+				</div>
+				<div id="rightTools">
+					<button class="ui-button ui-widget ui-corner-all" id="submitButton" style="width: 100px">Compute</button>
+					<button class="ui-button ui-widget ui-corner-all" style="position: absolute; right: 130px;"id="statsButton">Stats</button>
+					<div id="displayCurrentServer" style="position:absolute; width: 100px; right: 250px; font-family: arial; font-size: 8pt"></div>
+				</div>
+			</div>
+		</div>
+		<div class="mainbox">
+			<!--  Graph Input via YFILES -->
+			<div id="graphComponent"></div>
+		</div>
+	</div>
+	<div class="settings" id="settings">
+		<div class="pages" id="pages">
+			<div class="pagesSettings">
+				<label for="page1" id="labelP1">Page 1</label> <input type="checkbox" id="page1"
+					checked disabled> <select id="typeP1" name="typeP1">
+					<option value="STACK">stack</option>
+					<option value="QUEUE">queue</option>
+					<option value="NONE">undefined</option>
+				</select> <select id="layoutP1" name="layoutP1">
+					<option value="NONE">maximal</option>
+					<option value="FOREST"> forest </option>
+					<option value="TREE">tree</option>
+					<option value="DISPERSIBLE">matching</option>
+				</select>
+			</div>
+		</div>
+		<div class="constraints">
+
+			<h4>Constraints</h4>
+			<ul id="constraintTags"></ul>
+		</div>
+	</div>
+	<div id="picture"></div>
+	<div id="footer">
+		<a href="about.html"> About </a>
+	</div>
+	<div id="exportDialog" title="Export as...">
+		<p>
+			<button class="ui-button ui-widget ui-corner-all" id="ExportAsPdf">Pdf</button>
+		<p>
+			<button class="ui-button ui-widget ui-corner-all" id="ExportAsImage">Image</button>
+	</div>
+	<div id="pageDialog" title="Assign to...">
+		<!--  IMPORTANT DO NOT DELETE -->
+	</div>
+
+	<div id="deleteDialog" title="Delete?">
+		Deleting these items might affect your constraints.<br><br>
+		<button class="ui-button ui-widget ui-corner-all" id="yesDelete">Delete</button>
+		<button class="ui-button ui-widget ui-corner-all" id="noDontDelete">Cancel</button>
+	</div>
+
+	<div id="cancelledNotificationDialog" title="Notice">
+	<p id="infoMessage"> </p>
+<!--	<p><button class="ui-button ui-widget ui-corner-all" id="messageAck">Okay</button>-->
+	</div>
+
+	<div id="unselectPagesDialog" title="Unselect?">
+		Unselecting this page affects your constraints. Still do it?<br><br>
+		<button class="ui-button ui-widget ui-corner-all" id="yesUnselect">Unselect</button>
+		<button class="ui-button ui-widget ui-corner-all" id="noDontUnselect">Cancel</button>
+	</div>
+
+	<div id="computeRandomDialog" title="New graph">
+		<select name="graphType" id="graphType">
+			<option value="random">Random Graph</option>
+			<option value="planar">Random Planar Graph</option>
+			<option value="planar3Tree">Random Planar 3-tree</option>
+			<option value="maximalPlanar">Random Maximal Planar Graph</option>
+			<option value="tree">Tree</option>
+			<option value="complete">Complete Graph</option>
+			<option value="completeBipartite">Complete Bipartite Graph</option>
+		</select><br><br>
+		<div id="divVertices">Number of vertices:
+		<input type="number" id="numberOfVertices" name="numberOfVertices" min="0" placeholder="10" value="10" required><br>
+		</div>
+		<div id="divEdges">Number of edges:
+		<input type="number" id="numberOfEdges" name="numberOfEdges" min="0" placeholder="30" value="30" required><br>
+		</div>
+		<div id="divBipartiteVerticesM" hidden>Number of vertices in partition A:
+		<input type="number" id="numberOfBipartiteVerticesM" name="numberOfBipartiteVerticesM" min="0" placeholder="5" value="5" required><br>
+		</div>
+		<div id="divBipartiteVerticesN" hidden>Number of vertices in partition B:
+		<input type="number" id="numberOfBipartiteVerticesN" name="numberOfBipartiteVerticesN" min="0" placeholder="5" value="5" required><br>
+		</div>
+		<br><br>
+		<button class="ui-button ui-widget ui-corner-all" id="computeRandomGraph">Create</button>
+		<button class="ui-button ui-widget ui-corner-all" id="cancelRandomGraph">Cancel</button>
+	</div>
+
+	<div id="computeDialog" title="Proceed?">
+		Would you like to compute the linear layout of this graph?<br>
+		<button class="ui-button ui-widget ui-corner-all" id="yesCompute">Yes</button>
+		<button class="ui-button ui-widget ui-corner-all" id="noCompute">No</button>
+
+		<p>
+			Or would you like to save the graph beforehand? <br>
+			<button class="ui-button ui-widget ui-corner-all" id="yesSaveCompute">Save,
+				then compute</button>
+	</div>
+
+	<div id="computeDialog2" title="Proceed?">
+		Would you like to compute the linear layout of this graph?<br>
+		<button class="ui-button ui-widget ui-corner-all" id="yesCompute2">Yes</button>
+		<button class="ui-button ui-widget ui-corner-all" id="noCompute2">No</button>
+
+	</div>
+
+	<div id="orderingDialog" title="Partial order">
+	What would you like to do?
+	<div id="miniGraphComponent"></div>
+	<button class="ui-button ui-widget ui-corner-all" id="requireOrder">Require this partial order</button>
+	<button class="ui-button ui-widget ui-corner-all" id="forbidOrder">Forbid this partial order</button>
+	</div>
+
+	<div id="restrictEdgesDialog" title="Restrict">
+	</div>
+
+
+	<div id="wentWrong" title="Something went wrong...">
+	For some reason our server could not process this request.
+	<br><br>
+	<div id="errorMessage"></div><br>
+	Be sure to save your graph and try again later.<br>
+	<button class="ui-button ui-widget ui-corner-all" id="okayWentWrong">Ok</button>
+	</div>
+
+	<div id="saveDialog" title="Save as...">
+	Specify a name below <br><br>
+	<input type="text" name="name" id="fileName" value="" class="ui-corner-all" style="width: 90%; height: 25px; font-size: 20px">
+	<p>
+	<button class="ui-button ui-widget ui-corner-all" id="saveButton">Save</button>
+	<button class="ui-button ui-widget ui-corner-all" id="cancelSaveDialog">Cancel</button>
+
+	</div>
+
+	<div id="statsDialog" title="Stats">
+	<table style="font-weight: bold">
+	<tr><td width="200px">Vertices:</td><td id="nrOfVertices"></td></tr>
+	<tr><td>Edges:</td><td id="nrOfEdges"></td></tr>
+	<tr><td>Planar:</td><td id="isPlanar"></td></tr>
+	<tr><td>Connected:</td><td id="isConnected"></td></tr>
+	<tr><td>Acyclic:</td><td id="isAcyclic"></td></tr>
+	<tr><td>Tree:</td><td id="isTree"></td></tr>
+	<tr><td>Bipartite:</td><td id="isBipartite"></td></tr>
+	<tr id="reducedTr" style="display:none"><td>Reduced:</td><td id="isReduced"></td></tr>
+	</table>
+	</div>
+
+	<div id="serverDialog" title="Server specification" class="ui-dialog">
+	Define the server url:
+	<p> <input type="text" id="serverUrl" style="width:100%">
+	<p> <button id="okChangeServer" class="ui-button ui-widget ui-corner-all" style="width:30%" >Ok</button>
+		<button id="abortChangeServer" class="ui-button ui-widget ui-corner-all" style="width:30%" >Cancel</button>
+		<button id="resetServer" class="ui-button ui-widget ui-corner-all" title="Resets to standard server" style="width:30%">Reset</button>
+	</div>
+
+
+	<div id="aboutDialog" title="About" class="ui-dialog">
+		<span  style="font-size: 18px">This system aims at automating the
+		procedure of computing different types of linear layouts of graphs
+		under a set of user-specific constraints. The system has been
+		developed using jQuery (including <a href="https://jqueryui.com/">jQuery UI</a>,  <a href="https://github.com/philzet/ColorPick.js">ColorPicker</a> and  <a href="https://github.com/aehlke/tag-it">TagIt</a>) in
+		conjunction with  <a href="https://www.yworks.com/">yFiles for HTML</a> under an academic license, which
+		restricts the usage of the system for strictly non-commercial purposes
+		only (research, teaching, university projects, courses and application
+		development).</span>
+	</div>
+
+
+	<script src="javascript/jquery/external/jquery/jquery.js"></script>
+	<script src="javascript/jquery/jquery-ui.js"></script>
+
+	<!--  Necessary for pdf-Export -->
+
+	<script src="https://www.yworks.com/resources/scripts/jspdf.min.dfa618c.js"></script>
+	<script src="https://www.yworks.com/resources/scripts/svg2pdf.min.a955ee8.js"></script>
+
+
+
+	<script src="javascript/yFiles/demos/resources/require.js"></script>
+	<script src="javascript/tags/js/tag-it.js" type="text/javascript" charset="utf-8"></script>
+
+	<script src="js/constraints.js"></script>
+	<script src="js/globalVariables.js"></script>
+
+	<script src="js/queryscript.js"></script>
+	<script src="js/yfilesscript.js"></script>
+	<!--  Jquery -->
+</body>
+</html>

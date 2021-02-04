@@ -1,0 +1,432 @@
+html, body {
+	background-color: white;
+	height: 100%;
+	overflow: hidden;
+}
+
+#computeRandomDialog {
+	min-width: 250px;
+}
+
+#graphType {
+	min-width: 100%;
+}
+
+input[type="number"] {
+	min-width: 100%;
+}
+
+/* Hide the Input Number Arrows*/
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+
+.ui-dialog
+{
+    z-index: 1;
+}
+
+.container-0 {
+	display: flex;
+	border: none;
+	background-color: white;
+	flex-direction: column;
+	height: 100%;
+}
+
+#greyDiv {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(128, 128, 128, 0.5);
+	z-index: 1;
+}
+
+#loadingDiv {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(128, 128, 128, 0.5);
+	z-index:3;
+
+	display: flex;
+	justify-content: center;
+}
+
+#progressbar {
+	position: relative;
+	top: 35%;
+	width: 300px
+}
+
+.container-1 {
+	display: flex;
+	border: none;
+	background-color: white;
+	flex-direction: column;
+}
+
+.container-1 button {
+	position: absolute;
+	visibility: hidden;
+}
+
+.container-1 input {
+	position: absolute;
+	visibility: hidden;
+}
+
+.container-1 button ~ label {
+	font-family: arial;
+	font-size: 20px;
+}
+
+.container-1 button ~label:hover {
+	filter: opacity(30%);
+}
+
+.container-1 input[type="checkbox"]:checked+label {
+	filter: opacity(30%);
+}
+
+.container-1 input[type="radio"]:checked+label img {
+	border: 1px solid;
+	border-radius: 3px;
+}
+
+#graphComponent {
+	width: 100%;
+	height: 63%;
+	position: fixed;
+	right: 0;
+}
+
+#miniGraphComponent {
+	width: 570px;
+	height: 150px;
+	border: 1px solid;
+}
+
+.mainbox {
+	border: none;
+	min-height: 100%;
+	display: flex;
+	flex-direction: row;
+	flex: 6;
+	height: 100%;
+}
+
+.headspace {
+	background-color: white;
+	border: none;
+	display: flex;
+	height: 70px;
+}
+
+.toolbar {
+	background-color: white;
+	display: flex;
+	border: none;
+	height: 40px;
+	vertical-align: center;
+	justify-content: space-between;
+}
+
+.container-0 span {
+	height: 1px;
+	width: 10px;
+	display: inline-block;
+	vertical-align: middle;
+	margin: 0 2px;
+}
+
+#leftTools {
+	display: flex;
+	flex-direction: row;
+	border: none;
+}
+
+#rightTools {
+	display: flex;
+	justify-content: flex-end;
+	width: 300px;
+}
+
+#rightTools button {
+	visibility: visible;
+}
+
+#file {
+	border: none;
+}
+
+#edit {
+	border: none;
+}
+
+#view {
+	border: none;
+}
+
+#layout {
+	border: none;
+}
+
+.extraButton {
+	vertical-align: middle;
+	border: none;
+}
+
+.settings {
+	display: flex;
+	justify-content: space-around;
+	background-color: white;
+	position: absolute;
+	left: 0;
+	bottom: 0px;
+	min-height: 160px;
+	flex-direction: row;
+	width: 100%;
+	border: none;
+	z-index: 0;
+}
+
+.pages {
+	display: flex;
+	font-size: 15px;
+	padding: 20px;
+	flex-direction: column;
+	flex: 1.0;
+	border: none;
+}
+
+.pagesSettings {
+	display: flex;
+	flex-direction: row;
+	margin-left: auto;
+	margin-right: auto;
+	border: none;
+}
+
+.sel {
+	display: flex;
+	justify-content: space-around;
+	border: none;
+	padding: 2px;
+}
+
+.constraints {
+	flex: 2.25;
+	border: none;
+	margin: 0px 10px 0px 0px;
+
+}
+
+.constraints h4 {
+	margin: 0;
+	font-family: arial;
+	border: none;
+	font-weight: 400;
+	font-size: 20px;
+}
+
+.constraints ul {
+	height: 120px;
+	overflow: scroll;
+}
+
+#footer {
+	position: absolute;
+	bottom: 0px;
+	left: 0px;
+	height: 5%;
+	width: 100%;
+	display: none;
+}
+
+#footer a {
+	position: absolute;
+	right: 3%;
+}
+
+@media ( max-width : 1200px) {
+	.container-1 button ~ label {
+		font-size: 13px;
+	}
+	.toolbar img {
+		height: 18px;
+	}
+	#rightTools {
+		width: 100px;
+	}
+	#pages {
+	flex: 2;
+	}
+}
+
+@media ( max-width : 800px) {
+	.toolbar {
+		vertical-align: center;
+		height: 70px;
+	}
+
+	#file, #edit, #layout, #view {
+		position: absolute;
+		top: 40px;
+	}
+
+}
+
+/* Settings Center */
+.ui-controlgroup.ui-controlgroup-vertical>button.ui-button,
+	.ui-controlgroup.ui-controlgroup-vertical>.ui-controlgroup-label {
+	text-align: center;
+}
+
+.ui-controlgroup-horizontal .ui-spinner-input {
+	width: 20px;
+}
+
+.demo-context-menu {
+	background: #fff;
+	border: 1px solid #d5d7d8;
+	box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+	top: 0;
+	left: 0;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	min-width: 100px;
+	user-select: none;
+}
+
+.demo-context-menu .demo-menu-item {
+	position: relative;
+	display: block;
+	padding: 5px;
+	text-align: left;
+	border: none;
+	border-bottom: 1px solid #d5d7d8;
+	background-color: white;
+	cursor: pointer;
+	width: 100%;
+}
+
+.demo-context-menu .demo-menu-item:hover {
+	background-color: #dedede;
+}
+
+.demo-context-menu .demo-separator {
+	width: 100%;
+	height: 1px;
+	background-color: #999999;
+}
+
+.demo-context-menu:last-child {
+	border-bottom: none;
+}
+
+#ExportAsPdf {
+	width: 200px;
+}
+
+#ExportAsImage {
+	width: 200px;
+}
+
+#yesCompute {
+	width: 100px
+}
+
+#noCompute {
+	width: 100px
+}
+
+#yesDelete, #yesUnselect, #noDontDelete, #noDontUnselect {
+	width: 100px;
+}
+
+#yesSaveCompute {
+	width: 200px
+}
+
+#saveButton {
+	width: 100px
+}
+
+#cancelSaveDialog {
+	width: 100px
+}
+
+#okayWentWrong, #yesBackToEdit {
+	width: 200px
+}
+
+#requireOrder, #forbidOrder {
+	width: 230px;
+	margin: 3px;
+}
+
+#errorMessage {
+	font-family: Courier New;
+}
+
+.restrictLabel1 {
+	width: 83px
+}
+.restrictLabel2 {
+	width: 90%
+}
+/* show.html */
+#display {
+	display: flex;
+	flex-direction: column;
+	min-height: 20%;
+	padding: 10px;
+	font-size: 15px;
+	padding: 20px;
+	flex-direction: column;
+	flex: 0.75;
+	border: none;
+}
+
+.displayingSettings {
+	display: flex;
+	flex-direction: row;
+	border: none;
+	font-size: 15px;
+}
+
+.displayingSettings input[type=color] {
+	height: 40px;
+}
+
+#editOriginalLayout, #editBookEmbedding {
+	width: 200px
+}
+
+#neighborhood {
+	width: 15%;
+	position: absolute;
+	left: 0;
+	z-index: 1;
+}
+
+#description {
+	height: 100%;
+	font-size: 14px;
+	font-family: arial;
+	overflow-y: auto;
+}

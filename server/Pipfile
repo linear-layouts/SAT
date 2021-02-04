@@ -1,0 +1,32 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+sympy = "*"
+sphinx = "*"
+networkx = "*"
+pyhull = "*"
+matplotlib = "*"
+perfplot = "*"
+sphinxcontrib-plantuml = "*"
+sphinxcontrib-bibtex = "*"
+
+[packages]
+flask = "==1.*"
+flask-restplus = "==0.*"
+waitress = "==1.*"
+numpy ="==1.*"
+flask-cors ="==3.*"
+lxml = "==4.*"
+# this is needed to serialize named touples as dicts. Flask uses this automatically if it is present
+simplejson = "==3.*"
+python-dateutil = "*"
+pebble = "*"
+werkzeug = "*"
+
+[requires]
+# Pipenv does not support multiple python versions from one pipfile. Python 3.6 is the minimum requirement.
+# Feel free to edit this file locally to include a higher python version like 3.7
+python_version = "3.8"

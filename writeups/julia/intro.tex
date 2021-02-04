@@ -1,0 +1,26 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Einleitung
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Introduction}
+
+\label{Introduction}
+A linear layout, in graph theory, is a way of drawing a graph where its vertices are positioned on a line (called the \textit{spine}) and its edges are arcs residing on half planes that are delimited by the spine. A linear layout is accompanied by a partition of the edges, where each subset in this partition lies in one of the half planes.
+These two properties, the linear order of the vertices and the assignment of edges to half planes, characterize a linear layout. Different types of linear layouts are distinguished by the structures the edges form, the two most commonly distinguished are \textit{stack layouts} and \textit{queue layouts}.\\
+\textit{Stack layouts} are linear layouts where each subset of edges has to form an outerplanar graph on its respective half plane, that is, no two edges assigned to the half plane (called \textit{stack}) are allowed to cross. The minimum number of stacks that is needed to embed the graph is called the \textit{stack number} of this graph.\\
+A \textit{queue layout} is a linear layout, where no two edges on the same half plane are allowed to nest. Two edges are called \textit{nested}, when both end vertices of one edge lie between both end vertices of the other edge. The \textit{queue number} of a graph is the minimum number of queues that are needed by any of its queue layouts.\\
+\section{Theoretical background}
+In the past decades many great discoveries concerning the lower and upper bounds for \textit{stack numbers} and \textit{queue numbers} have been made.\\
+For \textit{stack layouts} Yannakakis proved that all planar graphs admit stack layouts with at most four stacks \cite{yannakakis1986four,yannakakis1989embedding}. There are subclasses of planar graphs which admit stack layouts with fewer stacks, for example all outerplanar graphs have a stack number of one \cite{bernhart1979book}.\\ 
+The upper bound \textit{queue number} for planar graphs is 49 \cite{duj19}. Similarly, certain subclasses can admit to smaller queue layouts, using again the example of outerplanar graphs that have a \textit{queue number} of at most 2 \cite{heath1992comparing}.
+\subsection{SAT Solving}
+In 2015 Bekos et al.\cite{Bekos2015TheBE} introduced an approach of automating the procedure of computing different types of linear layouts that utilizes SAT-Solving. For this purpose graphs are translated into SAT instances following strict rules to define the desired linear layout. Though this results in rather large SAT instances, they can be solved in reasonable time. This SAT formulation proved to be very useful and inspired new research.
+\section{Contribution}
+This thesis describes the development of a framework, that allows the user to compute a the linear layout of a graph, using the SAT-Solving approach described earlier. The framework consists of two parts, the editing of the graph and the viewing of the result.\\
+Rather than a textual representation, the user can create the drawing of a graph in an easy to use editor. Additionally, to steer the SAT-Solver towards the desired linear layout, basic and advanced constraints can be imposed upon the layout to be computed. Once the graph has been fully created and the constraints of the linear layout have also been specified, then a request for computing a linear layout that conforms with the specifications given is sent to a properly configured server that supports the SAT solving procedure. The server returns a linear layout, if existent. The result is then displayed in the viewing part of the framework, which provides tools to examine the layout closely.
+\section{Thesis structure}
+\autoref{PR} gives the necessary definitions that are used in this thesis and introduces linear layouts formally.
+In \autoref{technologies} the technologies and tools used for the implementations are presented.
+The structure and handling of the framework is explained in \autoref{Implementation}.
+\autoref{POC} demonstrates a proof of concept application of our framework of a challenging task.
+Last but not least, \autoref{Discussion} recaps the evolution of the framework and draws conclusions on the outcome of the project.
