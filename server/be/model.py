@@ -40,7 +40,7 @@ def static_encode_page_assignment(edge_to_page: ndarray) -> List[List[int]]:
     """
     Generates the clauses to assign each edge to at least one page
 
-    :param edge_to_page: edge_to_page[p, e] <=> edge e is assigned to page p
+    :param edge_to_page: edge_to_page[p, e] <=> the edge e is assigned to page p
         """
     clauses = []
     for e in range(edge_to_page.shape[1]):
