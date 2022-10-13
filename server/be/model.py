@@ -13,7 +13,7 @@ def static_encode_vertex_order(precedes: ndarray) -> List[List[int]]:
     Generates the clauses to ensure that the node order is asymmetric and transitive.
     It is static in order to make optimizing more easy
 
-    :param precedes: precedes[i, j] <=> vertex i precedes vertex j
+    :param precedes: precedes[i, j] <=> the vertex i precedes vertex j
     :return: the list of generated clauses
     """
     clauses = []
