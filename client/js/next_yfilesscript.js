@@ -73,7 +73,7 @@ require([
 	let treatEdgesAsDirected = false;
 	let originalNodeHeight = 30;
 	let originalNodeWidth = 30;
-	let standardServer = "http://alice.informatik.uni-tuebingen.de:5555/embeddings"
+	let standardServer = "http://alice.cs.uni-tuebingen.de:5555/embeddings"
 	let numberOfVisibleNodesOnConstrainedLayout = 0
 	let currentLayout = LayoutOption.LINEAR
 	let previousLayout = LayoutOption.LINEAR
@@ -1790,7 +1790,7 @@ addDefaultColor();*/
 			let currentServer = window.localStorage.getItem("currentServer");
 			if (currentServer == null) {
 				document.getElementById("displayCurrentServer").innerHTML = standardServer;
-				link = "http://alice.informatik.uni-tuebingen.de:5555/embeddings/" + embeddingID;
+				link = "http://alice.cs.uni-tuebingen.de:5555/embeddings/" + embeddingID;
 			}
 			else {
 				document.getElementById("displayCurrentServer").innerHTML = currentServer;

@@ -35,7 +35,7 @@ require([
 
 	let graph = null;
 
-	var standardServer = "http://alice.informatik.uni-tuebingen.de:5555/embeddings"
+	var standardServer = "http://alice.cs.uni-tuebingen.de:5555/embeddings"
 	//var standardServer = "http://0.0.0.0:5555/embeddings"
 
 	var numberOfPages = parseInt(window.localStorage.getItem("numberOfPages"));
