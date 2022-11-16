@@ -8,7 +8,7 @@
  *
  */
 
-class Constraint {
+ class Constraint {
 
 	constructor (_type, _objects) {
 

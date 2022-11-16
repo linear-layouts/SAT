@@ -125,13 +125,14 @@ def static_to_dimacs(clauses: list, first_line: str) -> str:
     #     ",", " ")
 
 
-def static_encode_same_page(edge_to_page: ndarray, e1: int, e2: int) -> List[List[int]]:
+def static_encode_same_page(edge_to_page: ndarray, e1: int, e2: int, e3: int) -> List[List[int]]:
     """
     This method generates the clauses to encode that two edges must be assigned to the same page.
     Because the corresponding CNF formula gets bloated on many pages, this method only handles up to four pages.
 
     :param e1: the index of the first edge
     :param e2: the index of the second edge
+    :param e3: the index of the third edge
     :param edge_to_page: edge_to_page[p, e] <=> edge e is assigned to page p
     :return: the generated clauses
     """
@@ -152,6 +153,7 @@ def static_encode_same_page(edge_to_page: ndarray, e1: int, e2: int) -> List[Lis
         clauses.append([e1_p1, e2_p2])
         clauses.append([e1_p2, e2_p1])
         clauses.append([e2_p1, e2_p2])
+        clauses.append([e2_p1, e3_p2])
     elif page_number == 3:
         e1_p1 = edge_to_page[0, e1]
         e2_p1 = edge_to_page[0, e2]
@@ -173,6 +175,7 @@ def static_encode_same_page(edge_to_page: ndarray, e1: int, e2: int) -> List[Lis
         e2_p1 = edge_to_page[0, e2]
         e1_p2 = edge_to_page[1, e1]
         e2_p2 = edge_to_page[1, e2]
+        e3_p2 = edge_to_page[1, e3]
         e1_p3 = edge_to_page[2, e1]
         e2_p3 = edge_to_page[2, e2]
         e1_p4 = edge_to_page[3, e1]
@@ -199,7 +202,7 @@ def static_encode_same_page(edge_to_page: ndarray, e1: int, e2: int) -> List[Lis
     return clauses
 
 
-def static_encode_different_pages(edge_to_page, e1, e2) -> List[List[int]]:
+def static_encode_different_pages(edge_to_page, e1, e2, e3) -> List[List[int]]:
     """
     Encodes different pages for two edges.
 
@@ -212,7 +215,7 @@ def static_encode_different_pages(edge_to_page, e1, e2) -> List[List[int]]:
     page_number = edge_to_page.shape[0]
 
     for p in range(page_number):
-        clauses.append([-edge_to_page[p, e1], -edge_to_page[p, e2]])
+        clauses.append([-edge_to_page[p, e1], -edge_to_page[p, e2], -edge_to_page[p, e3] ])
 
     return clauses
 
@@ -335,6 +338,7 @@ def static_encode_stack_page(precedes: ndarray, edge_to_page: ndarray, edges: nd
             e2v2 = edges[f][2]
 
             duplicates = get_duplicates([e1v1, e1v2, e2v1, e2v2])
+            print (duplicates)
 
             if len(duplicates) > 1:
                 # ignore double edges
@@ -439,6 +443,70 @@ def static_encode_queue_page(precedes: ndarray, edge_to_page: ndarray, edges: nd
                 ])
                 clauses.extend((forbidden_patterns * -1).tolist())
     return clauses
+
+def static_encode_rique_page(precedes: ndarray, edge_to_page: ndarray, edges: ndarray, p: int) -> List[List[int]]:
+    """
+    Encodes a rique page
+
+    :param precedes: precedes[i, j] <=> vertex i precedes vertex j
+    :param edge_to_page: edge_to_page[p, e] <=> edge e is assigned to page p
+    :param edges: all edges
+    :param p: the index of the current page
+            """
+    clauses = []
+    for e in range(edges.shape[0]):
+        e1 = edges[e][0]
+        e1v1 = edges[e][1]
+        e1v2 = edges[e][2]
+        for f in range(e):
+            e2 = edges[f][0]
+            if e1 == e2:
+                continue
+            e2v1 = edges[f][1]
+            e2v2 = edges[f][2]
+            for g in range(f):
+                e3 = edges[g][0]
+                if e1 == e3 or e2 == e3:
+                    continue
+                e3v1 = edges[g][1]
+                e3v2 = edges[g][2]
+
+                #duplicates = get_duplicates([e1v1, e1v2, e2v1, e2v2, e3v1, e3v2])
+
+                for a1 in (e1v1, e1v2) :
+                    if a1 == e1v1 :
+                        a2 = e1v2
+                    else :
+                        a2 = e1v1
+                    for b1 in (e2v1, e2v2) :
+                        if b1 == e2v1:
+                            b2 = e2v2
+                        else:
+                            b2 = e2v1
+                        for c1 in (e3v1, e3v2) :
+                            if c1 == e3v1 :
+                                c2 = e3v2
+                            else :
+                                c2 = e3v1
+
+                            duplicates = get_duplicates([a1, b1, c1, b2])
+                            
+                            #if a2 in (a1, b1, c1, b2) or c2 in (a1, b1, c1, b2):
+                                #continue 
+
+                            forbidden_patterns = np.array([
+                                [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], precedes[b2, a2], precedes[b2, c2]] + static_encode_partial_order(precedes, a1, b1, c1, b2),
+                                [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], precedes[c2, a2], precedes[c2, b2]] + static_encode_partial_order(precedes, a1, c1, b1, c2),
+
+                                [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], precedes[a2, b2], precedes[a2, c2]] + static_encode_partial_order(precedes, b1, a1, c1, a2),
+                                [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], precedes[c2, a2], precedes[c2, b2]] + static_encode_partial_order(precedes, b1, c1, a1, c2),
+
+                                [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], precedes[a2, b2], precedes[a2, c2]] + static_encode_partial_order(precedes, c1, a1, b1, a2),
+                                [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], precedes[b2, a2], precedes[b2, c2]] + static_encode_partial_order(precedes, c1, b1, a1, b2),
+                            ])
+                            clauses.extend((forbidden_patterns * -1).tolist())
+    return clauses
+
 
 
 class SatModel(object):
@@ -574,6 +642,8 @@ class SatModel(object):
                 self._add_clauses(static_encode_stack_page(precedes, edge_to_page, edges, p))
             elif page['type'] == 'QUEUE':
                 self._add_clauses(static_encode_queue_page(precedes, edge_to_page, edges, p))
+            elif page['type'] == 'RIQUE':
+                self._add_clauses(static_encode_rique_page(precedes, edge_to_page, edges, p))
             elif page['type'] == 'NONE':
                 continue
             else:

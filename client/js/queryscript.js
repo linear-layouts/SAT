@@ -13,6 +13,7 @@ function fillPages() {
 					'name="page'+j+'" id="page'+j+'"  onclick="handlePageCheckbox('+j+')" > <select id="typeP'+j+'" name="typeP'+j+'">'+
 					'<option value="STACK">stack</option>'+
 					'<option value="QUEUE">queue</option>'+
+					'<option value="RIQUE">rique</option>'+
 					'<option value="NONE">undefined</option>' +
 					'</select> <select id="layoutP'+j+'" name="layoutP'+j+'">'+
 					'<option value="NONE">maximal</option>'+

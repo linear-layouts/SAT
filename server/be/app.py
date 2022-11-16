@@ -111,6 +111,7 @@ class App:
                                                                       'NONE allows all patterns',
                                                           enum=['QUEUE',
                                                                 'STACK',
+                                                                'RIQUE',
                                                                 'NONE'],
                                                           required=True),
                                     'constraint': fields.String(description='Additional constraints for the page',

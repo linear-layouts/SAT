@@ -1312,6 +1312,7 @@ require([
 				var con = new RequirePartialOrder(objItems)
 				constraintsArray.push(con)
 				$("#constraintTags").tagit("createTag", con.getPrintable())
+				
 				break;
 			case "NODES_FORBID_PARTIAL_ORDER":
 
@@ -1325,6 +1326,7 @@ require([
 				var con = new ForbidPartialOrder(objItems)
 				constraintsArray.push(con)
 				$("#constraintTags").tagit("createTag", con.getPrintable())
+
 				break;
 			case "EDGES_FROM_NODES_ON_PAGES":
 				var objString = filterStringByTag(objects, "objectsA")[0]
@@ -2608,6 +2610,7 @@ require([
 				'name="page'+numberOfPages+'" id="page'+numberOfPages+'"  onclick="handlePageCheckbox('+numberOfPages+')" > <select id="typeP'+numberOfPages+'" name="typeP'+numberOfPages+'">'+
 				'<option value="STACK">stack</option>'+
 				'<option value="QUEUE">queue</option>'+
+				'<option value="">rique</option>'+
 				'<option value="NONE">undefined</option>' +
 				'</select> <select id="layoutP'+numberOfPages+'" name="layoutP'+numberOfPages+'">'+
 				'<option value="NONE">maximal</option>'+
