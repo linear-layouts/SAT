@@ -28,7 +28,7 @@
  ***************************************************************************/
 'use strict'
 
-define(['javascript/yFiles/lib/umd/view-component'], (yfiles, util) => {
+define(['libs/yFiles/lib/umd/view-component'], (yfiles, util) => {
   /**
    * A class that provides png-image export. The image is exported to svg and converted to png.
    */

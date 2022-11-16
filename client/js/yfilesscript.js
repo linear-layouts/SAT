@@ -2,9 +2,9 @@
 
 require.config({
 	paths: {
-		yfiles: 'javascript/yFiles/lib/umd/',
-		utils: 'javascript/yFiles/demos/utils/',
-		resources: 'javascript/yFiles/demos/resources/'
+		yfiles: 'libs/yFiles/lib/umd/',
+		utils: 'libs/yFiles/demos/utils/',
+		resources: 'libs/yFiles/demos/resources/'
 	}
 })
 

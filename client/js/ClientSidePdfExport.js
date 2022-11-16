@@ -28,7 +28,7 @@
  ***************************************************************************/
 'use strict'
 
-define(['javascript/yFiles/lib/umd/view-component'], yfiles => {
+define(['libs/yFiles/lib/umd/view-component'], yfiles => {
   /**
    * A class that provides PDF-image export. The image is exported to svg and converted to PDF.
    */
