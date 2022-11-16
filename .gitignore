@@ -553,3 +553,4 @@ dmypy.json
 
 # End of https://www.gitignore.io/api/latex,python,eclipse,jetbrains+all
 
+/server/cancel.txt
