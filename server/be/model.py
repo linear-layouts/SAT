@@ -564,6 +564,7 @@ def static_encode_deque_page(precedes: ndarray, edge_to_page: ndarray, edges: nd
                                         d2 = e4v1
 
                                     forbidden_patterns = np.array([
+                                        # pattern 1
                                         [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4], precedes[a2, c2], precedes[c2, b2], precedes[c2, d2]] + static_encode_partial_order(precedes, a1, b1, c1, d1, a2),
                                         [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4], precedes[a2, c2], precedes[c2, b2], precedes[c2, d2]] + static_encode_partial_order(precedes, a1, d1, c1, b1, a2),
 
@@ -599,6 +600,43 @@ def static_encode_deque_page(precedes: ndarray, edge_to_page: ndarray, edges: nd
 
                                         [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4], precedes[d2, c2], precedes[c2, a2], precedes[c2, b2]] + static_encode_partial_order(precedes, d1, a1, c1, b1, d2),
                                         [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4], precedes[d2, c2], precedes[c2, a2], precedes[c2, b2]] + static_encode_partial_order(precedes, d1, b1, c1, a1, d2),
+
+                                        # pattern 2
+                                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4], precedes[b2, c2], precedes[c2, a2], precedes[c2, d2]] + static_encode_partial_order(precedes, a1, b1, c1, d1, b2),
+                                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4], precedes[b2, c2], precedes[c2, a2], precedes[c2, d2]] + static_encode_partial_order(precedes, d1, b1, c1, a1, b2),
+
+                                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4], precedes[b2, a2], precedes[a2, c2], precedes[a2, d2]] + static_encode_partial_order(precedes, c1, b1, a1, d1, b2),
+                                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4], precedes[b2, a2], precedes[a2, c2], precedes[a2, d2]] + static_encode_partial_order(precedes, d1, b1, a1, d1, b2),
+
+                                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4], precedes[b2, d2], precedes[d2, a2], precedes[d2, c2]] + static_encode_partial_order(precedes, a1, b1, d1, c1, b2),
+                                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4], precedes[b2, d2], precedes[d2, a2], precedes[d2, c2]] + static_encode_partial_order(precedes, c1, b1, d1, a1, b2),
+
+                                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4], precedes[a2, b2], precedes[b2, c2], precedes[b2, d2]] + static_encode_partial_order(precedes, c1, a1, b1, d1, a2),
+                                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4], precedes[a2, b2], precedes[b2, c2], precedes[b2, d2]] + static_encode_partial_order(precedes, d1, a1, b1, c1, a2),
+
+                                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4], precedes[a2, c2], precedes[c2, b2], precedes[c2, d2]] + static_encode_partial_order(precedes, b1, a1, c1, d1, a2),
+                                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4], precedes[a2, c2], precedes[c2, b2], precedes[c2, d2]] + static_encode_partial_order(precedes, d1, a1, c1, b1, a2),
+
+                                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4], precedes[a2, d2], precedes[d2, b2], precedes[d2, c2]] + static_encode_partial_order(precedes, b1, a1, d1, c1, a2),
+                                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4], precedes[a2, d2], precedes[d2, b2], precedes[d2, c2]] + static_encode_partial_order(precedes, c1, a1, d1, b1, a2),
+
+                                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4], precedes[c2, a2], precedes[a2, b2], precedes[a2, d2]] + static_encode_partial_order(precedes, b1, c1, a1, d1, c2),
+                                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4], precedes[c2, a2], precedes[a2, b2], precedes[a2, d2]] + static_encode_partial_order(precedes, d1, c1, a1, b1, c2),
+
+                                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4], precedes[c2, b2], precedes[b2, a2], precedes[b2, d2]] + static_encode_partial_order(precedes, a1, c1, b1, d1, c2),
+                                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4], precedes[c2, b2], precedes[b2, a2], precedes[b2, d2]] + static_encode_partial_order(precedes, d1, c1, b1, a1, c2),
+
+                                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4], precedes[c2, d2], precedes[d2, a2], precedes[d2, b2]] + static_encode_partial_order(precedes, a1, c1, d1, b1, c2),
+                                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4], precedes[c2, d2], precedes[d2, a2], precedes[d2, b2]] + static_encode_partial_order(precedes, b1, c1, d1, a1, c2),
+
+                                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4], precedes[d2, a2], precedes[a2, b2], precedes[a2, c2]] + static_encode_partial_order(precedes, b1, d1, a1, c1, d2),
+                                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4], precedes[d2, a2], precedes[a2, b2], precedes[a2, c2]] + static_encode_partial_order(precedes, c1, d1, a1, b1, d2),
+
+                                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4], precedes[d2, b2], precedes[b2, a2], precedes[b2, c2]] + static_encode_partial_order(precedes, a1, d1, b1, c1, d2),
+                                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4], precedes[d2, b2], precedes[b2, a2], precedes[b2, c2]] + static_encode_partial_order(precedes, c1, d1, b1, a1, d2),
+
+                                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4], precedes[d2, c2], precedes[c2, a2], precedes[c2, b2]] + static_encode_partial_order(precedes, a1, d1, c1, b1, d2),
+                                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4], precedes[d2, c2], precedes[c2, a2], precedes[c2, b2]] + static_encode_partial_order(precedes, b1, d1, c1, a1, d2)
                                     ])
                                     clauses.extend((forbidden_patterns * -1).tolist())
     return clauses
