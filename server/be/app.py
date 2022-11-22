@@ -112,6 +112,7 @@ class App:
                                                           enum=['QUEUE',
                                                                 'STACK',
                                                                 'RIQUE',
+                                                                'DEQUE',
                                                                 'NONE'],
                                                           required=True),
                                     'constraint': fields.String(description='Additional constraints for the page',
