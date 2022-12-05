@@ -532,12 +532,6 @@ def static_encode_deque_page(precedes: ndarray, edge_to_page: ndarray, edges: nd
             e2v2 = edges[f][2]
             if e2v1 == e2v2:
                 continue
-            # nodes must be pairwise different except e1v1, e2v1 and e2v2, e4v2
-            # check for each additional edge to improve runtime (compared to one check at the end)
-            duplicates1 = get_duplicates([e1v1, e1v2, e2v2])
-            duplicates2 = get_duplicates([e2v1, e1v2, e2v2])
-            if len(duplicates1) > 0 or len(duplicates2) > 0:
-                continue
             for g in range(edges.shape[0]):
                 e3 = edges[g][0]
                 if e1 == e3 or e2 == e3:
@@ -545,11 +539,6 @@ def static_encode_deque_page(precedes: ndarray, edge_to_page: ndarray, edges: nd
                 e3v1 = edges[g][1]
                 e3v2 = edges[g][2]
                 if e3v1 == e3v2:
-                    continue
-                # nodes must be pairwise different except e1v1, e2v1 and e2v2, e4v2
-                duplicates1 = get_duplicates([e1v1, e1v2, e2v2, e3v1, e3v2])
-                duplicates2 = get_duplicates([e2v1, e1v2, e2v2, e3v1, e3v2])
-                if len(duplicates1) > 0 or len(duplicates2) > 0:
                     continue
                 for h in range(edges.shape[0]):
                     e4 = edges[h][0]
@@ -563,7 +552,7 @@ def static_encode_deque_page(precedes: ndarray, edge_to_page: ndarray, edges: nd
                     duplicates1 = get_duplicates([e1v1, e2v2, e1v2, e3v1, e3v2, e4v1])
                     duplicates2 = get_duplicates([e2v1, e2v2, e1v2, e3v1, e3v2, e4v1])
                     duplicates3 = get_duplicates([e1v1, e4v2, e1v2, e3v1, e3v2, e4v1])
-                    duplicates4 = get_duplicates([e2v1, e4v2, ]e1v2, e3v1, e3v2, e4v1)
+                    duplicates4 = get_duplicates([e2v1, e4v2, e1v2, e3v1, e3v2, e4v1])
                     if len(duplicates1) > 0 or len(duplicates2) > 0 or len(duplicates3) > 0 or len(duplicates4) > 0:
                         continue
 
@@ -571,9 +560,10 @@ def static_encode_deque_page(precedes: ndarray, edge_to_page: ndarray, edges: nd
                         [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], edge_to_page[p, e4],
                         # a und b vor c, c2 vor b2 und d2
                         precedes[e1v1, e3v1], precedes[e2v1, e3v1], precedes[e3v2, e2v2], precedes[e3v2, e4v2]] +
-                        static_encode_partial_order(precedes, e3v1, e4v1, e1v2, e3v3)  
+                        static_encode_partial_order(precedes, e3v1, e4v1, e1v2, e3v2)  
                     ])
                     clauses.extend((forbidden_patterns * -1).tolist())
+    print(clauses)
     return clauses
 
 class SatModel(object):
