@@ -51,13 +51,16 @@ class SolverInterface(object):
 
             page_assignments = None
             vertex_order = None
+            deq_edge_type = None
             if sat_result['satisfiable']:
                 vertex_order = model.get_vertex_order_result()
                 page_assignments = model.get_page_assignment_result()
+                deq_edge_type = model.get_edge_type_result()
 
             return SolverResult(satisfiable=sat_result['satisfiable'],
                                 page_assignments=page_assignments,
                                 vertex_order=vertex_order,
+                                deq_edge_type=deq_edge_type,
                                 solver_output=sat_result['full'],
                                 entity_id=entity_id)
         except KeyError as e:

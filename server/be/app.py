@@ -512,6 +512,7 @@ class App:
             entity['status'] = 'FINISHED'
             entity['satisfiable'] = result.satisfiable
             entity['assignments'] = result.page_assignments
+            entity['deq_edge_type'] = result.deq_edge_type
             entity['vertex_order'] = result.vertex_order
             entity['rawSolverResult'] = result.solver_output
             entity['finished'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
