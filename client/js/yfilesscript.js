@@ -1594,7 +1594,6 @@ require([
 			disableFollowingPages(2);
 			deselectPage(2);
 			yfiles.input.ICommand.FIT_GRAPH_BOUNDS.execute(null, graphComponent);
-
 		})
 		*/
 
@@ -2610,7 +2609,8 @@ require([
 				'name="page'+numberOfPages+'" id="page'+numberOfPages+'"  onclick="handlePageCheckbox('+numberOfPages+')" > <select id="typeP'+numberOfPages+'" name="typeP'+numberOfPages+'">'+
 				'<option value="STACK">stack</option>'+
 				'<option value="QUEUE">queue</option>'+
-				'<option value="">rique</option>'+
+				'<option value="RIQUE">rique</option>'+
+				'<option value="DEQUE">deque</option>'+
 				'<option value="NONE">undefined</option>' +
 				'</select> <select id="layoutP'+numberOfPages+'" name="layoutP'+numberOfPages+'">'+
 				'<option value="NONE">maximal</option>'+
