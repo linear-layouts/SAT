@@ -11,6 +11,7 @@ from be.utils import get_duplicates
 def static_encode_vertex_order(precedes: ndarray) -> List[List[int]]:
     """
     Generates the clauses to ensure that the node order is asymmetric and transitive.
+    Test: precedes[u, u] false for DEQUE
     It is static in order to make optimizing more easy
 
     :param precedes: precedes[i, j] <=> the vertex i precedes vertex j
@@ -19,6 +20,7 @@ def static_encode_vertex_order(precedes: ndarray) -> List[List[int]]:
     clauses = []
     # Ensure asymmetry
     for u in range(precedes.shape[0]):
+        clauses.append([precedes[u, u]]) # needed for Deque
         for v in range(u):
             if u == v:
                 continue
@@ -330,7 +332,6 @@ def static_encode_stack_page(precedes: ndarray, edge_to_page: ndarray, edges: nd
     :param p: the index of the current page
             """
     clauses = []
-    print("DAFRICK")
     for e in range(edges.shape[0]):
         e1 = edges[e][0]
         e1v1 = edges[e][1]
@@ -475,40 +476,49 @@ def static_encode_rique_page(precedes: ndarray, edge_to_page: ndarray, edges: nd
                 e3v1 = edges[g][1]
                 e3v2 = edges[g][2]
 
-                #duplicates = get_duplicates([e1v1, e1v2, e2v1, e2v2, e3v1, e3v2])
-
-                for a1 in (e1v1, e1v2) :
-                    if a1 == e1v1 :
+                for a1 in (e1v1, e1v2):
+                    if a1 == e1v1:
                         a2 = e1v2
-                    else :
+                    else:
                         a2 = e1v1
-                    for b1 in (e2v1, e2v2) :
+                    for b1 in (e2v1, e2v2):
                         if b1 == e2v1:
                             b2 = e2v2
                         else:
                             b2 = e2v1
-                        for c1 in (e3v1, e3v2) :
-                            if c1 == e3v1 :
+                        for c1 in (e3v1, e3v2):
+                            if c1 == e3v1:
                                 c2 = e3v2
-                            else :
+                            else:
                                 c2 = e3v1
 
-                            duplicates = get_duplicates([a1, b1, c1, b2])
-                            
-                            #if a2 in (a1, b1, c1, b2) or c2 in (a1, b1, c1, b2):
-                                #continue 
+                            duplicates1 = get_duplicates([a2, b1, c1, b2])
+                            duplicates2 = get_duplicates([c2, b1, a1, b2])
+                            if len(duplicates1) == 0 and len(duplicates2) == 0:
+                                forbidden_patterns = np.array([
+                                    [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], precedes[b2, a2], precedes[b2, c2]] + static_encode_partial_order(precedes, a1, b1, c1, b2),
+                                    [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], precedes[b2, a2], precedes[b2, c2]] + static_encode_partial_order(precedes, c1, b1, a1, b2)
+                                ])
+                                clauses.extend((forbidden_patterns * -1).tolist())
 
-                            forbidden_patterns = np.array([
-                                [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], precedes[b2, a2], precedes[b2, c2]] + static_encode_partial_order(precedes, a1, b1, c1, b2),
-                                [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], precedes[c2, a2], precedes[c2, b2]] + static_encode_partial_order(precedes, a1, c1, b1, c2),
+                            duplicates1 = get_duplicates([a2, c1, b1, c2])
+                            duplicates2 = get_duplicates([b2, c1, a1, c2])
+                            if len(duplicates1) == 0 and len(duplicates2) == 0:
+                                forbidden_patterns = np.array([
+                                    [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], precedes[c2, a2], precedes[c2, b2]] + static_encode_partial_order(precedes, a1, c1, b1, c2),
+                                    [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], precedes[c2, a2], precedes[c2, b2]] + static_encode_partial_order(precedes, b1, c1, a1, c2)
+                                ])
+                                clauses.extend((forbidden_patterns * -1).tolist())
 
-                                [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], precedes[a2, b2], precedes[a2, c2]] + static_encode_partial_order(precedes, b1, a1, c1, a2),
-                                [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], precedes[c2, a2], precedes[c2, b2]] + static_encode_partial_order(precedes, b1, c1, a1, c2),
+                            duplicates1 = get_duplicates([b2, a1, c1, a2])
+                            duplicates2 = get_duplicates([c2, a1, b1, a2])
+                            if len(duplicates1) == 0 and len(duplicates2) == 0:
+                                forbidden_patterns = np.array([
+                                    [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], precedes[a2, b2], precedes[a2, c2]] + static_encode_partial_order(precedes, b1, a1, c1, a2),
+                                    [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], precedes[a2, b2], precedes[a2, c2]] + static_encode_partial_order(precedes, c1, a1, b1, a2)
+                                ])
+                                clauses.extend((forbidden_patterns * -1).tolist())
 
-                                [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], precedes[a2, b2], precedes[a2, c2]] + static_encode_partial_order(precedes, c1, a1, b1, a2),
-                                [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], precedes[b2, a2], precedes[b2, c2]] + static_encode_partial_order(precedes, c1, b1, a1, b2),
-                            ])
-                            clauses.extend((forbidden_patterns * -1).tolist())
     return clauses
 
 
@@ -538,26 +548,155 @@ def static_encode_deque_page(precedes: ndarray, edge_to_page: ndarray, edges: nd
     :param p: the index of the current page
     :param deq_edge_type: deq_edge_type[type_num, e] <=> edge e is assigned as edge type (exactly one type per edge)
     """
-
-    clauses = static_encode_deque_types(deq_edge_type)
-
+    clauses = []
     for e in range(edges.shape[0]):
         e1 = edges[e][0]
-        # u
         e1v1 = edges[e][1]
-        # v
         e1v2 = edges[e][2]
+        if e1v1 == e1v2:
+            continue
         for f in range(edges.shape[0]):
             e2 = edges[f][0]
             if e1 == e2:
                 continue
-            # z
             e2v1 = edges[f][1]
-            # w
             e2v2 = edges[f][2]
-            # pairwise different
+            if e2v1 == e2v2:
+                continue
+            # adjacent nodes might need handling
+            # add clauses if e1 stack edge and e2 queue edge: one node of e2 enclosed
+            # enclosed node can't be shared with e1
+            duplicates = get_duplicates([e1v1, e1v2, e2v1])
+            if len(duplicates) == 0:
+                forbidden_patterns = np.array([
+                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.HEAD.value, e1], deq_edge_type[TypeEnum.QUEUE_H_T.value, e2]] + static_encode_partial_order(precedes, e1v1, e2v1, e1v2, e2v2),
+                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.HEAD.value, e1], deq_edge_type[TypeEnum.QUEUE_H_T.value, e2]] + static_encode_partial_order(precedes, e1v2, e2v1, e1v1, e2v2),
+
+                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.HEAD.value, e1], deq_edge_type[TypeEnum.QUEUE_T_H.value, e2]] + static_encode_partial_order(precedes, e2v2, e1v1, e2v1, e1v2),
+                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.HEAD.value, e1], deq_edge_type[TypeEnum.QUEUE_T_H.value, e2]] + static_encode_partial_order(precedes, e2v2, e1v2, e2v1, e1v1),
+
+                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.TAIL.value, e1], deq_edge_type[TypeEnum.QUEUE_T_H.value, e2]] + static_encode_partial_order(precedes, e1v1, e2v1, e1v2, e2v2),
+                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.TAIL.value, e1], deq_edge_type[TypeEnum.QUEUE_T_H.value, e2]] + static_encode_partial_order(precedes, e1v2, e2v1, e1v1, e2v2),
+
+                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.TAIL.value, e1], deq_edge_type[TypeEnum.QUEUE_H_T.value, e2]] + static_encode_partial_order(precedes, e2v2, e1v1, e2v1, e1v2),
+                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.TAIL.value, e1], deq_edge_type[TypeEnum.QUEUE_H_T.value, e2]] + static_encode_partial_order(precedes, e2v2, e1v2, e2v1, e1v1)
+                ])
+                clauses.extend((forbidden_patterns * -1).tolist())
+            duplicates = get_duplicates([e1v1, e1v2, e2v2])
+            if len(duplicates) == 0:
+                forbidden_patterns = np.array([
+                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.HEAD.value, e1], deq_edge_type[TypeEnum.QUEUE_H_T.value, e2]] + static_encode_partial_order(precedes, e1v1, e2v2, e1v2, e2v1),
+                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.HEAD.value, e1], deq_edge_type[TypeEnum.QUEUE_H_T.value, e2]] + static_encode_partial_order(precedes, e1v2, e2v2, e1v1, e2v1),
+
+                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.HEAD.value, e1], deq_edge_type[TypeEnum.QUEUE_T_H.value, e2]] + static_encode_partial_order(precedes, e2v1, e1v1, e2v2, e1v2),
+                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.HEAD.value, e1], deq_edge_type[TypeEnum.QUEUE_T_H.value, e2]] + static_encode_partial_order(precedes, e2v1, e1v2, e2v2, e1v1),
+
+                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.TAIL.value, e1], deq_edge_type[TypeEnum.QUEUE_T_H.value, e2]] + static_encode_partial_order(precedes, e1v1, e2v2, e1v2, e2v1),
+                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.TAIL.value, e1], deq_edge_type[TypeEnum.QUEUE_T_H.value, e2]] + static_encode_partial_order(precedes, e1v2, e2v2, e1v1, e2v1),
+
+                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.TAIL.value, e1], deq_edge_type[TypeEnum.QUEUE_H_T.value, e2]] + static_encode_partial_order(precedes, e2v1, e1v1, e2v2, e1v2),
+                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.TAIL.value, e1], deq_edge_type[TypeEnum.QUEUE_H_T.value, e2]] + static_encode_partial_order(precedes, e2v1, e1v2, e2v2, e1v1)
+                    ])
+                clauses.extend((forbidden_patterns * -1).tolist())
+            # add clauses if e1 stack edge and e2 queue edge: both nodes of e2 enclosed
+            # inserted at same side -> first nodes cant be the same
+            for type_num1 in [TypeEnum.HEAD.value, TypeEnum.TAIL.value]:
+                type_num2 = None
+                if type_num1 == TypeEnum.HEAD.value:
+                    type_num2 = TypeEnum.QUEUE_H_T.value
+                else:
+                    type_num2 = TypeEnum.QUEUE_T_H.value
+                if e1v1 != e2v1:
+                    forbidden_patterns = np.array([
+                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[type_num1, e1], deq_edge_type[type_num2, e2]] + static_encode_partial_order(precedes, e1v1, e2v1, e2v2, e1v2)
+                    ])
+                    clauses.extend((forbidden_patterns * -1).tolist())
+                if e1v1 != e2v2:
+                    forbidden_patterns = np.array([
+                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[type_num1, e1], deq_edge_type[type_num2, e2]] + static_encode_partial_order(precedes, e1v1, e2v2, e2v1, e1v2)
+                    ])
+                    clauses.extend((forbidden_patterns * -1).tolist())
+                if e1v2 != e2v1:
+                    forbidden_patterns = np.array([
+                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[type_num1, e1], deq_edge_type[type_num2, e2]] + static_encode_partial_order(precedes, e1v2, e2v1, e2v2, e1v1)
+                    ])
+                    clauses.extend((forbidden_patterns * -1).tolist())
+                if e1v2 != e2v2:
+                    forbidden_patterns = np.array([
+                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[type_num1, e1], deq_edge_type[type_num2, e2]] + static_encode_partial_order(precedes, e1v2, e2v2, e2v1, e1v1)
+                    ])
+                    clauses.extend((forbidden_patterns * -1).tolist())
+            # inserted at different sides -> last nodes cant be the same
+            for type_num1 in [TypeEnum.HEAD.value, TypeEnum.TAIL.value]:
+                type_num2 = None
+                if type_num1 == TypeEnum.HEAD.value:
+                    type_num2 = TypeEnum.QUEUE_T_H.value
+                else:
+                    type_num2 = TypeEnum.QUEUE_H_T.value
+                if e1v1 != e2v1:
+                    forbidden_patterns = np.array([
+                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[type_num1, e1], deq_edge_type[type_num2, e2]] + static_encode_partial_order(precedes, e1v2, e2v2, e2v1, e1v1)
+                    ])
+                    clauses.extend((forbidden_patterns * -1).tolist())
+                if e1v1 != e2v2:
+                    forbidden_patterns = np.array([
+                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[type_num1, e1], deq_edge_type[type_num2, e2]] + static_encode_partial_order(precedes, e1v2, e2v1, e2v2, e1v1)
+                    ])
+                    clauses.extend((forbidden_patterns * -1).tolist())
+                if e1v2 != e2v1:
+                    forbidden_patterns = np.array([
+                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[type_num1, e1], deq_edge_type[type_num2, e2]] + static_encode_partial_order(precedes, e1v1, e2v2, e2v1, e1v2)
+                    ])
+                    clauses.extend((forbidden_patterns * -1).tolist())
+                if e1v2 != e2v2:
+                    forbidden_patterns = np.array([
+                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[type_num1, e1], deq_edge_type[type_num2, e2]] + static_encode_partial_order(precedes, e1v1, e2v1, e2v2, e1v2)
+                    ])
+                    clauses.extend((forbidden_patterns * -1).tolist())
+            # add clauses if e1 and e2 queue edges: different directions, one node of e2 enclosed
+            for type_num1 in [TypeEnum.QUEUE_H_T.value, TypeEnum.QUEUE_T_H.value]:
+                type_num2 = None
+                if type_num1 == TypeEnum.QUEUE_H_T.value:
+                    type_num2 = TypeEnum.QUEUE_T_H.value
+                else:
+                    type_num2 = TypeEnum.QUEUE_H_T.value
+                # enclosed node must be different from node on the same side (tail, head)
+                if e2v1 != e1v1:
+                    forbidden_patterns = np.array([
+                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[type_num1, e1], deq_edge_type[type_num2, e2]] + static_encode_partial_order(precedes, e1v2, e2v1, e1v1, e2v2)
+                    ])
+                    clauses.extend((forbidden_patterns * -1).tolist())
+                if e2v1 != e1v2:
+                    forbidden_patterns = np.array([
+                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[type_num1, e1], deq_edge_type[type_num2, e2]] + static_encode_partial_order(precedes, e1v1, e2v1, e1v2, e2v2),
+                    ])
+                    clauses.extend((forbidden_patterns * -1).tolist())
+                if e2v2 != e1v1:
+                    forbidden_patterns = np.array([
+                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[type_num1, e1], deq_edge_type[type_num2, e2]] + static_encode_partial_order(precedes, e1v2, e2v2, e1v1, e2v1)
+                    ])
+                    clauses.extend((forbidden_patterns * -1).tolist())
+                if e2v2 != e1v2:
+                    forbidden_patterns = np.array([
+                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[type_num1, e1], deq_edge_type[type_num2, e2]] + static_encode_partial_order(precedes, e1v1, e2v2, e1v2, e2v1)
+                    ])
+                    clauses.extend((forbidden_patterns * -1).tolist())
+            # add clauses if e1 and e2 queue edges: different direction, both nodes of e2 enclosed
+            for type_num1 in [TypeEnum.QUEUE_H_T.value, TypeEnum.QUEUE_T_H.value]:
+                type_num2 = None
+                if type_num1 == TypeEnum.QUEUE_H_T.value:
+                    type_num2 = TypeEnum.QUEUE_T_H.value
+                else:
+                    type_num2 = TypeEnum.QUEUE_H_T.value
+                forbidden_patterns = np.array([
+                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[type_num1, e1], deq_edge_type[type_num2, e2]] + static_encode_partial_order(precedes, e1v1, e2v1, e2v2, e1v2),
+                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[type_num1, e1], deq_edge_type[type_num2, e2]] + static_encode_partial_order(precedes, e1v1, e2v2, e2v1, e1v2),
+                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[type_num1, e1], deq_edge_type[type_num2, e2]] + static_encode_partial_order(precedes, e1v2, e2v1, e2v2, e1v1),
+                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[type_num1, e1], deq_edge_type[type_num2, e2]] + static_encode_partial_order(precedes, e1v2, e2v2, e2v1, e1v1)
+                ])
+                clauses.extend((forbidden_patterns * -1).tolist())
+            # adjacent nodes do not need handling
             duplicates = get_duplicates([e1v1, e1v2, e2v1, e2v2])
-            print(duplicates)
             if len(duplicates) > 0:
                 continue
             # add stack clauses if both tail or head edges
@@ -569,50 +708,15 @@ def static_encode_deque_page(precedes: ndarray, edge_to_page: ndarray, edges: nd
                     [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[type_num, e1], deq_edge_type[type_num, e2]] + static_encode_partial_order(precedes, e1v2, e2v2, e1v1, e2v1)
                 ])
                 clauses.extend((forbidden_patterns * -1).tolist())
-
-            # add clauses if e2 queue edge and e1 tail or head edge
-            for type_num in [TypeEnum.TAIL.value, TypeEnum.HEAD.value]:
+            # add clauses if e1 and e2 queue edges: same direction, both nodes of e2 enclosed
+            for type_num in [TypeEnum.QUEUE_H_T.value, TypeEnum.QUEUE_T_H.value]:
                 forbidden_patterns = np.array([
-                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[type_num, e1], deq_edge_type[TypeEnum.QUEUE.value, e2]] + static_encode_partial_order(precedes, e1v1, e2v2, e2v1, e1v2),
-                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[type_num, e1], deq_edge_type[TypeEnum.QUEUE.value, e2]] + static_encode_partial_order(precedes, e1v2, e2v2, e2v1, e1v1),
-                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[type_num, e1], deq_edge_type[TypeEnum.QUEUE.value, e2]] + static_encode_partial_order(precedes, e1v1, e2v1, e2v2, e1v2),
-                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[type_num, e1], deq_edge_type[TypeEnum.QUEUE.value, e2]] + static_encode_partial_order(precedes, e1v2, e2v1, e2v2, e1v1)
+                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[type_num, e1], deq_edge_type[type_num, e2]] + static_encode_partial_order(precedes, e1v1, e2v1, e2v2, e1v2),
+                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[type_num, e1], deq_edge_type[type_num, e2]] + static_encode_partial_order(precedes, e1v1, e2v2, e2v1, e1v2),
+                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[type_num, e1], deq_edge_type[type_num, e2]] + static_encode_partial_order(precedes, e1v2, e2v1, e2v2, e1v1),
+                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[type_num, e1], deq_edge_type[type_num, e2]] + static_encode_partial_order(precedes, e1v2, e2v2, e2v1, e1v1)
                 ])
                 clauses.extend((forbidden_patterns * -1).tolist())
-            # add clauses if e1 and e2 queue edges
-            forbidden_patterns = np.array([
-                [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.QUEUE.value, e1], deq_edge_type[TypeEnum.QUEUE.value, e2]] + static_encode_partial_order(precedes, e1v1, e2v1, e2v2, e1v2),
-                [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.QUEUE.value, e1], deq_edge_type[TypeEnum.QUEUE.value, e2]] + static_encode_partial_order(precedes, e1v2, e2v1, e2v2, e1v1),
-                [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.QUEUE.value, e1], deq_edge_type[TypeEnum.QUEUE.value, e2]] + static_encode_partial_order(precedes, e1v1, e2v2, e2v1, e1v2),
-                [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.QUEUE.value, e1], deq_edge_type[TypeEnum.QUEUE.value, e2]] + static_encode_partial_order(precedes, e1v2, e2v2, e2v1, e1v1)
-            ])
-            clauses.extend((forbidden_patterns * -1).tolist())
-            for g in range(edges.shape[0]):
-                e3 = edges[g][0]
-                if e1 == e3 or e2 == e3:
-                    continue
-                # a
-                e3v1 = edges[g][1]
-                # b
-                e3v2 = edges[g][2]
-                # pairwise different except e1v1, e1v2 with e3v1, e3v2
-                duplicates = get_duplicates([e3v1, e3v2, e2v1, e2v2])
-                if len(duplicates) > 0:
-                    continue
-                # add clauses if e2 queue edge and e1, e3 tail or head edges
-                for type_num in [TypeEnum.TAIL.value, TypeEnum.HEAD.value]:
-                    forbidden_patterns = np.array([
-                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], deq_edge_type[type_num, e1], deq_edge_type[type_num, e3], deq_edge_type[TypeEnum.QUEUE.value, e2]] + static_encode_partial_order(precedes, e3v1, e2v1, e3v2, e1v1, e2v2, e1v2),
-                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], deq_edge_type[type_num, e1], deq_edge_type[type_num, e3], deq_edge_type[TypeEnum.QUEUE.value, e2]] + static_encode_partial_order(precedes, e3v1, e2v2, e3v2, e1v1, e2v1, e1v2),
-                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], deq_edge_type[type_num, e1], deq_edge_type[type_num, e3], deq_edge_type[TypeEnum.QUEUE.value, e2]] + static_encode_partial_order(precedes, e3v1, e2v2, e3v2, e1v2, e2v1, e1v1),
-                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], deq_edge_type[type_num, e1], deq_edge_type[type_num, e3], deq_edge_type[TypeEnum.QUEUE.value, e2]] + static_encode_partial_order(precedes, e3v1, e2v1, e3v2, e1v2, e2v2, e1v1),
-
-                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], deq_edge_type[type_num, e1], deq_edge_type[type_num, e3], deq_edge_type[TypeEnum.QUEUE.value, e2]] + static_encode_partial_order(precedes, e3v2, e2v1, e3v1, e1v1, e2v2, e1v2),
-                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], deq_edge_type[type_num, e1], deq_edge_type[type_num, e3], deq_edge_type[TypeEnum.QUEUE.value, e2]] + static_encode_partial_order(precedes, e3v2, e2v2, e3v1, e1v1, e2v1, e1v2),
-                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], deq_edge_type[type_num, e1], deq_edge_type[type_num, e3], deq_edge_type[TypeEnum.QUEUE.value, e2]] + static_encode_partial_order(precedes, e3v2, e2v2, e3v1, e1v2, e2v1, e1v1),
-                        [edge_to_page[p, e1], edge_to_page[p, e2], edge_to_page[p, e3], deq_edge_type[type_num, e1], deq_edge_type[type_num, e3], deq_edge_type[TypeEnum.QUEUE.value, e2]] + static_encode_partial_order(precedes, e3v2, e2v1, e3v1, e1v2, e2v2, e1v1)
-                    ])
-                    clauses.extend((forbidden_patterns * -1).tolist())
     return clauses
 
 class SatModel(object):
@@ -777,6 +881,9 @@ class SatModel(object):
             elif page['type'] == 'RIQUE':
                 self._add_clauses(static_encode_rique_page(precedes, edge_to_page, edges, p))
             elif page['type'] == 'DEQUE':
+                # ensures that each edge is assigned to exactly one type
+                self._add_clauses(static_encode_deque_types(deq_edge_type))
+                # adds page clauses
                 self._add_clauses(static_encode_deque_page(precedes, edge_to_page, edges, p, deq_edge_type))
             elif page['type'] == 'NONE':
                 continue
@@ -1040,7 +1147,9 @@ class SatModel(object):
                                             self._edge_to_page)].reshape(
                 self._edge_to_page.shape) > 0
             result['deq_edge_type'] = vars[
-                                        np.size(self._precedes):np.size(self._precedes) + np.size(
+                                        np.size(self._precedes) + np.size(
+                                            self._edge_to_page):np.size(self._precedes) + np.size(
+                                            self._edge_to_page) + np.size(
                                             self._deq_edge_type)].reshape(
                 self._deq_edge_type.shape) > 0
             pass

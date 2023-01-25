@@ -14,6 +14,7 @@ function fillPages() {
 					'<option value="STACK">stack</option>'+
 					'<option value="QUEUE">queue</option>'+
 					'<option value="RIQUE">rique</option>'+
+					'<option value="DEQUE">deque</option>'+
 					'<option value="NONE">undefined</option>' +
 					'</select> <select id="layoutP'+j+'" name="layoutP'+j+'">'+
 					'<option value="NONE">maximal</option>'+
@@ -786,7 +787,6 @@ $( function() {
 			for (i=0; i<constraintsArray.length; i++){
 				if (constraintsArray[i].getPrintable() == ui.tagLabel) {
 					// delete Constraints
-
 					var temp1 = constraintsArray.slice(0,i)
 					var temp2 = constraintsArray.slice(i+1, constraintsArray.length)
 					constraintsArray = temp1.concat(temp2)

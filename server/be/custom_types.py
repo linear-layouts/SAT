@@ -19,7 +19,8 @@ class PageAssignment(NamedTuple):
 class TypeEnum(Enum):
     TAIL = 0
     HEAD = 1
-    QUEUE = 2
+    QUEUE_T_H = 2
+    QUEUE_H_T = 3
     
 class EdgeType(NamedTuple):
     edge: str
