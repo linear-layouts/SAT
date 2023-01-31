@@ -58,12 +58,14 @@ Then it means there are no alternatives that have been configured, hence let’s
 
 Here we are setting up two versions as alternatives, later we will be able to choose between them to set one of them as the system default one.
 
-```sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1
+```
+sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1
 ```
 
 Switch the default Python version 
 
-```sudo update-alternatives --config python
+```
+sudo update-alternatives --config python
 ```
 
 When you check the version of Python this time, you will have 3.8. For that use:
@@ -74,7 +76,8 @@ python -V
 
 In order to install the necessary packages to run this application run the following commands in the same directory as this README.md file.
 
-```bash
+```
+bash
 pipenv install          # install new dependencies from pipfile
 pipenv clean            # remove unused dependencies
 ```
