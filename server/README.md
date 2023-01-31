@@ -38,17 +38,21 @@ Set the default Python version
 
 Check what python versions are available on your systems:
 
-```ls /usr/bin/python*
+```
+ls /usr/bin/python*
 ```
 
 To know whether any version is configured as python alternatives or not. For that run:
 
-```sudo update-alternatives --list python
+```
+sudo update-alternatives --list python
 ```
 
 If the output is:
 
-```update-alternatives: error: no alternatives for python```
+```
+update-alternatives: error: no alternatives for python
+```
 
 Then it means there are no alternatives that have been configured, hence let’s do some.
 
