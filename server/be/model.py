@@ -569,33 +569,33 @@ def static_encode_deque_page(precedes: ndarray, edge_to_page: ndarray, edges: nd
             duplicates = get_duplicates([e1v1, e1v2, e2v1])
             if len(duplicates) == 0:
                 forbidden_patterns = np.array([
-                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.HEAD.value, e1], deq_edge_type[TypeEnum.QUEUE_H_T.value, e2]] + static_encode_partial_order(precedes, e1v1, e2v1, e1v2, e2v2),
-                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.HEAD.value, e1], deq_edge_type[TypeEnum.QUEUE_H_T.value, e2]] + static_encode_partial_order(precedes, e1v2, e2v1, e1v1, e2v2),
+                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, TypeEnum.HEAD.value, e1], deq_edge_type[p, TypeEnum.QUEUE_H_T.value, e2]] + static_encode_partial_order(precedes, e1v1, e2v1, e1v2, e2v2),
+                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, TypeEnum.HEAD.value, e1], deq_edge_type[p, TypeEnum.QUEUE_H_T.value, e2]] + static_encode_partial_order(precedes, e1v2, e2v1, e1v1, e2v2),
 
-                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.HEAD.value, e1], deq_edge_type[TypeEnum.QUEUE_T_H.value, e2]] + static_encode_partial_order(precedes, e2v2, e1v1, e2v1, e1v2),
-                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.HEAD.value, e1], deq_edge_type[TypeEnum.QUEUE_T_H.value, e2]] + static_encode_partial_order(precedes, e2v2, e1v2, e2v1, e1v1),
+                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, TypeEnum.HEAD.value, e1], deq_edge_type[p, TypeEnum.QUEUE_T_H.value, e2]] + static_encode_partial_order(precedes, e2v2, e1v1, e2v1, e1v2),
+                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, TypeEnum.HEAD.value, e1], deq_edge_type[p, TypeEnum.QUEUE_T_H.value, e2]] + static_encode_partial_order(precedes, e2v2, e1v2, e2v1, e1v1),
 
-                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.TAIL.value, e1], deq_edge_type[TypeEnum.QUEUE_T_H.value, e2]] + static_encode_partial_order(precedes, e1v1, e2v1, e1v2, e2v2),
-                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.TAIL.value, e1], deq_edge_type[TypeEnum.QUEUE_T_H.value, e2]] + static_encode_partial_order(precedes, e1v2, e2v1, e1v1, e2v2),
+                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, TypeEnum.TAIL.value, e1], deq_edge_type[p, TypeEnum.QUEUE_T_H.value, e2]] + static_encode_partial_order(precedes, e1v1, e2v1, e1v2, e2v2),
+                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, TypeEnum.TAIL.value, e1], deq_edge_type[p, TypeEnum.QUEUE_T_H.value, e2]] + static_encode_partial_order(precedes, e1v2, e2v1, e1v1, e2v2),
 
-                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.TAIL.value, e1], deq_edge_type[TypeEnum.QUEUE_H_T.value, e2]] + static_encode_partial_order(precedes, e2v2, e1v1, e2v1, e1v2),
-                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.TAIL.value, e1], deq_edge_type[TypeEnum.QUEUE_H_T.value, e2]] + static_encode_partial_order(precedes, e2v2, e1v2, e2v1, e1v1)
+                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, TypeEnum.TAIL.value, e1], deq_edge_type[p, TypeEnum.QUEUE_H_T.value, e2]] + static_encode_partial_order(precedes, e2v2, e1v1, e2v1, e1v2),
+                    [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, TypeEnum.TAIL.value, e1], deq_edge_type[p, TypeEnum.QUEUE_H_T.value, e2]] + static_encode_partial_order(precedes, e2v2, e1v2, e2v1, e1v1)
                 ])
                 clauses.extend((forbidden_patterns * -1).tolist())
             duplicates = get_duplicates([e1v1, e1v2, e2v2])
             if len(duplicates) == 0:
                 forbidden_patterns = np.array([
-                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.HEAD.value, e1], deq_edge_type[TypeEnum.QUEUE_H_T.value, e2]] + static_encode_partial_order(precedes, e1v1, e2v2, e1v2, e2v1),
-                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.HEAD.value, e1], deq_edge_type[TypeEnum.QUEUE_H_T.value, e2]] + static_encode_partial_order(precedes, e1v2, e2v2, e1v1, e2v1),
+                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, TypeEnum.HEAD.value, e1], deq_edge_type[p, TypeEnum.QUEUE_H_T.value, e2]] + static_encode_partial_order(precedes, e1v1, e2v2, e1v2, e2v1),
+                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, TypeEnum.HEAD.value, e1], deq_edge_type[p, TypeEnum.QUEUE_H_T.value, e2]] + static_encode_partial_order(precedes, e1v2, e2v2, e1v1, e2v1),
 
-                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.HEAD.value, e1], deq_edge_type[TypeEnum.QUEUE_T_H.value, e2]] + static_encode_partial_order(precedes, e2v1, e1v1, e2v2, e1v2),
-                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.HEAD.value, e1], deq_edge_type[TypeEnum.QUEUE_T_H.value, e2]] + static_encode_partial_order(precedes, e2v1, e1v2, e2v2, e1v1),
+                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, TypeEnum.HEAD.value, e1], deq_edge_type[p, TypeEnum.QUEUE_T_H.value, e2]] + static_encode_partial_order(precedes, e2v1, e1v1, e2v2, e1v2),
+                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, TypeEnum.HEAD.value, e1], deq_edge_type[p, TypeEnum.QUEUE_T_H.value, e2]] + static_encode_partial_order(precedes, e2v1, e1v2, e2v2, e1v1),
 
-                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.TAIL.value, e1], deq_edge_type[TypeEnum.QUEUE_T_H.value, e2]] + static_encode_partial_order(precedes, e1v1, e2v2, e1v2, e2v1),
-                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.TAIL.value, e1], deq_edge_type[TypeEnum.QUEUE_T_H.value, e2]] + static_encode_partial_order(precedes, e1v2, e2v2, e1v1, e2v1),
+                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, TypeEnum.TAIL.value, e1], deq_edge_type[p, TypeEnum.QUEUE_T_H.value, e2]] + static_encode_partial_order(precedes, e1v1, e2v2, e1v2, e2v1),
+                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, TypeEnum.TAIL.value, e1], deq_edge_type[p, TypeEnum.QUEUE_T_H.value, e2]] + static_encode_partial_order(precedes, e1v2, e2v2, e1v1, e2v1),
 
-                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.TAIL.value, e1], deq_edge_type[TypeEnum.QUEUE_H_T.value, e2]] + static_encode_partial_order(precedes, e2v1, e1v1, e2v2, e1v2),
-                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[TypeEnum.TAIL.value, e1], deq_edge_type[TypeEnum.QUEUE_H_T.value, e2]] + static_encode_partial_order(precedes, e2v1, e1v2, e2v2, e1v1)
+                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, TypeEnum.TAIL.value, e1], deq_edge_type[p, TypeEnum.QUEUE_H_T.value, e2]] + static_encode_partial_order(precedes, e2v1, e1v1, e2v2, e1v2),
+                        [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, TypeEnum.TAIL.value, e1], deq_edge_type[p, TypeEnum.QUEUE_H_T.value, e2]] + static_encode_partial_order(precedes, e2v1, e1v2, e2v2, e1v1)
                     ])
                 clauses.extend((forbidden_patterns * -1).tolist())
             # add clauses if e1 stack edge and e2 queue edge: both nodes of e2 enclosed
@@ -775,9 +775,9 @@ class SatModel(object):
         # self._edges_to_pages[e,p] <=> edge e is assigned to page p
         self._edge_to_page = self._create_variables(page_number * m).reshape((page_number, m))
 
-        # DEQUE: tail (0), head (1) or queue edges (2)
-        # self._deq_edge_type[type_num, e] <=> edge e is assigned as edge type
-        self._deq_edge_type = self._create_variables(len(TypeEnum) * m).reshape((len(TypeEnum), m))
+        # DEQUE: tail (0), head (1), tail to head (2) or head to tail (3)
+        # self._deq_edge_type[p, type_num, e] <=> edge e is assigned as edge type for page p
+        self._deq_edge_type = self._create_variables(page_number * len(TypeEnum) * m).reshape((page_number, len(TypeEnum), m))
 
     def _create_variables(self, number: int = 1) -> ndarray:
         assert number >= 1, "cannot create less than 1 new variables"
