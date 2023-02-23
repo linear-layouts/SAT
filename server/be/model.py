@@ -522,21 +522,20 @@ def static_encode_rique_page(precedes: ndarray, edge_to_page: ndarray, edges: nd
     return clauses
 
 
-def static_encode_deque_types(deq_edge_type: ndarray) -> List[List[int]]:
+def static_encode_deque_types(deq_edge_type: ndarray, p: int) -> List[List[int]]:
     """
     Generates the clauses to assign each edge to one edge type
 
     :param deq_edge_type: deq_edge_type[p, type_num, e] <=> edge e is assigned as edge type for page p
     """
     clauses = []
-    for p in range(deq_edge_type.shape[0]):
-        for e in range(deq_edge_type.shape[2]):
-            # each edge has to be assigned to at least one type
-            clauses.append(list(deq_edge_type[p, :, e]))
-            # at most one type per edge
-            for t1 in range(deq_edge_type.shape[1]):
-                for t2 in range(t1 + 1, deq_edge_type.shape[1]):
-                    clauses.append([-deq_edge_type[p, t1, e], -deq_edge_type[p, t2, e]])
+    for e in range(deq_edge_type.shape[2]):
+        # each edge has to be assigned to at least one type
+        clauses.append(list(deq_edge_type[p, :, e]))
+        # at most one type per edge
+        for t1 in range(deq_edge_type.shape[1]):
+            for t2 in range(t1 + 1, deq_edge_type.shape[1]):
+                clauses.append([-deq_edge_type[p, t1, e], -deq_edge_type[p, t2, e]])
     return clauses
 
 def static_encode_deque_page(precedes: ndarray, edge_to_page: ndarray, edges: ndarray, p: int, deq_edge_type: ndarray) -> List[List[int]]:
@@ -883,7 +882,7 @@ class SatModel(object):
                 self._add_clauses(static_encode_rique_page(precedes, edge_to_page, edges, p))
             elif page['type'] == 'DEQUE':
                 # ensures that each edge is assigned to exactly one type
-                self._add_clauses(static_encode_deque_types(deq_edge_type))
+                self._add_clauses(static_encode_deque_types(deq_edge_type, p))
                 # adds page clauses
                 self._add_clauses(static_encode_deque_page(precedes, edge_to_page, edges, p, deq_edge_type))
             elif page['type'] == 'NONE':
