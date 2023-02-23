@@ -10,11 +10,11 @@ This application requires lingeling which depends on UNIX. This files assumes th
 
 ### Init project workspace
 
-First install python, pip, pipenv
+First install python 3.8, pip, pipenv
 
 ```bash
 sudo apt update
-sudo apt install -y python3 python3-pip                 # installs the tools to run the application 
+sudo apt install -y python3.8 python3-pip                 # installs the tools to run the application 
 echo "export PATH=\"~/.local/bin:\$PATH\"" >> ~/.bashrc # add pip installed binaries to path
 pip3 install pipenv                                     # installs pipenv
 exec bash                                               # load the new PATH variable
@@ -34,9 +34,50 @@ exec bash                                               # load the new PATH vari
 lingeling --version                                     # should show something like bcj 78ebb8672540bde0a335aea946bbf32515157d5a
 ```
 
+Set the default Python version
+
+Check what python versions are available on your systems:
+
+```
+ls /usr/bin/python*
+```
+
+To know whether any version is configured as python alternatives or not. For that run:
+
+```
+sudo update-alternatives --list python
+```
+
+If the output is:
+
+```
+update-alternatives: error: no alternatives for python
+```
+
+Then it means there are no alternatives that have been configured, hence let’s do some.
+
+Here we are setting up two versions as alternatives, later we will be able to choose between them to set one of them as the system default one.
+
+```
+sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1
+```
+
+Switch the default Python version 
+
+```
+sudo update-alternatives --config python
+```
+
+When you check the version of Python this time, you will have 3.8. For that use:
+
+```
+python -V
+```
+
 In order to install the necessary packages to run this application run the following commands in the same directory as this README.md file.
 
-```bash
+```
+bash
 pipenv install          # install new dependencies from pipfile
 pipenv clean            # remove unused dependencies
 ```
