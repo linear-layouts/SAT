@@ -521,22 +521,20 @@ def static_encode_rique_page(precedes: ndarray, edge_to_page: ndarray, edges: nd
 
     return clauses
 
-
-def static_encode_deque_types(deq_edge_type: ndarray) -> List[List[int]]:
+def static_encode_deque_types(deq_edge_type: ndarray, p: int) -> List[List[int]]:
     """
     Generates the clauses to assign each edge to one edge type
 
     :param deq_edge_type: deq_edge_type[p, type_num, e] <=> edge e is assigned as edge type for page p
     """
     clauses = []
-    for p in range(deq_edge_type.shape[0]):
-        for e in range(deq_edge_type.shape[2]):
-            # each edge has to be assigned to at least one type
-            clauses.append(list(deq_edge_type[p, :, e]))
-            # at most one type per edge
-            for t1 in range(deq_edge_type.shape[1]):
-                for t2 in range(t1 + 1, deq_edge_type.shape[1]):
-                    clauses.append([-deq_edge_type[p, t1, e], -deq_edge_type[p, t2, e]])
+    for e in range(deq_edge_type.shape[2]):
+        # each edge has to be assigned to at least one type
+        clauses.append(list(deq_edge_type[p, :, e]))
+        # at most one type per edge
+        for t1 in range(deq_edge_type.shape[1]):
+            for t2 in range(t1 + 1, deq_edge_type.shape[1]):
+                clauses.append([-deq_edge_type[p, t1, e], -deq_edge_type[p, t2, e]])
     return clauses
 
 def static_encode_deque_page(precedes: ndarray, edge_to_page: ndarray, edges: ndarray, p: int, deq_edge_type: ndarray) -> List[List[int]]:
@@ -817,47 +815,31 @@ class SatModel(object):
             "Not all nodes from >{}< are present in the ordered dict >{}<".format(self.vertices, ordered)
         return order
 
-    def get_page_assignment_result(self) -> List[PageAssignment]:
-        """
-        Reads the result and translates it back to an assignment of the edges to the pages.
-
-        :return: The list of page assignments
-        """
-
+    def get_assignment_result(self) -> List[List]:
+        
         if not self.result or not np.size(self.result['edge_to_page']):
             raise Exception("Please set the result first")
-
-        # get the indexes of the page assignment variables which evaluated to True
-        as_idxs = np.argwhere(self.result['edge_to_page'])
-
-        # Create a PageAssignment for each True variable and translate the index beck to the given id
-        ret_val = []
-        for idx in as_idxs:
-            edge_id = self._edge_idx_to_id[idx[1]]
-            page_id = self._page_idx_to_id[idx[0]]
-            ret_val.append(PageAssignment(edge=edge_id, page=page_id))
-        return ret_val
-
-    def get_edge_type_result(self) -> List[EdgeType]:
-        """
-        Reads the result and translates it back to an assignment of the edges to the DEQUE types.
-
-        :return: The list of edge types
-        """
-
         if not self.result or not np.size(self.result['deq_edge_type']):
             raise Exception("Please set the result first")
 
+        # get the indexes of the page assignment variables which evaluated to True
+        as_idxs_page = np.argwhere(self.result['edge_to_page'])
         # get the indexes of the edge type variables which evaluated to True
-        as_idxs = np.argwhere(self.result['deq_edge_type'])
+        as_idxs_type = np.argwhere(self.result['deq_edge_type'])
 
-        # Create a EdgeType for each True variable and translate the index back to the given id
-        ret_val = []
-        for idx in as_idxs:
+        # Create a PageAssignment for each True variable and translate the index beck to the given id
+        ret_val_page = []
+        ret_val_type = []
+        for idx in as_idxs_page:
             edge_id = self._edge_idx_to_id[idx[1]]
-            edge_type = TypeEnum(idx[0]).name
-            ret_val.append(EdgeType(edge=edge_id, edge_type=edge_type))
-        return ret_val
+            page_id = self._page_idx_to_id[idx[0]]
+            # only make type assignment to edges that are assigned to a page
+            for idx_type in as_idxs_type:
+                if page_id == self._page_idx_to_id[idx_type[0]] and edge_id == self._edge_idx_to_id[idx_type[2]]:
+                    edge_type = TypeEnum(idx_type[1]).name
+                    ret_val_type.append(EdgeType(edge=edge_id, edge_type=edge_type))
+            ret_val_page.append(PageAssignment(edge=edge_id, page=page_id))
+        return [ret_val_page, ret_val_type]
 
     def add_page_constraints(self):
         """
@@ -883,7 +865,7 @@ class SatModel(object):
                 self._add_clauses(static_encode_rique_page(precedes, edge_to_page, edges, p))
             elif page['type'] == 'DEQUE':
                 # ensures that each edge is assigned to exactly one type
-                self._add_clauses(static_encode_deque_types(deq_edge_type))
+                self._add_clauses(static_encode_deque_types(deq_edge_type, p))
                 # adds page clauses
                 self._add_clauses(static_encode_deque_page(precedes, edge_to_page, edges, p, deq_edge_type))
             elif page['type'] == 'NONE':

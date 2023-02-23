@@ -1,4 +1,3 @@
-
 'use strict'
 
 require.config({
@@ -18,7 +17,7 @@ require([
 	'js/ClientSideImageExport.js',
 	'js/ClientSidePdfExport.js',
 	'js/next_query.js',
-	'resources/license'
+	'resources/license',
 
 	], (/** @type {yfiles_namespace} */ /** typeof yfiles */ yfiles,
 			ContextMenu,
@@ -45,12 +44,12 @@ require([
 		Global Variables
 	----------------------------------------------------------------------------------------------
 	*/
-
 		var numberOfPages = parseInt(window.localStorage.getItem("numberOfPages"));
 
     let pagesArray = [];
-
-
+    let DeqTypesMap = new Map([["TAIL", []], ["HEAD", []], ["QUEUE_H_T", []], ["QUEUE_T_H", []]]);
+    var nextNodex = 0;
+    const node_distance = 200;
 
     function dynamicPagesArray() {
         let i = 0;
@@ -366,6 +365,21 @@ addDefaultColor();*/
 		})
 	}
 
+	function registerEdgesDequeType(types) {
+		// registering which edges are of which deque type
+		if (types.length !== 0) {
+			types.forEach(function(t) {
+				let type = DeqTypesMap.get(t.edge_type);
+				let edges = graphComponent.graph.edges.toArray();
+				edges.forEach(function(e) {
+					if (t.edge === e.tag.toString()) {
+						type.push(e)
+					}
+				})
+			})
+		}
+	}
+
 	function updatePagesWithConstraints(pages) {
 		// updates the pages with constraints
 		pages.forEach(function(p) {
@@ -514,6 +528,17 @@ addDefaultColor();*/
 				return i;
 			}
 		}
+	}
+
+	// Returns deque edge type from DeqTypesMap for an Edge
+	function getDequeType(edge) {
+		let type;
+		DeqTypesMap.forEach(function(value, key) {
+			if(value.includes(edge)) {
+				type = key;
+			}
+		})
+		return type;
 	}
 
 	// Get number of visible nodes on the UI based on the layout
@@ -893,9 +918,81 @@ addDefaultColor();*/
 		let pageNumber = getPageIndex(edge) + 1;
 		let color = colorsOfPages[pageNumber - 1];
 		let placing = $("#placingPage" + pageNumber).val().slice(0,5);
-		let height = (placing === "below") ? -getArcHeight(edge) : getArcHeight(edge);
 		let stroke = getStrokeString(getEdgeStrokeDefaultThickness(), getEdgeStrokeDefaultLineStyle(), color);
-		graphComponent.graph.setStyle(edge, getEdgeArcStyle(color, height, stroke, directed));
+		let height;
+		let style;
+		let point_x;
+		let point_y;
+		// deque page
+		if (placing === "deque") {
+			let type = getDequeType(edge);
+			if (type === "TAIL") {
+				height = -getArcHeight(edge);
+				graphComponent.graph.setStyle(edge, getEdgeArcStyle(color, height, stroke, directed));
+			} else if (type === "HEAD") {
+				height = getArcHeight(edge);
+				graphComponent.graph.setStyle(edge, getEdgeArcStyle(color, height, stroke, directed));
+			} else if (type === "QUEUE_H_T") {
+				if (edge.bends.toArray().length == 0) {
+					let max_distance = (nextNodex / 200) * 20;
+					let helper_distance = - max_distance + (edge.sourceNode.layout.x / 200) * 20;
+					const helper_node = graphComponent.graph.createNodeAt(new yfiles.geometry.Point(helper_distance, 0));
+					const above_port = graphComponent.graph.addPort(edge.sourceNode, yfiles.graph.FreeNodePortLocationModel.NODE_TOP_LEFT_ANCHORED);
+					const below_port = graphComponent.graph.addPort(edge.targetNode, yfiles.graph.FreeNodePortLocationModel.NODE_TOP_RIGHT_ANCHORED);
+					const helper_edge_above = graphComponent.graph.createEdge(edge.sourceNode, helper_node);
+					const helper_edge_below = graphComponent.graph.createEdge(helper_node, edge.targetNode);
+					graphComponent.graph.setEdgePorts(helper_edge_above, above_port, helper_node.ports.toArray()[0]);
+					graphComponent.graph.setEdgePorts(helper_edge_below, helper_node.ports.toArray()[0], below_port);
+					// add bends based on points
+					Array.from(new Array(101), (x, i) => {
+						style = getEdgeArcStyle(color, getArcHeight(helper_edge_above), stroke, directed);
+						point_x = style.renderer.getPathGeometry(helper_edge_above, style).getPath().getPoint(i/100).x
+						point_y = style.renderer.getPathGeometry(helper_edge_above, style).getPath().getPoint(i/100).y
+						graphComponent.graph.addBend(edge, new yfiles.geometry.Point(point_x, -point_y));
+					});
+					Array.from(new Array(101), (x, i) => {
+						style = getEdgeArcStyle(color, getArcHeight(helper_edge_below), stroke, directed);
+						point_x = style.renderer.getPathGeometry(helper_edge_below, style).getPath().getPoint(i/100).x
+						point_y = style.renderer.getPathGeometry(helper_edge_below, style).getPath().getPoint(i/100).y
+						graphComponent.graph.addBend(edge, new yfiles.geometry.Point(point_x, -point_y));
+					});
+					graphComponent.graph.remove(helper_node);
+				}
+				graphComponent.graph.setStyle(edge, getEdgeBezierStyle(color, stroke, directed));
+			} else if (type === "QUEUE_T_H") {
+				if (edge.bends.toArray().length == 0) {
+					let max_distance = nextNodex + (nextNodex / 200) * 20;
+					let helper_distance = max_distance - (edge.sourceNode.layout.x / 200) * 20;
+					const helper_node = graphComponent.graph.createNodeAt(new yfiles.geometry.Point(helper_distance, 0));
+					const below_port = graphComponent.graph.addPort(edge.sourceNode, yfiles.graph.FreeNodePortLocationModel.NODE_TOP_LEFT_ANCHORED);
+					const above_port = graphComponent.graph.addPort(edge.targetNode, yfiles.graph.FreeNodePortLocationModel.NODE_TOP_RIGHT_ANCHORED);
+					const helper_edge_below = graphComponent.graph.createEdge(edge.sourceNode, helper_node);
+					const helper_edge_above = graphComponent.graph.createEdge(helper_node, edge.targetNode);
+					graphComponent.graph.setEdgePorts(helper_edge_below, below_port, helper_node.ports.toArray()[0]);
+					graphComponent.graph.setEdgePorts(helper_edge_above, helper_node.ports.toArray()[0], above_port);
+					// add bends based on points
+					Array.from(new Array(101), (x, i) => {
+						style = getEdgeArcStyle(color, getArcHeight(helper_edge_below), stroke, directed);
+						point_x = style.renderer.getPathGeometry(helper_edge_below, style).getPath().getPoint(i/100).x
+						point_y = style.renderer.getPathGeometry(helper_edge_below, style).getPath().getPoint(i/100).y
+						graphComponent.graph.addBend(edge, new yfiles.geometry.Point(point_x, -point_y));
+					});
+					Array.from(new Array(101), (x, i) => {
+						style = getEdgeArcStyle(color, getArcHeight(helper_edge_above), stroke, directed);
+						point_x = style.renderer.getPathGeometry(helper_edge_above, style).getPath().getPoint(i/100).x
+						point_y = style.renderer.getPathGeometry(helper_edge_above, style).getPath().getPoint(i/100).y
+						graphComponent.graph.addBend(edge, new yfiles.geometry.Point(point_x, -point_y));
+					});
+					graphComponent.graph.remove(helper_node);
+				}
+				graphComponent.graph.setStyle(edge, getEdgeBezierStyle(color, stroke, directed));
+			}
+		}
+		// normal page
+		else {
+			height = (placing === "below") ? -getArcHeight(edge) : getArcHeight(edge);
+			graphComponent.graph.setStyle(edge, getEdgeArcStyle(color, height, stroke, directed));
+		}
 	}
 
 	// Set edge polyline style
@@ -976,6 +1073,14 @@ addDefaultColor();*/
 		return new yfiles.styles.ArcEdgeStyle({
 			height: height,
 			provideHeightHandle: false,
+			stroke: stroke
+		});
+	}
+
+	// Returns edge style for deque edges
+	function getEdgeBezierStyle(color, stroke, directed) {
+		return new yfiles.styles.BezierEdgeStyle({
+			color: color,
 			stroke: stroke
 		});
 	}
@@ -1065,7 +1170,8 @@ addDefaultColor();*/
 			let height = node.layout.height;
 			let width = node.layout.width;
 			graphComponent.graph.setNodeLayout(node, new yfiles.geometry.Rect(x, y, width, height));
-			x = x + 200;
+			x = x + node_distance;
+			nextNodex = x - 100; // needed for deque
 		}
 	}
 
@@ -1221,6 +1327,7 @@ addDefaultColor();*/
 		linearNodesArrangement(object.vertex_order);
 		rearrangeEdgesForLinearLayout(object.vertex_order);
 		registerEdgesInPagesArray(object.assignments); // REGISTERING WHICH EDGES GO TO WHICH PAGES
+		registerEdgesDequeType(object.deq_edge_type);
 
 		// LabelPlacing
 		const edgeSegmentLabelModel = new yfiles.graph.EdgeSegmentLabelModel()
@@ -1252,6 +1359,7 @@ addDefaultColor();*/
 		linearNodesArrangement(object.vertex_order);
 		rearrangeEdgesForLinearLayout(object.vertex_order);
 		registerEdgesInPagesArray(object.assignments);
+		registerEdgesDequeType(object.deq_edge_type);
 		// Since edges can be re-created above we need to reload the constraints and selected constraints and highlight edges
 		// interpret constraints
 		loadConstraintsFromJSON(object.constraints);
@@ -1411,6 +1519,7 @@ addDefaultColor();*/
 						"<select id='placingPage"+i+"'>"+
 						"<option value='abovePage"+i+"'>above</option>"+
 						"<option value='belowPage"+i+"'>below</option>"+
+						"<option value='dequePage"+i+"'>deque</option>"+
 						"</select>"+
 						"<div class='picker' id='picker"+i+"'></div>" +
 						"</div>"
@@ -1423,6 +1532,7 @@ addDefaultColor();*/
 						"<select id='placingPage"+i+"'>"+
 						"<option value='abovePage"+i+"'>above</option>"+
 						"<option value='belowPage"+i+"' selected='selected'>below</option>"+
+						"<option value='dequePage"+i+"'>deque</option>"+
 						"</select>"+
 						"<div class='picker' id='picker"+i+"'></div>" +
 						"</div>"
@@ -1474,6 +1584,7 @@ addDefaultColor();*/
 
 				    // data.item.value ==> "belowPage12" [for page 12]
 				    // data.item.value ==> "abovePage12" [for page 12]
+				    // data.item.value ==> "dequePage12" [for page 12]
 
 				    let pageNumber = parseInt(data.item.value.slice(9)); // since length of abovePage and belowPage ==> 9
 //					let pageNumber = parseInt(data.item.value.slice(-1));
