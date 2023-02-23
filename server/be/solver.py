@@ -54,8 +54,9 @@ class SolverInterface(object):
             deq_edge_type = None
             if sat_result['satisfiable']:
                 vertex_order = model.get_vertex_order_result()
-                page_assignments = model.get_page_assignment_result()
-                deq_edge_type = model.get_edge_type_result()
+                assignments = model.get_assignment_result()
+                page_assignments = assignments[0]
+                deq_edge_type = assignments[1]
 
             return SolverResult(satisfiable=sat_result['satisfiable'],
                                 page_assignments=page_assignments,
