@@ -521,7 +521,7 @@ def static_encode_rique_page(precedes: ndarray, edge_to_page: ndarray, edges: nd
 
     return clauses
 
-def static_encode_deque_types(deq_edge_type: ndarray, p: int) -> List[List[int]]:
+def static_encode_deque_types(deq_edge_type: ndarray, p: int, isRique: bool = False) -> List[List[int]]:
     """
     Generates the clauses to assign each edge to one edge type
 
@@ -533,7 +533,21 @@ def static_encode_deque_types(deq_edge_type: ndarray, p: int) -> List[List[int]]
         clauses.append(list(deq_edge_type[p, :, e]))
         # at most one type per edge
         for t1 in range(deq_edge_type.shape[1]):
+            if isRique: 
+                if t1 == TypeEnum.QUEUE_T_H.value:
+                    clauses.append([-deq_edge_type[p, t1, e]])
+                    continue
+                if t1 == TypeEnum.TAIL.value:
+                    clauses.append([-deq_edge_type[p, t1, e]])
+                    continue
             for t2 in range(t1 + 1, deq_edge_type.shape[1]):
+                if isRique: 
+                    if t2 == TypeEnum.QUEUE_T_H.value:
+                        clauses.append([-deq_edge_type[p, t2, e]])
+                        continue
+                    if t2 == TypeEnum.TAIL.value:
+                        clauses.append([-deq_edge_type[p, t2, e]])
+                        continue
                 clauses.append([-deq_edge_type[p, t1, e], -deq_edge_type[p, t2, e]])
     return clauses
 
@@ -862,7 +876,12 @@ class SatModel(object):
             elif page['type'] == 'QUEUE':
                 self._add_clauses(static_encode_queue_page(precedes, edge_to_page, edges, p))
             elif page['type'] == 'RIQUE':
-                self._add_clauses(static_encode_rique_page(precedes, edge_to_page, edges, p))
+                # ensures that each edge is assigned to exactly one type
+                self._add_clauses(static_encode_deque_types(deq_edge_type, p, True))
+                # adds page clauses
+                self._add_clauses(static_encode_deque_page(precedes, edge_to_page, edges, p, deq_edge_type))
+                # the following implementation is by adopting the forbidden pattern
+                # self._add_clauses(static_encode_rique_page(precedes, edge_to_page, edges, p))
             elif page['type'] == 'DEQUE':
                 # ensures that each edge is assigned to exactly one type
                 self._add_clauses(static_encode_deque_types(deq_edge_type, p))
