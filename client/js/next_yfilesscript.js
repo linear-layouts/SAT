@@ -36,7 +36,8 @@ require([
 	const LayoutOption = {
 		LINEAR : "Linear",
 		CIRCULAR : "Circular",
-		CONSTRAINED : "Constrained"
+		CONSTRAINED : "Constrained",
+		MATRIX: "Matrix"
 	}
 
 	/*
@@ -643,16 +644,25 @@ addDefaultColor();*/
 				$("#lineLayoutButtonLabel").css("color", "#00A3E8");
 				$("#circLayoutButtonLabel").css("color", "black");
 				$("#consLayoutButtonLabel").css("color", "black");
+				$("#matrixLayoutButtonLabel").css("color", "black");
 				break;
 			case LayoutOption.CIRCULAR:
 				$("#lineLayoutButtonLabel").css("color", "black");
 				$("#circLayoutButtonLabel").css("color", "#00A3E8");
 				$("#consLayoutButtonLabel").css("color", "black");
+				$("#matrixLayoutButtonLabel").css("color", "black");
 				break;
 			case LayoutOption.CONSTRAINED:
 				$("#lineLayoutButtonLabel").css("color", "black");
 				$("#circLayoutButtonLabel").css("color", "black");
 				$("#consLayoutButtonLabel").css("color", "#00A3E8");
+				$("#matrixLayoutButtonLabel").css("color", "black");
+				break;
+			case LayoutOption.MATRIX:
+				$("#lineLayoutButtonLabel").css("color", "black");
+				$("#circLayoutButtonLabel").css("color", "black");
+				$("#consLayoutButtonLabel").css("color", "black");
+				$("#matrixLayoutButtonLabel").css("color", "#00A3E8");
 				break;
 		}
 	}
@@ -769,9 +779,20 @@ addDefaultColor();*/
 
 	// Hide Edges of the page number provided
 	function hideEdgesOfPage(pageNumber){
-		for(let edge of pagesArray[pageNumber - 1]) {
-	//	for(let edge of pagesArray[pageNumber]) {
-			hideEdgeWithLabels(edge);
+		if (currentLayout === LayoutOption.MATRIX) {
+			for(let edge of pagesArray[pageNumber - 1]) {
+				for(let node of graphComponent.graph.nodes.toArray()) {
+					if(node.tag === "matrix" && node.labels.toArray()[0].text === edge.labels.toArray()[0].text) {
+						graphComponent.graph.setStyle(node, getNodeStyleForHiding());
+						hideLabels(node);
+					}
+				}
+			}
+		} else {
+			for(let edge of pagesArray[pageNumber - 1]) {
+		//	for(let edge of pagesArray[pageNumber]) {
+				hideEdgeWithLabels(edge);
+			}
 		}
 	}
 
@@ -797,13 +818,18 @@ addDefaultColor();*/
 		}
 		else {
 			// unHide everyone and highlight only selected ones
-			for(let edge of pagesArray[pageNumber - 1]) {
-				setLabelsStyle(edge);
-				if(data.edgesOfConstraints.includes(edge)){
-					highlightEdgeStyle(edge, layoutOption, directed);
-				}
-				else{
-					setEdgeStyle(edge, layoutOption, directed);
+			if(currentLayout === LayoutOption.MATRIX) {
+
+
+			} else {
+				for(let edge of pagesArray[pageNumber - 1]) {
+					setLabelsStyle(edge);
+					if(data.edgesOfConstraints.includes(edge)){
+						highlightEdgeStyle(edge, layoutOption, directed);
+					}
+					else{
+						setEdgeStyle(edge, layoutOption, directed);
+					}
 				}
 			}
 		}
@@ -919,80 +945,86 @@ addDefaultColor();*/
 		let color = colorsOfPages[pageNumber - 1];
 		let placing = $("#placingPage" + pageNumber).val().slice(0,5);
 		let stroke = getStrokeString(getEdgeStrokeDefaultThickness(), getEdgeStrokeDefaultLineStyle(), color);
+		if (placing === "deque") {
+			setEdgeArcStyleDequePage(edge, directed, color, placing, stroke);
+		} else {
+			let height = (placing === "below") ? -getArcHeight(edge) : getArcHeight(edge);
+			graphComponent.graph.setStyle(edge, getEdgeArcStyle(color, height, stroke, directed));
+		}
+	}
+
+	function setEdgeArcStyleDequePage(edge, directed, color, placing, stroke) {
+		let type = getDequeType(edge);
 		let height;
 		let style;
 		let point_x;
 		let point_y;
-		// deque page
-		if (placing === "deque") {
-			let type = getDequeType(edge);
-			if (type === "TAIL") {
-				height = -getArcHeight(edge);
-				graphComponent.graph.setStyle(edge, getEdgeArcStyle(color, height, stroke, directed));
-			} else if (type === "HEAD") {
-				height = getArcHeight(edge);
-				graphComponent.graph.setStyle(edge, getEdgeArcStyle(color, height, stroke, directed));
-			} else if (type === "QUEUE_H_T") {
-				if (edge.bends.toArray().length == 0) {
-					let max_distance = (nextNodex / 200) * 20;
-					let helper_distance = - max_distance + (edge.sourceNode.layout.x / 200) * 20;
-					const helper_node = graphComponent.graph.createNodeAt(new yfiles.geometry.Point(helper_distance, 0));
-					const above_port = graphComponent.graph.addPort(edge.sourceNode, yfiles.graph.FreeNodePortLocationModel.NODE_TOP_LEFT_ANCHORED);
-					const below_port = graphComponent.graph.addPort(edge.targetNode, yfiles.graph.FreeNodePortLocationModel.NODE_TOP_RIGHT_ANCHORED);
-					const helper_edge_above = graphComponent.graph.createEdge(edge.sourceNode, helper_node);
-					const helper_edge_below = graphComponent.graph.createEdge(helper_node, edge.targetNode);
-					graphComponent.graph.setEdgePorts(helper_edge_above, above_port, helper_node.ports.toArray()[0]);
-					graphComponent.graph.setEdgePorts(helper_edge_below, helper_node.ports.toArray()[0], below_port);
-					// add bends based on points
-					Array.from(new Array(101), (x, i) => {
-						style = getEdgeArcStyle(color, getArcHeight(helper_edge_above), stroke, directed);
-						point_x = style.renderer.getPathGeometry(helper_edge_above, style).getPath().getPoint(i/100).x
-						point_y = style.renderer.getPathGeometry(helper_edge_above, style).getPath().getPoint(i/100).y
-						graphComponent.graph.addBend(edge, new yfiles.geometry.Point(point_x, -point_y));
-					});
-					Array.from(new Array(101), (x, i) => {
-						style = getEdgeArcStyle(color, getArcHeight(helper_edge_below), stroke, directed);
-						point_x = style.renderer.getPathGeometry(helper_edge_below, style).getPath().getPoint(i/100).x
-						point_y = style.renderer.getPathGeometry(helper_edge_below, style).getPath().getPoint(i/100).y
-						graphComponent.graph.addBend(edge, new yfiles.geometry.Point(point_x, -point_y));
-					});
-					graphComponent.graph.remove(helper_node);
-				}
-				graphComponent.graph.setStyle(edge, getEdgeBezierStyle(color, stroke, directed));
-			} else if (type === "QUEUE_T_H") {
-				if (edge.bends.toArray().length == 0) {
-					let max_distance = nextNodex + (nextNodex / 200) * 20;
-					let helper_distance = max_distance - (edge.sourceNode.layout.x / 200) * 20;
-					const helper_node = graphComponent.graph.createNodeAt(new yfiles.geometry.Point(helper_distance, 0));
-					const below_port = graphComponent.graph.addPort(edge.sourceNode, yfiles.graph.FreeNodePortLocationModel.NODE_TOP_LEFT_ANCHORED);
-					const above_port = graphComponent.graph.addPort(edge.targetNode, yfiles.graph.FreeNodePortLocationModel.NODE_TOP_RIGHT_ANCHORED);
-					const helper_edge_below = graphComponent.graph.createEdge(edge.sourceNode, helper_node);
-					const helper_edge_above = graphComponent.graph.createEdge(helper_node, edge.targetNode);
-					graphComponent.graph.setEdgePorts(helper_edge_below, below_port, helper_node.ports.toArray()[0]);
-					graphComponent.graph.setEdgePorts(helper_edge_above, helper_node.ports.toArray()[0], above_port);
-					// add bends based on points
-					Array.from(new Array(101), (x, i) => {
-						style = getEdgeArcStyle(color, getArcHeight(helper_edge_below), stroke, directed);
-						point_x = style.renderer.getPathGeometry(helper_edge_below, style).getPath().getPoint(i/100).x
-						point_y = style.renderer.getPathGeometry(helper_edge_below, style).getPath().getPoint(i/100).y
-						graphComponent.graph.addBend(edge, new yfiles.geometry.Point(point_x, -point_y));
-					});
-					Array.from(new Array(101), (x, i) => {
-						style = getEdgeArcStyle(color, getArcHeight(helper_edge_above), stroke, directed);
-						point_x = style.renderer.getPathGeometry(helper_edge_above, style).getPath().getPoint(i/100).x
-						point_y = style.renderer.getPathGeometry(helper_edge_above, style).getPath().getPoint(i/100).y
-						graphComponent.graph.addBend(edge, new yfiles.geometry.Point(point_x, -point_y));
-					});
-					graphComponent.graph.remove(helper_node);
-				}
-				graphComponent.graph.setStyle(edge, getEdgeBezierStyle(color, stroke, directed));
-			}
-		}
-		// normal page
-		else {
-			height = (placing === "below") ? -getArcHeight(edge) : getArcHeight(edge);
+		if (type === "TAIL") {
+			height = -getArcHeight(edge);
 			graphComponent.graph.setStyle(edge, getEdgeArcStyle(color, height, stroke, directed));
+		} else if (type === "HEAD") {
+			height = getArcHeight(edge);
+			graphComponent.graph.setStyle(edge, getEdgeArcStyle(color, height, stroke, directed));
+		} else if (type === "QUEUE_H_T") {
+			if (edge.bends.toArray().length == 0) {
+				let helper_distance = - (edge.sourceNode.layout.x / 200) * 20 - 20;
+				const helper_node = graphComponent.graph.createNodeAt(new yfiles.geometry.Point(helper_distance, 0));
+				const above_port = graphComponent.graph.addPort(edge.sourceNode, yfiles.graph.FreeNodePortLocationModel.NODE_TOP_LEFT_ANCHORED);
+				const below_port = graphComponent.graph.addPort(edge.targetNode, yfiles.graph.FreeNodePortLocationModel.NODE_TOP_RIGHT_ANCHORED);
+				const helper_edge_above = graphComponent.graph.createEdge(edge.sourceNode, helper_node);
+				const helper_edge_below = graphComponent.graph.createEdge(helper_node, edge.targetNode);
+				graphComponent.graph.setEdgePorts(helper_edge_above, above_port, helper_node.ports.toArray()[0]);
+				graphComponent.graph.setEdgePorts(helper_edge_below, helper_node.ports.toArray()[0], below_port);
+				// add bends based on points
+				Array.from(new Array(101), (x, i) => {
+					style = getEdgeArcStyle(color, getArcHeight(helper_edge_above), stroke, directed);
+					point_x = style.renderer.getPathGeometry(helper_edge_above, style).getPath().getPoint(i/100).x
+					point_y = style.renderer.getPathGeometry(helper_edge_above, style).getPath().getPoint(i/100).y
+					graphComponent.graph.addBend(edge, new yfiles.geometry.Point(point_x, -point_y));
+				});
+				Array.from(new Array(101), (x, i) => {
+					style = getEdgeArcStyle(color, getArcHeight(helper_edge_below), stroke, directed);
+					point_x = style.renderer.getPathGeometry(helper_edge_below, style).getPath().getPoint(i/100).x
+					point_y = style.renderer.getPathGeometry(helper_edge_below, style).getPath().getPoint(i/100).y
+					graphComponent.graph.addBend(edge, new yfiles.geometry.Point(point_x, -point_y));
+				});
+				graphComponent.graph.remove(helper_node);
+			}
+			graphComponent.graph.setStyle(edge, getEdgeBezierStyle(color, stroke, directed));
+		} else if (type === "QUEUE_T_H") {
+			if (edge.bends.toArray().length == 0) {
+				let max_distance = nextNodex + (nextNodex / 200) * 20;
+				let helper_distance = max_distance - (edge.sourceNode.layout.x / 200) * 20;
+				const helper_node = graphComponent.graph.createNodeAt(new yfiles.geometry.Point(helper_distance, 0));
+				const below_port = graphComponent.graph.addPort(edge.sourceNode, yfiles.graph.FreeNodePortLocationModel.NODE_TOP_LEFT_ANCHORED);
+				const above_port = graphComponent.graph.addPort(edge.targetNode, yfiles.graph.FreeNodePortLocationModel.NODE_TOP_RIGHT_ANCHORED);
+				const helper_edge_below = graphComponent.graph.createEdge(edge.sourceNode, helper_node);
+				const helper_edge_above = graphComponent.graph.createEdge(helper_node, edge.targetNode);
+				graphComponent.graph.setEdgePorts(helper_edge_below, below_port, helper_node.ports.toArray()[0]);
+				graphComponent.graph.setEdgePorts(helper_edge_above, helper_node.ports.toArray()[0], above_port);
+				// add bends based on points
+				Array.from(new Array(101), (x, i) => {
+					style = getEdgeArcStyle(color, getArcHeight(helper_edge_below), stroke, directed);
+					point_x = style.renderer.getPathGeometry(helper_edge_below, style).getPath().getPoint(i/100).x
+					point_y = style.renderer.getPathGeometry(helper_edge_below, style).getPath().getPoint(i/100).y
+					graphComponent.graph.addBend(edge, new yfiles.geometry.Point(point_x, -point_y));
+				});
+				Array.from(new Array(101), (x, i) => {
+					style = getEdgeArcStyle(color, getArcHeight(helper_edge_above), stroke, directed);
+					point_x = style.renderer.getPathGeometry(helper_edge_above, style).getPath().getPoint(i/100).x
+					point_y = style.renderer.getPathGeometry(helper_edge_above, style).getPath().getPoint(i/100).y
+					graphComponent.graph.addBend(edge, new yfiles.geometry.Point(point_x, -point_y));
+				});
+				graphComponent.graph.remove(helper_node);
+			}
+			graphComponent.graph.setStyle(edge, getEdgeBezierStyle(color, stroke, directed));
 		}
+	}
+
+	function cleanUpEdgeArcStyleDequePage() {
+		graphComponent.graph.edges.toArray().forEach(function(e) {
+			graphComponent.graph.clearBends(e);
+		})
 	}
 
 	// Set edge polyline style
@@ -1002,7 +1034,7 @@ addDefaultColor();*/
 		let stroke = getStrokeString(getEdgeStrokeDefaultThickness(), getEdgeStrokeDefaultLineStyle(), color);
 		graphComponent.graph.setStyle(edge, getEdgePolylineStyle(color, stroke, directed));
 	}
-
+	
 	// Set edge style
 	function setEdgeStyle(edge, layoutOption, directed) {
 		if (layoutOption === LayoutOption.LINEAR || (layoutOption === LayoutOption.CONSTRAINED && previousLayout === LayoutOption.LINEAR)) {
@@ -1201,6 +1233,9 @@ addDefaultColor();*/
 			previousLayout = currentLayout
 			currentLayout = LayoutOption.LINEAR
 		}
+		if(previousLayout == LayoutOption.MATRIX){
+			cleanUpMatrix();
+		}
 		highlightLayoutOptions(currentLayout) // blue color to selected layout option button
 		// UnHide Nodes
 		for(let node of graphComponent.graph.nodes.toArray()){
@@ -1218,6 +1253,12 @@ addDefaultColor();*/
 		if(currentLayout !== LayoutOption.CIRCULAR){
 			previousLayout = currentLayout;
 			currentLayout = LayoutOption.CIRCULAR;
+		}
+		if(previousLayout == LayoutOption.LINEAR){
+			cleanUpEdgeArcStyleDequePage();
+		}
+		if(previousLayout == LayoutOption.MATRIX){
+			cleanUpMatrix();
 		}
 		circularNodesArrangement(respondedObject.vertex_order);
 
@@ -1241,9 +1282,98 @@ addDefaultColor();*/
 			previousLayout = currentLayout;
 			currentLayout = LayoutOption.CONSTRAINED;
 		}
+		if(previousLayout == LayoutOption.LINEAR){
+			cleanUpEdgeArcStyleDequePage();
+		}
+		if(previousLayout == LayoutOption.MATRIX){
+			cleanUpMatrix();
+		}
 		hideEveryone();
 		refreshStyling(treatEdgesAsDirected);
 		graphComponent.fitGraphBounds();
+	}
+
+	function showMatrixLayout(){
+		highlightLayoutOptions(LayoutOption.MATRIX);
+		if(currentLayout !== LayoutOption.MATRIX){
+			previousLayout = currentLayout;
+			currentLayout = LayoutOption.MATRIX;
+		}
+		if(previousLayout == LayoutOption.LINEAR){
+			cleanUpEdgeArcStyleDequePage();
+		}
+		disableAllPagesOptions();
+		hideEveryone();
+		// instead of nodes show matrix labeled with node numbers (in order)
+		let space = 70;
+		let num = 1;
+		let deqOffset = space*respondedObject.vertex_order.length + 100;
+		let OffsetBool = true;
+		let node;
+		// box
+		respondedObject.vertex_order.forEach(function(edge_num) {
+			node = graphComponent.graph.createNodeAt(new yfiles.geometry.Point(5, -space*num));
+			graphComponent.graph.addLabel(node, edge_num);
+			graphComponent.graph.setStyle(node, getNodeStyle("grey", getNodeDefaultShape(), getNodeDefaultStroke()))
+			node.tag = "matrix";
+			node = graphComponent.graph.createNodeAt(new yfiles.geometry.Point(space*num, 5));
+			graphComponent.graph.addLabel(node, edge_num);
+			graphComponent.graph.setStyle(node, getNodeStyle("grey", getNodeDefaultShape(), getNodeDefaultStroke()))
+			node.tag = "matrix";
+			num = num + 1;
+		})
+		// edges (represented as nodes)
+		for(let pageNumber=1; pageNumber <= pagesArray.length; pageNumber++){
+			var color = colorsOfPages[pageNumber - 1];
+			var placing = $("#placingPage" + pageNumber).val().slice(0,5);
+			for(let edge of pagesArray[pageNumber - 1]){
+				for(let edgeNumber=1; edgeNumber <= respondedObject.vertex_order.length; edgeNumber++) {
+					if (edge.sourceNode.labels.toArray()[0].text == respondedObject.vertex_order[edgeNumber - 1]) {
+						var x = edgeNumber*space;
+					} else if (edge.targetNode.labels.toArray()[0].text == respondedObject.vertex_order[edgeNumber - 1]) {
+						var y = -edgeNumber*space;
+					}
+				}
+				var type = getDequeType(edge);
+				if(type && OffsetBool) {
+					num = 1
+					respondedObject.vertex_order.forEach(function(edge_num) {
+						node = graphComponent.graph.createNodeAt(new yfiles.geometry.Point(5 + deqOffset, -space*num));
+						graphComponent.graph.addLabel(node, edge_num);
+						graphComponent.graph.setStyle(node, getNodeStyle("grey", getNodeDefaultShape(), getNodeDefaultStroke()))
+						node.tag = "matrix";
+						node = graphComponent.graph.createNodeAt(new yfiles.geometry.Point(space*num + deqOffset, 5));
+						graphComponent.graph.addLabel(node, edge_num);
+						graphComponent.graph.setStyle(node, getNodeStyle("grey", getNodeDefaultShape(), getNodeDefaultStroke()))
+						node.tag = "matrix";
+						num = num + 1;
+					})
+					OffsetBool = false;
+				}
+				if(type === "TAIL" || type === "QUEUE_H_T" || type === "QUEUE_T_H") {
+					x = x + deqOffset;
+				}
+				node = graphComponent.graph.createNodeAt(new yfiles.geometry.Point(x, y));
+				graphComponent.graph.addLabel(node, edge.labels.toArray()[0].text);
+				node.tag = "matrix";
+				if (getDequeType(edge) === "QUEUE_H_T") {
+					graphComponent.graph.setStyle(node, getNodeStyle(color, "triangle", getNodeDefaultStroke()))
+				} else if (getDequeType(edge) === "QUEUE_T_H") {
+					graphComponent.graph.setStyle(node, getNodeStyle(color, "triangle2", getNodeDefaultStroke()))
+				} else {
+					graphComponent.graph.setStyle(node, getNodeStyle(color, getNodeDefaultShape(), getNodeDefaultStroke()))
+				}
+			}
+		}
+		graphComponent.fitGraphBounds();
+	}
+
+	function cleanUpMatrix() {
+		graphComponent.graph.nodes.toArray().forEach(function(node) {
+			if (node.tag === "matrix") {
+				graphComponent.graph.remove(node);
+			}
+		})
 	}
 
 	/*
@@ -1482,7 +1612,7 @@ addDefaultColor();*/
 
 	function run() {
 
-		highlightLayoutOptions(currentLayout); // Highlights current layout button LINEAR, CIRCULAR, CONSTRAINED
+		highlightLayoutOptions(currentLayout); // Highlights current layout button LINEAR, CIRCULAR, CONSTRAINED, MATRIX
 
 		graphComponent = new yfiles.view.GraphComponent("#graphComponent");
 		graphComponent.inputMode = new yfiles.input.GraphViewerInputMode({
@@ -1731,6 +1861,11 @@ addDefaultColor();*/
 		// Constrained Layout Button Click
 		document.querySelector("#consLayoutButton").addEventListener("click", () => {
 			showConstrainedLayout();
+		});
+
+		// Matrix Layout Button Click
+		document.querySelector("#matrixLayoutButton").addEventListener("click", () => {
+			showMatrixLayout();
 		});
 
 
