@@ -1342,24 +1342,28 @@ addDefaultColor();*/
 						graphComponent.graph.addLabel(node, edge_num);
 						graphComponent.graph.setStyle(node, getNodeStyle("grey", getNodeDefaultShape(), getNodeDefaultStroke()))
 						node.tag = "matrix";
-						node = graphComponent.graph.createNodeAt(new yfiles.geometry.Point(space*num + deqOffset, 5));
-						graphComponent.graph.addLabel(node, edge_num);
-						graphComponent.graph.setStyle(node, getNodeStyle("grey", getNodeDefaultShape(), getNodeDefaultStroke()))
-						node.tag = "matrix";
-						num = num + 1;
+						//node = graphComponent.graph.createNodeAt(new yfiles.geometry.Point(space*num + deqOffset, 5));
+						//graphComponent.graph.addLabel(node, edge_num);
+						//graphComponent.graph.setStyle(node, getNodeStyle("grey", getNodeDefaultShape(), getNodeDefaultStroke()))
+						//node.tag = "matrix";
+						//num = num + 1;
 					})
 					OffsetBool = false;
 				}
-				if(type === "TAIL" || type === "QUEUE_H_T" || type === "QUEUE_T_H") {
-					x = x + deqOffset;
-				}
+				//if(type === "TAIL" || type === "QUEUE_H_T" || type === "QUEUE_T_H") {
+				//	x = x + deqOffset;
+				//}
 				node = graphComponent.graph.createNodeAt(new yfiles.geometry.Point(x, y));
 				graphComponent.graph.addLabel(node, edge.labels.toArray()[0].text);
 				node.tag = "matrix";
-				if (getDequeType(edge) === "QUEUE_H_T") {
+				if (getDequeType(edge) === "HEAD") {
 					graphComponent.graph.setStyle(node, getNodeStyle(color, "triangle", getNodeDefaultStroke()))
-				} else if (getDequeType(edge) === "QUEUE_T_H") {
+				} else if (getDequeType(edge) === "TAIL") {
 					graphComponent.graph.setStyle(node, getNodeStyle(color, "triangle2", getNodeDefaultStroke()))
+				} else if (getDequeType(edge) === "QUEUE_H_T") {
+					graphComponent.graph.setStyle(node, getNodeStyle(color, "circle", getNodeDefaultStroke())) 
+				} else if (getDequeType(edge) === "QUEUE_T_H") {
+					graphComponent.graph.setStyle(node, getNodeStyle(color, "square", getNodeDefaultStroke())) 
 				} else {
 					graphComponent.graph.setStyle(node, getNodeStyle(color, getNodeDefaultShape(), getNodeDefaultStroke()))
 				}
