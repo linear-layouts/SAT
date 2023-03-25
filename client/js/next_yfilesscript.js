@@ -1307,19 +1307,20 @@ addDefaultColor();*/
 		// instead of nodes show matrix labeled with node numbers (in order)
 		let space = 70;
 		let num = 1;
-		let deqOffset = space*respondedObject.vertex_order.length + 100;
-		let OffsetBool = true;
 		let node;
+		let order_array = [];
 		// box
-		respondedObject.vertex_order.forEach(function(edge_num) {
+		respondedObject.vertex_order.forEach(function(node_tag) {
 			node = graphComponent.graph.createNodeAt(new yfiles.geometry.Point(5, -space*num));
-			graphComponent.graph.addLabel(node, edge_num);
-			graphComponent.graph.setStyle(node, getNodeStyle("grey", getNodeDefaultShape(), getNodeDefaultStroke()))
+			let label = getNodeByTag(node_tag).labels.toArray()[0].text;
+			graphComponent.graph.addLabel(node, label);
+			graphComponent.graph.setStyle(node, getNodeStyle("lightgrey", getNodeDefaultShape(), getNodeDefaultStroke()))
 			node.tag = "matrix";
 			node = graphComponent.graph.createNodeAt(new yfiles.geometry.Point(space*num, 5));
-			graphComponent.graph.addLabel(node, edge_num);
-			graphComponent.graph.setStyle(node, getNodeStyle("grey", getNodeDefaultShape(), getNodeDefaultStroke()))
+			graphComponent.graph.addLabel(node, label);
+			graphComponent.graph.setStyle(node, getNodeStyle("lightgrey", getNodeDefaultShape(), getNodeDefaultStroke()))
 			node.tag = "matrix";
+			order_array.push(label);
 			num = num + 1;
 		})
 		// edges (represented as nodes)
@@ -1327,32 +1328,14 @@ addDefaultColor();*/
 			var color = colorsOfPages[pageNumber - 1];
 			var placing = $("#placingPage" + pageNumber).val().slice(0,5);
 			for(let edge of pagesArray[pageNumber - 1]){
-				for(let edgeNumber=1; edgeNumber <= respondedObject.vertex_order.length; edgeNumber++) {
-					if (edge.sourceNode.labels.toArray()[0].text == respondedObject.vertex_order[edgeNumber - 1]) {
+				for(let edgeNumber=1; edgeNumber <= order_array.length; edgeNumber++) {
+					if (edge.sourceNode.labels.toArray()[0].text == order_array[edgeNumber - 1]) {
 						var x = edgeNumber*space;
-					} else if (edge.targetNode.labels.toArray()[0].text == respondedObject.vertex_order[edgeNumber - 1]) {
+					} else if (edge.targetNode.labels.toArray()[0].text == order_array[edgeNumber - 1]) {
 						var y = -edgeNumber*space;
 					}
 				}
 				var type = getDequeType(edge);
-				if(type && OffsetBool) {
-					num = 1
-					respondedObject.vertex_order.forEach(function(edge_num) {
-						node = graphComponent.graph.createNodeAt(new yfiles.geometry.Point(5 + deqOffset, -space*num));
-						graphComponent.graph.addLabel(node, edge_num);
-						graphComponent.graph.setStyle(node, getNodeStyle("grey", getNodeDefaultShape(), getNodeDefaultStroke()))
-						node.tag = "matrix";
-						//node = graphComponent.graph.createNodeAt(new yfiles.geometry.Point(space*num + deqOffset, 5));
-						//graphComponent.graph.addLabel(node, edge_num);
-						//graphComponent.graph.setStyle(node, getNodeStyle("grey", getNodeDefaultShape(), getNodeDefaultStroke()))
-						//node.tag = "matrix";
-						//num = num + 1;
-					})
-					OffsetBool = false;
-				}
-				//if(type === "TAIL" || type === "QUEUE_H_T" || type === "QUEUE_T_H") {
-				//	x = x + deqOffset;
-				//}
 				node = graphComponent.graph.createNodeAt(new yfiles.geometry.Point(x, y));
 				graphComponent.graph.addLabel(node, edge.labels.toArray()[0].text);
 				node.tag = "matrix";
@@ -1369,7 +1352,7 @@ addDefaultColor();*/
 				}
 			}
 		}
-		graphComponent.fitGraphBounds();
+		graphComponent.zoomTo(new yfiles.geometry.Rect(0, -respondedObject.vertex_order.length*space-10, respondedObject.vertex_order.length*space, respondedObject.vertex_order.length*space));
 	}
 
 	function cleanUpMatrix() {
