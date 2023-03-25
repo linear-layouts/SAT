@@ -1685,7 +1685,6 @@ addDefaultColor();*/
 			$("#displayPage"+i).on("change", function(event, data) {
 				/*
 					LOGIC
-
 					if page == checked:
 						if currentLayout == LINEAR:
 							enabled Above/Below options
@@ -1704,7 +1703,6 @@ addDefaultColor();*/
 					else:
 						Disable page options
 						Hide all the edges that are a part of this page
-
 				*/
 
 				let pageNumber = this.id.slice(-1);
