@@ -521,7 +521,7 @@ def static_encode_rique_page(precedes: ndarray, edge_to_page: ndarray, edges: nd
 
     return clauses
 
-def static_encode_deque_types(deq_edge_type: ndarray, p: int, isRique: bool = False) -> List[List[int]]:
+def static_encode_deque_types(deq_edge_type: ndarray, p: int, isRique: bool = False, isMonque: bool = False) -> List[List[int]]:
     """
     Generates the clauses to assign each edge to one edge type
 
@@ -540,12 +540,20 @@ def static_encode_deque_types(deq_edge_type: ndarray, p: int, isRique: bool = Fa
                 if t1 == TypeEnum.TAIL.value:
                     clauses.append([-deq_edge_type[p, t1, e]])
                     continue
+            if isMonque:
+                if t1 == TypeEnum.QUEUE_T_H.value:
+                    clauses.append([-deq_edge_type[p, t1, e]])
+                    continue
             for t2 in range(t1 + 1, deq_edge_type.shape[1]):
                 if isRique: 
                     if t2 == TypeEnum.QUEUE_T_H.value:
                         clauses.append([-deq_edge_type[p, t2, e]])
                         continue
                     if t2 == TypeEnum.TAIL.value:
+                        clauses.append([-deq_edge_type[p, t2, e]])
+                        continue
+                if isMonque:
+                    if t2 == TypeEnum.QUEUE_T_H.value:
                         clauses.append([-deq_edge_type[p, t2, e]])
                         continue
                 clauses.append([-deq_edge_type[p, t1, e], -deq_edge_type[p, t2, e]])
@@ -885,6 +893,11 @@ class SatModel(object):
             elif page['type'] == 'DEQUE':
                 # ensures that each edge is assigned to exactly one type
                 self._add_clauses(static_encode_deque_types(deq_edge_type, p))
+                # adds page clauses
+                self._add_clauses(static_encode_deque_page(precedes, edge_to_page, edges, p, deq_edge_type))
+            elif page['type'] == "MONQUE":
+                # ensures that each edge is assigned to exactly one type
+                self._add_clauses(static_encode_deque_types(deq_edge_type, p, False, True))
                 # adds page clauses
                 self._add_clauses(static_encode_deque_page(precedes, edge_to_page, edges, p, deq_edge_type))
             elif page['type'] == 'NONE':
