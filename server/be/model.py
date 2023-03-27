@@ -6,6 +6,7 @@ from numpy import ndarray
 from be.custom_types import Edge, PageAssignment, EdgeType, TypeEnum
 from be.utils import get_duplicates
 from numba import jit
+import sys
 
 def static_encode_vertex_order(precedes: ndarray) -> List[List[int]]:
     """
@@ -93,7 +94,7 @@ def static_encode_partial_order(precedes, *vertices: List[int]) -> List[List[int
     return clauses
 
 
-def static_to_dimacs(clauses: list, first_line: str) -> str:
+def static_to_dimacs(clauses: list) -> str:
     """
     This method generates a string in the `DIMACS <http://www.satcompetition.org/2009/format-benchmarks2009.html>`_ format.
     This method is on of the hotspots for large problem instances. It was compared against various other
@@ -104,7 +105,7 @@ def static_to_dimacs(clauses: list, first_line: str) -> str:
     :param first_line: the header of the generated file
     :return: a string which encodes all given clauses in DIMACS format
     """
-    ret_val = first_line
+    ret_val = ""
     # Code block 'str translate' took: 26281.30907699233 ms
     s = str(clauses)[2:-2].translate(
         str.maketrans({'\n': None, ' ': None, ',': " "})
@@ -520,6 +521,7 @@ def static_encode_rique_page(precedes: ndarray, edge_to_page: ndarray, edges: nd
 
     return clauses
 
+#@jit(forceobj=True)
 def static_encode_deque_types(deq_edge_type: ndarray, p: int, isRique: bool = False, isMonque: bool = False) -> List[List[int]]:
     """
     Generates the clauses to assign each edge to one edge type
@@ -597,7 +599,7 @@ def static_encode_deque_constraints_fast(precedes: ndarray, edge_to_page: ndarra
                     [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, TypeEnum.TAIL.value, e1], deq_edge_type[p, TypeEnum.QUEUE_H_T.value, e2], precedes[e2v2, e1v1], precedes[e1v1, e2v1], precedes[e2v1, e1v2]],
                     [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, TypeEnum.TAIL.value, e1], deq_edge_type[p, TypeEnum.QUEUE_H_T.value, e2], precedes[e2v2, e1v2], precedes[e1v2, e2v1], precedes[e2v1, e1v1]]
                 ])
-                clauses.extend(forbidden_patterns * -1)
+                clauses.extend(list((map(list, forbidden_patterns*-1))))
             # get duplicates e1v1, e1v2, e2v2
             items = np.array([e1v1, e1v2, e2v2])
             s = np.sort(items)
@@ -616,7 +618,7 @@ def static_encode_deque_constraints_fast(precedes: ndarray, edge_to_page: ndarra
                         [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, TypeEnum.TAIL.value, e1], deq_edge_type[p, TypeEnum.QUEUE_H_T.value, e2], precedes[e2v1, e1v1], precedes[e1v1, e2v2], precedes[e2v2, e1v2]],
                         [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, TypeEnum.TAIL.value, e1], deq_edge_type[p, TypeEnum.QUEUE_H_T.value, e2], precedes[e2v1, e1v2], precedes[e1v2, e2v2], precedes[e2v2, e1v1]]
                     ])
-                clauses.extend(forbidden_patterns * -1)
+                clauses.extend(list((map(list, forbidden_patterns*-1))))
             # add clauses if e1 stack edge and e2 queue edge: both nodes of e2 enclosed
             # inserted at same side -> first nodes cant be the same
             for type_num1 in [TypeEnum.HEAD.value, TypeEnum.TAIL.value]:
@@ -629,22 +631,22 @@ def static_encode_deque_constraints_fast(precedes: ndarray, edge_to_page: ndarra
                     forbidden_patterns = np.array([
                         [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, type_num1, e1], deq_edge_type[p, type_num2, e2], precedes[e1v1, e2v1], precedes[e2v1, e2v2], precedes[e2v2, e1v2]]
                     ])
-                    clauses.extend(forbidden_patterns * -1)
+                    clauses.extend(list((map(list, forbidden_patterns*-1))))
                 if e1v1 != e2v2:
                     forbidden_patterns = np.array([
                         [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, type_num1, e1], deq_edge_type[p, type_num2, e2], precedes[e1v1, e2v2], precedes[e2v2, e2v1], precedes[e2v1, e1v2]]
                     ])
-                    clauses.extend(forbidden_patterns * -1)
+                    clauses.extend(list((map(list, forbidden_patterns*-1))))
                 if e1v2 != e2v1:
                     forbidden_patterns = np.array([
                         [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, type_num1, e1], deq_edge_type[p, type_num2, e2], precedes[e1v2, e2v1], precedes[e2v1, e2v2], precedes[e2v2, e1v1]]
                     ])
-                    clauses.extend(forbidden_patterns * -1)
+                    clauses.extend(list((map(list, forbidden_patterns*-1))))
                 if e1v2 != e2v2:
                     forbidden_patterns = np.array([
                         [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, type_num1, e1], deq_edge_type[p, type_num2, e2], precedes[e1v2, e2v2], precedes[e2v2, e2v1], precedes[e2v1, e1v1]]
                     ])
-                    clauses.extend(forbidden_patterns * -1)
+                    clauses.extend(list((map(list, forbidden_patterns*-1))))
             # inserted at different sides -> last nodes cant be the same
             for type_num1 in [TypeEnum.HEAD.value, TypeEnum.TAIL.value]:
                 type_num2 = None
@@ -656,22 +658,22 @@ def static_encode_deque_constraints_fast(precedes: ndarray, edge_to_page: ndarra
                     forbidden_patterns = np.array([
                         [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, type_num1, e1], deq_edge_type[p, type_num2, e2], precedes[e1v2, e2v2], precedes[e2v2, e2v1], precedes[e2v1, e1v1]]
                     ])
-                    clauses.extend(forbidden_patterns * -1)
+                    clauses.extend(list((map(list, forbidden_patterns*-1))))
                 if e1v1 != e2v2:
                     forbidden_patterns = np.array([
                         [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, type_num1, e1], deq_edge_type[p, type_num2, e2], precedes[e1v2, e2v1], precedes[e2v1, e2v2], precedes[e2v2, e1v1]]
                     ])
-                    clauses.extend(forbidden_patterns * -1)
+                    clauses.extend(list((map(list, forbidden_patterns*-1))))
                 if e1v2 != e2v1:
                     forbidden_patterns = np.array([
                         [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, type_num1, e1], deq_edge_type[p, type_num2, e2], precedes[e1v1, e2v2], precedes[e2v2, e2v1], precedes[e2v1, e1v2]]
                     ])
-                    clauses.extend(forbidden_patterns * -1)
+                    clauses.extend(list((map(list, forbidden_patterns*-1))))
                 if e1v2 != e2v2:
                     forbidden_patterns = np.array([
                         [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, type_num1, e1], deq_edge_type[p, type_num2, e2], precedes[e1v1, e2v1], precedes[e2v1, e2v2], precedes[e2v2, e1v2]]
                     ])
-                    clauses.extend(forbidden_patterns * -1)
+                    clauses.extend(list((map(list, forbidden_patterns*-1))))
             # add clauses if e1 and e2 queue edges: different directions, one node of e2 enclosed
             for type_num1 in [TypeEnum.QUEUE_H_T.value, TypeEnum.QUEUE_T_H.value]:
                 type_num2 = None
@@ -684,22 +686,22 @@ def static_encode_deque_constraints_fast(precedes: ndarray, edge_to_page: ndarra
                     forbidden_patterns = np.array([
                         [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, type_num1, e1], deq_edge_type[p, type_num2, e2], precedes[e1v2, e2v1], precedes[e2v1, e1v1], precedes[e1v1, e2v2]]
                     ])
-                    clauses.extend(forbidden_patterns * -1)
+                    clauses.extend(list((map(list, forbidden_patterns*-1))))
                 if e2v1 != e1v2:
                     forbidden_patterns = np.array([
                         [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, type_num1, e1], deq_edge_type[p, type_num2, e2], precedes[e1v1, e2v1], precedes[e2v1, e1v2], precedes[e1v2, e2v2]]
                     ])
-                    clauses.extend(forbidden_patterns * -1)
+                    clauses.extend(list((map(list, forbidden_patterns*-1))))
                 if e2v2 != e1v1:
                     forbidden_patterns = np.array([
                         [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, type_num1, e1], deq_edge_type[p, type_num2, e2], precedes[e1v2, e2v2], precedes[e2v2, e1v1], precedes[e1v1, e2v1]]
                     ])
-                    clauses.extend(forbidden_patterns * -1)
+                    clauses.extend(list((map(list, forbidden_patterns*-1))))
                 if e2v2 != e1v2:
                     forbidden_patterns = np.array([
                         [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, type_num1, e1], deq_edge_type[p, type_num2, e2], precedes[e1v1, e2v2], precedes[e2v2, e1v2], precedes[e1v2, e2v1]]
                     ])
-                    clauses.extend(forbidden_patterns * -1)
+                    clauses.extend(list((map(list, forbidden_patterns*-1))))
             # add clauses if e1 and e2 queue edges: different direction, both nodes of e2 enclosed
             for type_num1 in [TypeEnum.QUEUE_H_T.value, TypeEnum.QUEUE_T_H.value]:
                 type_num2 = None
@@ -713,7 +715,7 @@ def static_encode_deque_constraints_fast(precedes: ndarray, edge_to_page: ndarra
                     [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, type_num1, e1], deq_edge_type[p, type_num2, e2], precedes[e1v2, e2v1], precedes[e2v1, e2v2], precedes[e2v2, e1v1]],
                     [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, type_num1, e1], deq_edge_type[p, type_num2, e2], precedes[e1v2, e2v2], precedes[e2v2, e2v1], precedes[e2v1, e1v1]]
                 ])
-                clauses.extend(forbidden_patterns * -1)
+                clauses.extend(list((map(list, forbidden_patterns*-1))))
             # adjacent nodes do not need handling
             # get duplicates e1v1, e1v2, e2v1, e2v2
             items = np.array([e1v1, e1v2, e2v1, e2v2])
@@ -729,7 +731,7 @@ def static_encode_deque_constraints_fast(precedes: ndarray, edge_to_page: ndarra
                     [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, type_num, e1], deq_edge_type[p, type_num, e2], precedes[e1v2, e2v1], precedes[e2v1, e1v1], precedes[e1v1, e2v2]],
                     [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, type_num, e1], deq_edge_type[p, type_num, e2], precedes[e1v2, e2v2], precedes[e2v2, e1v1], precedes[e1v1, e2v1]]
                 ])
-                clauses.extend(forbidden_patterns * -1)
+                clauses.extend(list((map(list, forbidden_patterns*-1))))
             # add clauses if e1 and e2 queue edges: same direction, both nodes of e2 enclosed
             for type_num in [TypeEnum.QUEUE_H_T.value, TypeEnum.QUEUE_T_H.value]:
                 forbidden_patterns = np.array([
@@ -738,11 +740,8 @@ def static_encode_deque_constraints_fast(precedes: ndarray, edge_to_page: ndarra
                     [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, type_num, e1], deq_edge_type[p, type_num, e2], precedes[e1v2, e2v1], precedes[e2v1, e2v2], precedes[e2v2, e1v1]],
                     [edge_to_page[p, e1], edge_to_page[p, e2], deq_edge_type[p, type_num, e1], deq_edge_type[p, type_num, e2], precedes[e1v2, e2v2], precedes[e2v2, e2v1], precedes[e2v1, e1v1]]
                 ])
-                clauses.extend(forbidden_patterns * -1)
+                clauses.extend(list((map(list, forbidden_patterns*-1))))
     return clauses
-
-def array_to_list(array):
-    return array.tolist()
 
 def static_encode_deque_page(precedes: ndarray, edge_to_page: ndarray, edges: ndarray, p: int, deq_edge_type: ndarray) -> List[List[int]]:
     """
@@ -754,8 +753,10 @@ def static_encode_deque_page(precedes: ndarray, edge_to_page: ndarray, edges: nd
     :param p: the index of the current page
     :param deq_edge_type: deq_edge_type[p, type_num, e] <=> edge e is assigned as edge type for page p
     """
-    numpy_clauses = static_encode_deque_constraints_fast(precedes, edge_to_page, edges, p, deq_edge_type)
-    clauses = map(array_to_list, numpy_clauses)
+    print("Adding constraints for deque page")
+    start_time = time.time()
+    clauses = static_encode_deque_constraints_fast(precedes, edge_to_page, edges, p, deq_edge_type)
+    print("--- %s seconds ---" % (time.time() - start_time))
     return clauses
 
 class SatModel(object):
@@ -779,6 +780,8 @@ class SatModel(object):
         self.vertices = vertices
         self.constraints = constraints
         self.clauses = []
+        self.temp_dimacs_str = ""
+        self.clausenum = 0
 
         # Check for dublicates in ids.
         if len(get_duplicates(vertices)) > 0:
@@ -906,6 +909,8 @@ class SatModel(object):
                 self._add_clauses(static_encode_deque_types(deq_edge_type, p, True))
                 # adds page clauses
                 self._add_clauses(static_encode_deque_page(precedes, edge_to_page, edges, p, deq_edge_type))
+                # add constraints to string (safe RAM)  
+                self.to_temp_dimacs_str()
                 # the following implementation is by adopting the forbidden pattern
                 # self._add_clauses(static_encode_rique_page(precedes, edge_to_page, edges, p))
             elif page['type'] == 'DEQUE':
@@ -913,11 +918,15 @@ class SatModel(object):
                 self._add_clauses(static_encode_deque_types(deq_edge_type, p))
                 # adds page clauses
                 self._add_clauses(static_encode_deque_page(precedes, edge_to_page, edges, p, deq_edge_type))
+                # add constraints to string (safe RAM)                
+                self.to_temp_dimacs_str()
             elif page['type'] == "MONQUE":
                 # ensures that each edge is assigned to exactly one type
                 self._add_clauses(static_encode_deque_types(deq_edge_type, p, False, True))
                 # adds page clauses
                 self._add_clauses(static_encode_deque_page(precedes, edge_to_page, edges, p, deq_edge_type))
+                # add constraints to string (safe RAM)  
+                self.to_temp_dimacs_str()
             elif page['type'] == 'NONE':
                 continue
             else:
@@ -1132,11 +1141,26 @@ class SatModel(object):
         encoding all the clauses. Out to conserve memory, the clauses will be deleted after the string generation.
         """
         clauses = self.clauses
-        first_line = "p cnf {} {}\n".format(np.max(self.max_var), len(clauses))
-        res_str = static_to_dimacs(clauses, first_line)
+        last_str = ""
+        if(len(clauses) > 0):
+            self.clausenum += len(clauses)
+            last_str += static_to_dimacs(clauses)
+        first_line = "p cnf {} {}\n".format(np.max(self.max_var), self.clausenum)
+        res_str = first_line + self.temp_dimacs_str + "\n" + last_str
         # remove the references in order to free memory
         self.clauses = None
         return res_str
+
+    def to_temp_dimacs_str(self):
+        """
+        generates a string before all clauses are finished, to safe RAM
+        """
+        clauses = self.clauses
+        self.clausenum = self.clausenum + len(clauses)
+        res_str = static_to_dimacs(clauses)
+        # remove the references in order to free memory
+        self.clauses = []
+        self.temp_dimacs_str = self.temp_dimacs_str + "\n" + res_str
 
     def parse_lingeling_result(self, dimacs_string):
         """
