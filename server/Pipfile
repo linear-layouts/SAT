@@ -25,6 +25,8 @@ simplejson = "==3.*"
 python-dateutil = "*"
 pebble = "*"
 werkzeug = "*"
+numba = "*"
+markupsafe = "==2.0.1"
 
 [requires]
 # Pipenv does not support multiple python versions from one pipfile. Python 3.6 is the minimum requirement.
