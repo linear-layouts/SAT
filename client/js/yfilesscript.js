@@ -2599,6 +2599,7 @@ require([
 	}
 
 	//Add new Pages
+	console.log("iugi")
 	document.querySelector("#AddPage").addEventListener("click", () => {
 		var currentNOP = parseInt(window.localStorage.getItem("numberOfPages"));
 		numberOfPages = currentNOP+1;
@@ -2611,6 +2612,7 @@ require([
 				'<option value="QUEUE">queue</option>'+
 				'<option value="RIQUE">rique</option>'+
 				'<option value="DEQUE">deque</option>'+
+				'<option value="MONQUE">monque</option>'+
 				'<option value="NONE">undefined</option>' +
 				'</select> <select id="layoutP'+numberOfPages+'" name="layoutP'+numberOfPages+'">'+
 				'<option value="NONE">maximal</option>'+
