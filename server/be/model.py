@@ -130,7 +130,7 @@ def static_to_dimacs(clauses: list, first_line: str) -> str:
     #     ",", " ")
 
 
-def static_encode_same_page(edge_to_page: ndarray, e1: int, e2: int, e3: int) -> List[List[int]]:
+def static_encode_same_page(edge_to_page: ndarray, e1: int, e2: int) -> List[List[int]]:
     """
     This method generates the clauses to encode that two edges must be assigned to the same page.
     Because the corresponding CNF formula gets bloated on many pages, this method only handles up to four pages.
@@ -158,7 +158,7 @@ def static_encode_same_page(edge_to_page: ndarray, e1: int, e2: int, e3: int) ->
         clauses.append([e1_p1, e2_p2])
         clauses.append([e1_p2, e2_p1])
         clauses.append([e2_p1, e2_p2])
-        clauses.append([e2_p1, e3_p2])
+        #clauses.append([e2_p1, e3_p2])
     elif page_number == 3:
         e1_p1 = edge_to_page[0, e1]
         e2_p1 = edge_to_page[0, e2]
@@ -180,7 +180,7 @@ def static_encode_same_page(edge_to_page: ndarray, e1: int, e2: int, e3: int) ->
         e2_p1 = edge_to_page[0, e2]
         e1_p2 = edge_to_page[1, e1]
         e2_p2 = edge_to_page[1, e2]
-        e3_p2 = edge_to_page[1, e3]
+        #e3_p2 = edge_to_page[1, e3]
         e1_p3 = edge_to_page[2, e1]
         e2_p3 = edge_to_page[2, e2]
         e1_p4 = edge_to_page[3, e1]
@@ -207,7 +207,7 @@ def static_encode_same_page(edge_to_page: ndarray, e1: int, e2: int, e3: int) ->
     return clauses
 
 
-def static_encode_different_pages(edge_to_page, e1, e2, e3) -> List[List[int]]:
+def static_encode_different_pages(edge_to_page, e1, e2) -> List[List[int]]:
     """
     Encodes different pages for two edges.
 
@@ -220,7 +220,7 @@ def static_encode_different_pages(edge_to_page, e1, e2, e3) -> List[List[int]]:
     page_number = edge_to_page.shape[0]
 
     for p in range(page_number):
-        clauses.append([-edge_to_page[p, e1], -edge_to_page[p, e2], -edge_to_page[p, e3] ])
+        clauses.append([-edge_to_page[p, e1], -edge_to_page[p, e2] ])
 
     return clauses
 
@@ -520,7 +520,7 @@ def static_encode_rique_page(precedes: ndarray, edge_to_page: ndarray, edges: nd
 
     return clauses
 
-def static_encode_deque_types(deq_edge_type: ndarray, p: int, isRique: bool = False, isMonque: bool = False) -> List[List[int]]:
+def static_encode_deque_types(deq_edge_type: ndarray, p: int, isRique: bool = False) -> List[List[int]]:
     """
     Generates the clauses to assign each edge to one edge type
 
@@ -539,23 +539,23 @@ def static_encode_deque_types(deq_edge_type: ndarray, p: int, isRique: bool = Fa
                 if t1 == TypeEnum.TAIL.value:
                     clauses.append([-deq_edge_type[p, t1, e]])
                     continue
-            if isMonque:
-                if t1 == TypeEnum.QUEUE_T_H.value:
-                    clauses.append([-deq_edge_type[p, t1, e]])
-                    continue
-            for t2 in range(t1 + 1, deq_edge_type.shape[1]):
-                if isRique: 
-                    if t2 == TypeEnum.QUEUE_T_H.value:
-                        clauses.append([-deq_edge_type[p, t2, e]])
-                        continue
-                    if t2 == TypeEnum.TAIL.value:
-                        clauses.append([-deq_edge_type[p, t2, e]])
-                        continue
-                if isMonque:
-                    if t2 == TypeEnum.QUEUE_T_H.value:
-                        clauses.append([-deq_edge_type[p, t2, e]])
-                        continue
-                clauses.append([-deq_edge_type[p, t1, e], -deq_edge_type[p, t2, e]])
+            #if isMonque:
+              #  if t1 == TypeEnum.QUEUE_T_H.value:
+                 #   clauses.append([-deq_edge_type[p, t1, e]])
+                #    continue
+          #  for t2 in range(t1 + 1, deq_edge_type.shape[1]):
+             #  if isRique: 
+                  #  if t2 == TypeEnum.QUEUE_T_H.value:
+                     #   clauses.append([-deq_edge_type[p, t2, e]])
+                     #   continue
+                  #  if t2 == TypeEnum.TAIL.value:
+                     #   clauses.append([-deq_edge_type[p, t2, e]])
+                     #   continue
+              #  if isMonque:
+                  #  if t2 == TypeEnum.QUEUE_T_H.value:
+                      #  clauses.append([-deq_edge_type[p, t2, e]])
+                    #    continue
+               # clauses.append([-deq_edge_type[p, t1, e], -deq_edge_type[p, t2, e]])
     return clauses
 
 # helper function to make deque page faster
@@ -913,11 +913,11 @@ class SatModel(object):
                 self._add_clauses(static_encode_deque_types(deq_edge_type, p))
                 # adds page clauses
                 self._add_clauses(static_encode_deque_page(precedes, edge_to_page, edges, p, deq_edge_type))
-            elif page['type'] == "MONQUE":
+            #elif page['type'] == "MONQUE":
                 # ensures that each edge is assigned to exactly one type
-                self._add_clauses(static_encode_deque_types(deq_edge_type, p, False, True))
+                #self._add_clauses(static_encode_deque_types(deq_edge_type, p, False, True))
                 # adds page clauses
-                self._add_clauses(static_encode_deque_page(precedes, edge_to_page, edges, p, deq_edge_type))
+                #self._add_clauses(static_encode_deque_page(precedes, edge_to_page, edges, p, deq_edge_type))
             elif page['type'] == 'NONE':
                 continue
             else:
