@@ -10,11 +10,11 @@ This application requires lingeling which depends on UNIX. This files assumes th
 
 ### Init project workspace
 
-First install python 3.8, pip, pipenv
+First install python 3.10, pip, pipenv
 
 ```bash
 sudo apt update
-sudo apt install -y python3.8 python3-pip                 # installs the tools to run the application 
+sudo apt install -y python3.10 python3-pip              # installs the tools to run the application 
 echo "export PATH=\"~/.local/bin:\$PATH\"" >> ~/.bashrc # add pip installed binaries to path
 pip3 install pipenv                                     # installs pipenv
 exec bash                                               # load the new PATH variable
@@ -59,7 +59,7 @@ Then it means there are no alternatives that have been configured, hence let’s
 Here we are setting up two versions as alternatives, later we will be able to choose between them to set one of them as the system default one.
 
 ```
-sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1
+sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1
 ```
 
 Switch the default Python version 
@@ -68,7 +68,7 @@ Switch the default Python version
 sudo update-alternatives --config python
 ```
 
-When you check the version of Python this time, you will have 3.8. For that use:
+When you check the version of Python this time, you will have 3.10. For that use:
 
 ```
 python -V
@@ -114,8 +114,18 @@ regularly backup the database file `data.db`
 
 #### Note
 
-For python >3.8, there is a runtime error related to cached_property, when starting the server for first time. To resolve the issue add the following line to the file mentioned in the error:
+For python >3.8, there is a runtime error related to cached_property or to collections, when starting the server for first time. To resolve these issue add the following lines to the file mentioned in the error (path_to_python/werkzeug/__init__.py):
 
 ```bash
 from werkzeug.utils import cached_property
+```
+
+
+```bash
+import collections
+from collections import abc
+collections.Mapping = abc.Mapping
+collections.Hashable = abc.Hashable
+collections.MutableMapping = abc.MutableMapping
+collections.Iterable = abc.Iterable
 ```

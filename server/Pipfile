@@ -14,19 +14,22 @@ sphinxcontrib-plantuml = "*"
 sphinxcontrib-bibtex = "*"
 
 [packages]
-flask = "==1.*"
-flask-restplus = "==0.*"
-waitress = "==1.*"
-numpy ="==1.*"
-flask-cors ="==3.*"
-lxml = "==4.*"
+flask = "==0.10.1"
+flask-restplus = "==0.9"
+flask-restful = "==0.3.4"
+waitress = "==1.4.4"
+numpy ="==1.26"
+flask-cors ="==3.0.6"
+lxml = "==4.9"
 # this is needed to serialize named touples as dicts. Flask uses this automatically if it is present
 simplejson = "==3.*"
-python-dateutil = "*"
+python-dateutil = "==2.7.3"
 pebble = "*"
-werkzeug = "*"
+werkzeug = "==0.16.1"
+markupsafe = "==1.1.1"
+itsdangerous = "==0.24"
 
 [requires]
 # Pipenv does not support multiple python versions from one pipfile. Python 3.6 is the minimum requirement.
 # Feel free to edit this file locally to include a higher python version like 3.7
-python_version = "3.*"
+python_version = "3.10"
