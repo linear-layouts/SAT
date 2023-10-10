@@ -58,12 +58,12 @@ def static_encode_page_assignment(edge_to_page: ndarray) -> List[List[int]]:
 def static_encode_not_all_in_page(edge_to_page: ndarray, edges: ndarray, p: int) -> List[List[int]]:
     """
     Encodes the constraint that not all given edges go to the same given page.
-
     :param edge_to_page: the index of the first edge
     :param edges: the given edges
     :param p: the page
     :return: the generated clauses
     """
+    
     clause = []
     for e in edges:
         clause.append(-edge_to_page[p, e])
