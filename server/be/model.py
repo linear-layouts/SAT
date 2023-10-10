@@ -16,6 +16,7 @@ def static_encode_vertex_order(precedes: ndarray) -> List[List[int]]:
     :param precedes: precedes[i, j] <=> the vertex i precedes vertex j
     :return: the list of generated clauses
     """
+    
     clauses = []
     # Ensure asymmetry
     for u in range(precedes.shape[0]):
