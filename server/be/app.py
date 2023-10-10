@@ -113,7 +113,6 @@ class App:
                                                                 'STACK',
                                                                 'RIQUE',
                                                                 'DEQUE',
-                                                                'MONQUE',
                                                                 'NONE'],
                                                           required=True),
                                     'constraint': fields.String(description='Additional constraints for the page',

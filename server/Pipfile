@@ -25,9 +25,15 @@ lxml = "==4.9"
 simplejson = "==3.*"
 python-dateutil = "==2.7.3"
 pebble = "*"
+<<<<<<< HEAD
 werkzeug = "==0.16.1"
 markupsafe = "==1.1.1"
 itsdangerous = "==0.24"
+=======
+werkzeug = "*"
+numba = "*"
+markupsafe = "==2.0.1"
+>>>>>>> 1ca00fb1e118adfbcc1ed0c0ca3e7397f7542861
 
 [requires]
 # Pipenv does not support multiple python versions from one pipfile. Python 3.6 is the minimum requirement.
