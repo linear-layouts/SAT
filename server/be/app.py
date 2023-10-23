@@ -186,12 +186,19 @@ class App:
                                       
                                       NODES_SET_FIRST: The given node has to be the first in any order.
                                       arguments: the node to be the first
-                                      modifier: none  
-                                      
+                                      modifier: none 
+
+                                      NODES_SET_NOT_FIRST: The given node has to be the not first in any order.
+                                      arguments: the node to be not first
+                                      modifier: none 
+
                                       NODES_SET_LAST: The given node has to be the last in any order.
                                       arguments: the node to be the last
                                       modifier: none 
                                       
+                                      NODES_SET_NOT_LAST: The given node has to be not last in any order.
+                                      arguments: the node to be not last
+                                      modifier: none 
                                       
                                       EDGES_SAME_PAGES_INCIDENT_NODE: All edges incident to this vertex should be on same page.
                                       arguments: the incident node
@@ -222,7 +229,9 @@ class App:
                                                                  "NODES_FORBID_PARTIAL_ORDER",
                                                                  "NODES_CONSECUTIVE",
                                                                  "NODES_SET_FIRST",
+                                                                 "NODES_SET_NOT_FIRST",
                                                                  "NODES_SET_LAST",
+                                                                 "NODES_SET_NOT_LAST",
                                                                  "EDGES_SAME_PAGES_INCIDENT_NODE",
                                                                  "EDGES_DIFFERENT_PAGES_INCIDENT_NODE",
                                                                  "EDGES_ON_PAGES_INCIDENT_NODE"

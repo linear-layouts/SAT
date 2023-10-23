@@ -421,7 +421,7 @@ require([
 		})
 
 		constraintsArray.forEach(function (c) {
-			if (["NODES_SET_FIRST", "NODES_SET_LAST", "NODES_PREDECESSOR", "NODES_CONSECUTIVE",
+			if (["NODES_SET_FIRST", "NODES_SET_NOT_FIRST", "NODES_SET_LAST", "NODES_SET_NOT_LAST", "NODES_PREDECESSOR", "NODES_CONSECUTIVE",
 				"NODES_REQUIRE_PARTIAL_ORDER", "NODES_FORBID_PARTIAL_ORDER", "EDGES_SAME_PAGES_INCIDENT_NODE",
 				"EDGES_DIFFERENT_PAGES_INCIDENT_NODE"].includes(c.type)) {
 				var constraintsNodesTagsSet = new Set();
@@ -488,7 +488,7 @@ require([
 			"EDGES_SAME_PAGES_INCIDENT_NODE",
 			"EDGES_TO_SUB_ARC_ON_PAGES", "EDGES_FROM_NODES_ON_PAGES",
 			"NODES_FORBID_PARTIAL_ORDER", "NODES_CONSECUTIVE",
-			"NODES_REQUIRE_PARTIAL_ORDER", "NODES_SET_FIRST", "NODES_SET_LAST", "NODES_PREDECESSOR"]
+			"NODES_REQUIRE_PARTIAL_ORDER", "NODES_SET_FIRST", "NODES_SET_NOT_FIRST", "NODES_SET_LAST", "NODES_SET_NOT_LAST", "NODES_PREDECESSOR"]
 		if (constraintsEnumRelatedToNodes.includes(constraintEnum)) {
 			return true
 		}
@@ -500,7 +500,11 @@ require([
 		switch (constraintEnum) {
 			case "NODES_SET_FIRST": constraint = new SetAsFirst(constraintArguments)
 				break;
+			case "NODES_SET_NOT_FIRST": constraint = new SetAsNotFirst(constraintArguments)
+				break;
 			case "NODES_SET_LAST": constraint = new SetAsLast(constraintArguments)
+				break;
+			case "NODES_SET_NOT_LAST": constraint = new SetAsNotLast(constraintArguments)
 				break;
 			case "NODES_PREDECESSOR": constraint = new Predecessor(constraintArguments)
 				break;
@@ -562,7 +566,9 @@ require([
 			var args = []
 			switch (c.type) {
 				case "NODES_SET_FIRST":
+				case "NODES_SET_NOT_FIRST":
 				case "NODES_SET_LAST":
+				case "NODES_SET_NOT_LAST":
 				case "EDGES_SAME_PAGES_INCIDENT_NODE":
 				case "EDGES_DIFFERENT_PAGES_INCIDENT_NODE":
 				case "NODES_PREDECESSOR":
@@ -771,13 +777,24 @@ require([
 				constraintsArray.push(constr)
 				$("#constraintTags").tagit("createTag", constr.getPrintable())
 			});
+			contextMenu.addMenuItem('Set as non-first in the order', () => {
+
+				let constr = new SetAsNotFirst(graphComponent.selection.selectedNodes.toArray());
+				constraintsArray.push(constr)
+				$("#constraintTags").tagit("createTag", constr.getPrintable())
+			});
 			contextMenu.addMenuItem('Set as last in the order', () => {
 
 				let constr = new SetAsLast(graphComponent.selection.selectedNodes.toArray());
 				constraintsArray.push(constr)
 				$("#constraintTags").tagit("createTag", constr.getPrintable())
 			});
+			contextMenu.addMenuItem('Set as non-last in the order', () => {
 
+				let constr = new SetAsNotLast(graphComponent.selection.selectedNodes.toArray());
+				constraintsArray.push(constr)
+				$("#constraintTags").tagit("createTag", constr.getPrintable())
+			});
 			contextMenu.addMenuItem('Assign all edges incident to this vertex to the same page', () => {
 				let constr = new SamePageForIncidentEdgesOf(graphComponent.selection.selectedNodes.toArray());
 				constraintsArray.push(constr)
@@ -1200,6 +1217,20 @@ require([
 				$("#constraintTags").tagit("createTag", con.getPrintable())
 
 				break;
+			case "NODES_SET_NOT_FIRST":
+				var objString = objects.split(",")
+	
+				var objItems = [];
+	
+				objString.forEach(function (os) {
+					objItems = objItems.concat(findObjectByTag(os, "node"))
+				})
+	
+				var con = new SetAsNotFirst(objItems)
+				constraintsArray.push(con);
+				$("#constraintTags").tagit("createTag", con.getPrintable())
+	
+				break;
 			case "EDGES_SAME_PAGES_INCIDENT_NODE":
 				var objString = objects.split(",")
 
@@ -1239,6 +1270,21 @@ require([
 				})
 
 				var con = new SetAsLast(objItems)
+				constraintsArray.push(con);
+				$("#constraintTags").tagit("createTag", con.getPrintable())
+
+				break;
+			case "NODES_SET_NOT_LAST":
+
+				var objString = objects.split(",")
+
+				var objItems = [];
+
+				objString.forEach(function (os) {
+					objItems = objItems.concat(findObjectByTag(os, "node"))
+				})
+
+				var con = new SetAsNotLast(objItems)
 				constraintsArray.push(con);
 				$("#constraintTags").tagit("createTag", con.getPrintable())
 
@@ -3937,6 +3983,22 @@ require([
 					$("#constraintTags").tagit("createTag", con.getPrintable())
 
 					break;
+				case "NODES_SET_NOT_FIRST":
+					var objItems = []
+		
+					c.arguments.forEach(function (a) {
+						graphComponent.graph.nodes.toArray().forEach(function (n) {
+							if (n.tag == a) {
+								objItems.push(n)
+							}
+						})
+					})
+		
+					var con = new SetAsNotFirst(objItems)
+					constraintsArray.push(con);
+					$("#constraintTags").tagit("createTag", con.getPrintable())
+		
+					break;
 				case "EDGES_SAME_PAGES_INCIDENT_NODE":
 					var objItems = []
 
@@ -3984,6 +4046,22 @@ require([
 					constraintsArray.push(con);
 					$("#constraintTags").tagit("createTag", con.getPrintable())
 
+					break;
+				case "NODES_SET_NOT_LAST":
+					var objItems = []
+		
+					c.arguments.forEach(function (a) {
+						graphComponent.graph.nodes.toArray().forEach(function (n) {
+							if (n.tag == a) {
+								objItems.push(n)
+							}
+						})
+					})
+		
+					var con = new SetAsNotLast(objItems)
+					constraintsArray.push(con);
+					$("#constraintTags").tagit("createTag", con.getPrintable())
+		
 					break;
 				case "EDGES_SAME_PAGES":
 					var objItems = [];

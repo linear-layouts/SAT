@@ -189,6 +189,18 @@ addDefaultColor();*/
 					var con = new SetAsFirst(objItems);
 					constraintsArray.push(con);
 					break;
+				case "NODES_SET_NOT_FIRST":
+					var objItems = [];
+					c.arguments.forEach(function(a) {
+						graphComponent.graph.nodes.toArray().forEach(function(n) {
+							if (n.tag.toString() === a) {
+								objItems.push(n);
+							}
+						});
+					});
+					var con = new SetAsNotFirst(objItems);
+					constraintsArray.push(con);
+					break;
 				case "NODES_SET_LAST":
 					var objItems = [];
 					c.arguments.forEach(function(a) {
@@ -199,6 +211,18 @@ addDefaultColor();*/
 						});
 					});
 					var con = new SetAsLast(objItems);
+					constraintsArray.push(con);
+					break;
+				case "NODES_SET_NOT_LAST":
+					var objItems = [];
+					c.arguments.forEach(function(a) {
+						graphComponent.graph.nodes.toArray().forEach(function(n) {
+							if (n.tag.toString() === a) {
+								objItems.push(n);
+							}
+						});
+					});
+					var con = new SetAsNotLast(objItems);
 					constraintsArray.push(con);
 					break;
 				case "EDGES_SAME_PAGES_INCIDENT_NODE":

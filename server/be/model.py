@@ -282,6 +282,22 @@ def static_encode_first_vertex(precedes, v) -> List[List[int]]:
     #print(f"Clauses {clauses}") # TODO: Nikadi de
     return clauses
 
+def static_encode_not_first_vertex(precedes, v) -> List[List[int]]:
+    """
+    Encodes that the given vertex is not first.
+
+    :param precedes: precedes[i, j] <=> vertex i precedes vertex j
+    :param v: the index of the vertex to prevent from being first
+        """
+    
+    clauses = []
+    Myclause = []
+    for w in range(precedes.shape[0]):
+        if w == v:
+            continue
+        Myclause.extend([-precedes[v, w]])
+    clauses.extend([Myclause])
+    return clauses
 
 def static_encode_last_vertex(precedes, v) -> List[List[int]]:
     """
@@ -298,6 +314,23 @@ def static_encode_last_vertex(precedes, v) -> List[List[int]]:
     #print(f"Clauses {clauses}")  # TODO: Nikadi de
     return clauses
 
+def static_encode_not_last_vertex(precedes, v) -> List[List[int]]:
+    """
+    Encodes that the given vertex is not last.
+
+    :param precedes: precedes[i, j] <=> vertex i precedes vertex j
+    :param v: the index of the vertex to prevent from being last
+        """
+    
+    clauses = []
+    Myclause = []
+    for w in range(precedes.shape[0]):
+        if w == v:
+            continue
+        Myclause.extend([-precedes[w, v]])
+    Myclause = Myclause[:-2]
+    clauses.extend([Myclause])
+    return clauses
 
 def static_encode_treat_graph_directed(precedes, edges) -> List[List[int]]:
     """
@@ -1103,12 +1136,22 @@ class SatModel(object):
                 if len(arguments) != 1:
                     abort(400, "The NODES_SET_FIRST constraint only allows exactly one argument")
                 clauses.extend(static_encode_first_vertex(self._precedes, self._node_id_to_idx[arguments[0]]))
+            
+            elif constraint['type'] == 'NODES_SET_NOT_FIRST':
+                if len(arguments) != 1:
+                    abort(400, "The NODES_SET_NOT_FIRST constraint only allows exactly one argument")
+                clauses.extend(static_encode_not_first_vertex(self._precedes, self._node_id_to_idx[arguments[0]]))
 
             elif constraint['type'] == 'NODES_SET_LAST':
                 if len(arguments) != 1:
                     abort(400, "The NODES_SET_LAST constraint only allows exactly one argument")
                 clauses.extend(static_encode_last_vertex(self._precedes, self._node_id_to_idx[arguments[0]]))
                 # clauses.extend(static_encode_last_vertex(self._precedes, self._node_id_to_idx[arguments[0]]))
+            
+            elif constraint['type'] == 'NODES_SET_NOT_LAST':
+                if len(arguments) != 1:
+                    abort(400, "The NODES_SET_NOT_LAST constraint only allows exactly one argument")
+                clauses.extend(static_encode_not_last_vertex(self._precedes, self._node_id_to_idx[arguments[0]]))
 
             elif constraint['type'] == 'TREAT_GRAPH_DIRECTED':
                 edges = np.array([

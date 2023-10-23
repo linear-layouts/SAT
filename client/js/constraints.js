@@ -106,6 +106,19 @@ class SetAsFirst extends Constraint {
 
 }
 
+class SetAsNotFirst extends Constraint {
+	constructor(_objects) {
+		super("NODES_SET_NOT_FIRST",_objects)
+
+		this.printable = "setNotFirst(" + this.objects.toString() + ")"
+	}
+
+	updatePrintable() {
+		this.printable = "setNotFirst(" + this.objects.toString() + ")"
+	}
+
+}
+
 class SetAsLast extends Constraint {
 	constructor(_objects) {
 		super("NODES_SET_LAST",_objects)
@@ -119,7 +132,18 @@ class SetAsLast extends Constraint {
 
 }
 
+class SetAsNotLast extends Constraint {
+	constructor(_objects) {
+		super("NODES_SET_NOT_LAST",_objects)
 
+		this.printable = "setNotLast(" + this.objects.toString() + ")"
+	}
+
+	updatePrintable() {
+		this.printable = "setNotLast(" + this.objects.toString() + ")"
+	}
+
+}
 
 class SamePageForIncidentEdgesOf extends Constraint {
 	constructor(_objects) {
