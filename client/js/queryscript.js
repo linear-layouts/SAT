@@ -15,6 +15,7 @@ function fillPages() {
 					'<option value="QUEUE">queue</option>'+
 					'<option value="RIQUE">rique</option>'+
 					'<option value="DEQUE">deque</option>'+
+					'<option value="BIARC">biarc</option>'+
 					//'<option value="MONQUE">monque</option>'+
 					'<option value="NONE">undefined</option>' +
 					'</select> <select id="layoutP'+j+'" name="layoutP'+j+'">'+

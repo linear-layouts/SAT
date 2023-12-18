@@ -405,6 +405,156 @@ addDefaultColor();*/
 		}
 	}
 
+	const CorrectedMyResults = { 'Position': [] };
+	
+	function registerBiarcsEdgePositions(ABOVE, BELOW) {
+		respondedObject.vertex_order.forEach(function(node_tag) {
+			let My_Node = getNodeByTag(node_tag);
+			//console.error(My_Node.toString())
+		})
+		//Check if ABOVE and BELOW are arrays, if not then there is an issue from transfering Top and Bottom from model.py
+		if (!Array.isArray(ABOVE)) {
+			console.error('ABOVE is not an array.');
+			return;
+		}
+		if (!Array.isArray(BELOW)) {
+			console.error('BELLOW is not an array.');
+			return;
+		}
+	
+		//Check if ABOVE and BELOW have any values
+		if (ABOVE.length === 0) {
+			console.error('ABOVE has no elements.');
+			return;
+		}
+		if (BELOW.length === 0) {
+			console.error('BELOW has no elements.');
+			return;
+		}
+		const ABOVE_size = [ABOVE.length, ABOVE[0].length, ABOVE[0][0].length];
+		const [m, n, p] = ABOVE_size;
+		const MyResults = { 'Position': Array.from({ length: m }, () => Array.from({ length: n }, () => Array(p).fill(null))) };
+		const RearrangedMyResults = { 'Position': Array.from({ length: m }, () => Array.from({ length: n }, () => Array(p).fill(null))) };
+		//const CorrectedMyResults = { 'Position': Array.from({ length: m }, () => Array.from({ length: n }, () => Array(p).fill(null))) };
+		if (CorrectedMyResults['Position'].length === 0) {
+			CorrectedMyResults['Position'] = Array.from({ length: m }, () => Array.from({ length: n }, () => Array(p).fill(null)));
+		}
+
+		for (let i = 0; i < m; i++) {
+    		for (let j = 0; j < n; j++) {
+        		for (let z = 0; z < p; z++) {
+            		let top = ABOVE[i][j][z];
+            		let bottom = BELOW[i][j][z];
+
+            		if (!top && !bottom) {
+                		MyResults['Position'][i][j][z] = "N/A";
+            		} else if (top && !bottom) {
+                		MyResults['Position'][i][j][z] = "Up";
+            		} else if (!top && bottom) {
+                		MyResults['Position'][i][j][z] = "Down";
+            		}
+        		}
+    		}
+		}
+		//Swapping Rows to much order of nodes.
+    	for (let i = 0; i < m; i++) {
+			let j=0;
+        	respondedObject.vertex_order.forEach(function(node_tag) {
+				let node = getNodeByTag(node_tag);
+				console.error(j.toString() + "this is vetrex" + node.toString())
+            	RearrangedMyResults['Position'][i][j] = MyResults['Position'][i][node];
+				j++;
+			})
+    	}
+		for (let i = 0; i < m; i++) {
+    		for (let j = 0; j < n; j++) {
+        		for (let z = 0; z < p; z++) {
+            		CorrectedMyResults['Position'][i][j][z] = RearrangedMyResults['Position'][i][j][z];
+        		}
+    		}
+		}
+		//To avoid adding cases such as: Up Down Down Down Down ... where is basicly a stack edge below,
+		//that add complexity to the SAT problem, they are allowed to be and are fixed in here in the solution
+		//this step is important to allow the correct and easiest representation of the graph
+		for (let i = 0; i < m; i++) {
+    		for (let j = 0; j < n - 2; j++) {
+        		for (let z = 0; z < p; z++) {
+					//prevPos := Previous Position
+					//pos := Current Position
+					//nextPos := 1st position after pos
+					//secNextPos := 2nd position after pos
+					//prevPos can not be defined when j = -1 so we set prevPos to Null to avoid further if conditions
+					let prevPos = j > 0 ? RearrangedMyResults['Position'][i][j - 1][z] : null;
+            		let pos = RearrangedMyResults['Position'][i][j][z];
+            		let nextPos = RearrangedMyResults['Position'][i][j + 1][z];
+            		let secNextPos = RearrangedMyResults['Position'][i][j + 2][z];
+
+            		if (nextPos !== secNextPos && j === n - 3 && (secNextPos === "Up" || secNextPos === "Down") && (nextPos === "Up" || nextPos === "Down") && (pos === nextPos)) {
+						CorrectedMyResults['Position'][i][j + 2][z] = nextPos;
+						// ....U U D ---> ...U U U
+						console.error("this is a test"+i.toString()+j.toString()+z.toString())
+					}
+		
+					if (nextPos !== secNextPos && j === n - 3 && (secNextPos === "Up" || secNextPos === "Down") && (nextPos === "Up" || nextPos === "Down") && (pos === "N/A")) {
+						CorrectedMyResults['Position'][i][j + 2][z] = nextPos;
+						// ....N/A U D ---> ...N/A U U
+						console.error("this is a test_important"+i.toString()+j.toString()+z.toString())
+					}
+		
+					if (pos !== nextPos && (pos === "Up" || pos === "Down") && (nextPos === "Up" || nextPos === "Down")) {
+						if (j === 0 && secNextPos === nextPos) {
+							CorrectedMyResults['Position'][i][j][z] = nextPos;
+							// D U U.... --- >U U U ....
+							console.error("this is a test"+i.toString()+j.toString()+z.toString())
+						}
+
+						if (j === 0 && secNextPos === "N/A") {
+							CorrectedMyResults['Position'][i][j][z] = nextPos;
+							// D U N/A.... --- >U U N/A ....
+							console.error("this is a test_LALALA"+i.toString()+j.toString()+z.toString())
+						}
+		
+						if (prevPos !== pos && nextPos === secNextPos && prevPos === "N/A") {
+							CorrectedMyResults['Position'][i][j][z] = nextPos;
+							// N/A U D D ---> N/A D D D
+							console.error("this is a test"+i.toString()+j.toString()+z.toString())
+						}
+		
+						if (prevPos !== pos && nextPos !== secNextPos && prevPos === "N/A") {
+							CorrectedMyResults['Position'][i][j][z] = nextPos;
+							// N/A D U D D D  ---> N/A U U D D D
+							console.error("this is a test"+i.toString()+j.toString()+z.toString())
+						}
+		
+						if (prevPos === pos && nextPos !== secNextPos && secNextPos === "N/A") {
+							CorrectedMyResults['Position'][i][j + 1][z] = pos;
+							// D D U N/A ---> D D D N/A
+							console.error("this is a test"+i.toString()+j.toString()+z.toString())
+						}
+		
+						if (prevPos !== pos && nextPos !== secNextPos && secNextPos === "N/A" && (prevPos === "Up" || prevPos === "Down")) {
+							CorrectedMyResults['Position'][i][j + 1][z] = pos;
+							// D D D U D N/A  ---> D D D U U N/A
+							console.error("this is a test"+i.toString()+j.toString()+z.toString())
+						}
+
+						if (j === 1 && prevPos !== pos && nextPos === secNextPos && prevPos == nextPos && (secNextPos === "Up" || secNextPos === "Down") && (prevPos === "Up" || prevPos === "Down")) {
+							CorrectedMyResults['Position'][i][j-1][z] = pos;
+							// D U D D D N/A  ---> U U D D D N/A
+							console.error("this is a testNEW"+i.toString()+j.toString()+z.toString())
+						}
+		
+						if (prevPos === "N/A" && secNextPos === "N/A") {
+							CorrectedMyResults['Position'][i][j][z] = nextPos;
+							// N/A U D N/A ---> N/A D D N/A 
+							console.error("this is a test"+i.toString()+j.toString()+z.toString())
+						}
+					}
+				}
+			}
+        }
+	}
+
 	function updatePagesWithConstraints(pages) {
 		// updates the pages with constraints
 		pages.forEach(function(p) {
@@ -971,6 +1121,8 @@ addDefaultColor();*/
 		let stroke = getStrokeString(getEdgeStrokeDefaultThickness(), getEdgeStrokeDefaultLineStyle(), color);
 		if (placing === "deque") {
 			setEdgeArcStyleDequePage(edge, directed, color, placing, stroke);
+		} else if (placing === "biarc") {
+			setEdgeArcStyleBiarcPage(edge, directed, color, placing, stroke);
 		} else {
 			let height = (placing === "below") ? -getArcHeight(edge) : getArcHeight(edge);
 			graphComponent.graph.setStyle(edge, getEdgeArcStyle(color, height, stroke, directed));
@@ -1042,6 +1194,174 @@ addDefaultColor();*/
 				graphComponent.graph.remove(helper_node);
 			}
 			graphComponent.graph.setStyle(edge, getEdgeBezierStyle(color, stroke, directed));
+		}
+	}
+
+	function setEdgeArcStyleBiarcPage(edge, directed, color, placing, stroke){
+		console.error(edge)
+		console.error(edge.toString())
+		let Edge_As_Integer = parseInt(edge.toString(), 10);
+		const  CorrectedMyResults_size= [CorrectedMyResults['Position'].length, CorrectedMyResults['Position'][0].length, CorrectedMyResults['Position'][0][0].length];
+		const [m, n, p] = CorrectedMyResults_size;
+		let Source_Node = null;
+		let Target_Node = null;
+		let Switch_Node = null;
+		let height;
+		let Source_Found = false;
+		let Target_Found = false;
+		let Is_Biarc = false;
+		let height_First_Part;
+		let height_Second_Part;
+		let Temp_Position_A = null;
+		let Temp_Position_B = null;
+		let helper_distance;
+		let style;
+		let Source_Port;
+		let Target_Port;
+		let point_x;
+		let point_y;
+		let Count_A;
+		let Count_B;
+		let Count_All;
+		graphComponent.graph.clearBends(edge);
+		for (let i = Edge_As_Integer; i <Edge_As_Integer+1; i++) {
+			Source_Found = false;
+			Target_Found = false;
+			Is_Biarc = false;
+			Temp_Position_A = null;
+		    Temp_Position_B = null;
+			Count_A = 0; 
+			Count_B = 0;
+			Count_All = 0;
+    		for (let j = 0; j < n; j++) {
+        		for (let z = 0; z < p; z++) {
+					//Because we don't have the list of edges in the right order, a search is performed
+					//Because verteces are in the order they are represended its obvious that the first 'Up' or 'Down' after a 'N/A' is the rightmsot endpoint of the edge
+					//Simillar the Last 'Up' or 'Down' before a 'N/A' is the other endpoint
+					//First the source of the edge is found
+            		if (CorrectedMyResults['Position'][i][j][z] !== "N/A" && Source_Found !== true) {
+						const Source_Node = respondedObject.vertex_order[j];
+						Source_Found = true;
+						Temp_Position_A = CorrectedMyResults['Position'][i][j][z];
+					}
+					//Then the target is found
+					if (j < n-1 && Source_Found === true) {
+						if (CorrectedMyResults['Position'][i][j][z] !== "N/A" && CorrectedMyResults['Position'][i][j+1][z] === "N/A" && Target_Found !== true) {
+							Target_Node = respondedObject.vertex_order[j];
+							Target_Found = true;
+							Temp_Position_B = CorrectedMyResults['Position'][i][j][z];
+						}
+					}
+					if (j == n-1 && Source_Found === true){
+						if ((CorrectedMyResults['Position'][i][j][z] === "Up" || CorrectedMyResults['Position'][i][j][z] === "Down") && (j = n-1) && Target_Found !== true) {
+							Target_Node = respondedObject.vertex_order[j];
+							Target_Found = true;
+							Temp_Position_B = CorrectedMyResults['Position'][i][j][z];
+						}
+					}
+					if (j < n-1 && Source_Found === true && Target_Found !== true) {
+						//If right after an 'Up' there is a 'Down' or vice versa then this edge is marked as biarc
+						if (CorrectedMyResults['Position'][i][j][z] !== "N/A" && CorrectedMyResults['Position'][i][j][z] !== CorrectedMyResults['Position'][i][j+1][z] && CorrectedMyResults['Position'][i][j+1][z] !== "N/A") {
+							Switch_Node = respondedObject.vertex_order[j+1];
+							Is_Biarc = true;
+						}
+						//Count_A is how many continious 'Up' or 'Down' we have before the switch
+						if (CorrectedMyResults['Position'][i][j][z] !== "N/A" && CorrectedMyResults['Position'][i][j][z] === CorrectedMyResults['Position'][i][j+1][z] && CorrectedMyResults['Position'][i][j][z] === Temp_Position_A) {
+							Count_A = Count_A + 1;
+							console.error(Count_A+ " A at "+CorrectedMyResults['Position'][i][j][z]);
+						}
+						//Count_B is how many continious 'Up' or 'Down' we have after the switch
+						if (CorrectedMyResults['Position'][i][j][z] !== "N/A" && CorrectedMyResults['Position'][i][j][z] === CorrectedMyResults['Position'][i][j+1][z] && CorrectedMyResults['Position'][i][j][z] !== Temp_Position_A) {
+							Count_B = Count_B + 1;
+							console.error(Count_B+ " B at "+CorrectedMyResults['Position'][i][j][z]);
+						}
+					}
+					if (CorrectedMyResults['Position'][i][j][z] !== "N/A") {
+						Count_All = Count_All + 1;
+					}
+					//if both endpoints are found and edge is marked as biarc then it is represended
+					if (Source_Found === true && Target_Found === true && Is_Biarc === true) {
+						if (edge.bends.toArray().length == 0) {
+							//console.error("source dist : "+edge.sourceNode.layout.x +" and target dist : "+ edge.targetNode.layout.x);
+							//set helper node position on switch point (note that source might be fourther than target)
+							//slight deviation is created with count_A and count_B to avoid overlaping parts of biarcs
+							if (edge.sourceNode.layout.x < edge.targetNode.layout.x){
+								helper_distance = ((edge.sourceNode.layout.x + ((Count_A) * node_distance)) + node_distance/2 + Count_A*10 - Count_B*10); //CHANGE THISSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSs
+							}
+							if (edge.sourceNode.layout.x > edge.targetNode.layout.x){
+								helper_distance = ((edge.targetNode.layout.x + ((Count_A) * node_distance)) + node_distance/2 + Count_A*10 - Count_B*10); //CHANGE THISSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSs
+							}
+							//console.error("helper dist : "+helper_distance +" and count_A*node_dist dist : "+ (Count_A-1) * node_distance);
+							const helper_node = graphComponent.graph.createNodeAt(new yfiles.geometry.Point(helper_distance, 15));
+							//Instead one edge from u to v we make a stack edge from u to the helper_node and one from the helper_node to v
+							//This edges are guidelines and will only be used to help place the original edge in the correct position
+							const helper_edge_First_Part = graphComponent.graph.createEdge(edge.sourceNode, helper_node);
+							const helper_edge_Second_part = graphComponent.graph.createEdge(helper_node, edge.targetNode);
+							if (Temp_Position_A == "Up") {
+								height_First_Part = getArcHeight(helper_edge_First_Part); // first part is Up
+								height_Second_Part = -getArcHeight(helper_edge_Second_part); // second part is Down
+							}
+							if (Temp_Position_A == "Down") {
+								height_First_Part = -getArcHeight(helper_edge_First_Part); // first part is Down
+								height_Second_Part = getArcHeight(helper_edge_Second_part); // second part is Up
+							}
+							graphComponent.graph.setStyle(helper_edge_First_Part, getEdgeArcStyle(color, height_First_Part, stroke, directed));
+							graphComponent.graph.setStyle(helper_edge_Second_part, getEdgeArcStyle(color, height_Second_Part, stroke, directed));
+							if (edge.sourceNode.layout.x < edge.targetNode.layout.x){
+								Source_Port = graphComponent.graph.addPort(edge.sourceNode, yfiles.graph.FreeNodePortLocationModel.NODE_LEFT_ANCHORED);
+								Target_Port = graphComponent.graph.addPort(edge.targetNode, yfiles.graph.FreeNodePortLocationModel.NODE_RIGHT_ANCHORED);
+							}
+							if (edge.sourceNode.layout.x > edge.targetNode.layout.x){
+								Target_Port = graphComponent.graph.addPort(edge.sourceNode, yfiles.graph.FreeNodePortLocationModel.NODE_LEFT_ANCHORED);
+								Source_Port = graphComponent.graph.addPort(edge.targetNode, yfiles.graph.FreeNodePortLocationModel.NODE_RIGHT_ANCHORED);
+							}
+							//set several ports on the first helper edge to guide the first part of the original edge
+							Array.from(new Array(201), (x, i) => {
+								style = getEdgeArcStyle(color, getArcHeight(helper_edge_First_Part), stroke, directed);
+								point_x = style.renderer.getPathGeometry(helper_edge_First_Part, style).getPath().getPoint(i/200).x-22
+								point_y = style.renderer.getPathGeometry(helper_edge_First_Part, style).getPath().getPoint(i/200).y-15//-(-15 / (1 +  Math.exp(-0.1 * (i - 100))))//-(Count_All-Count_A)*(0.08)*(220/i)
+								if (height_First_Part > 0){
+									graphComponent.graph.addBend(edge, new yfiles.geometry.Point(point_x+22, point_y+15));
+								}
+								if (height_First_Part < 0){
+									graphComponent.graph.addBend(edge, new yfiles.geometry.Point(point_x+22, -point_y+15));
+								}
+							});
+							//set several ports on the second helper edge to guide the second part of the original edge
+							Array.from(new Array(201), (x, i) => {
+								style = getEdgeArcStyle(color, getArcHeight(helper_edge_Second_part), stroke, directed);
+								point_x = style.renderer.getPathGeometry(helper_edge_Second_part, style).getPath().getPoint(i/200).x-22
+								point_y = style.renderer.getPathGeometry(helper_edge_Second_part, style).getPath().getPoint(i/200).y-15//-(-15 / (1 +  Math.exp(-0.1 * (i - 100))))
+								if (height_Second_Part > 0){
+									graphComponent.graph.addBend(edge, new yfiles.geometry.Point(point_x+22, point_y+15));
+								}
+								if (height_Second_Part < 0){
+									graphComponent.graph.addBend(edge, new yfiles.geometry.Point(point_x+22, -point_y+15));
+								}
+							});
+							//remove helper node (also removes helper edges)
+							graphComponent.graph.remove(helper_node);
+							graphComponent.graph.setStyle(edge, getEdgeBezierStyle(color, stroke, directed));
+							break;
+						}
+	
+					}
+					//if the edge is not marked as biarc then its drawn as stack edge
+					if (Source_Found === true && Target_Found === true && Is_Biarc === false) {
+						if (Temp_Position_A === "Up") {
+							height = getArcHeight(edge);
+							graphComponent.graph.setStyle(edge, getEdgeArcStyle(color, height+5, stroke, directed));
+						}
+						if (Temp_Position_A === "Down") {
+							height = -getArcHeight(edge);
+							graphComponent.graph.setStyle(edge, getEdgeArcStyle(color, height-5, stroke, directed));
+						}
+						break;
+					}
+					
+
+        		}
+    		}
 		}
 	}
 
@@ -1469,6 +1789,7 @@ addDefaultColor();*/
 		rearrangeEdgesForLinearLayout(object.vertex_order);
 		registerEdgesInPagesArray(object.assignments); // REGISTERING WHICH EDGES GO TO WHICH PAGES
 		registerEdgesDequeType(object.deq_edge_type);
+		registerBiarcsEdgePositions(object.Top, object.Bottom);
 
 		// LabelPlacing
 		const edgeSegmentLabelModel = new yfiles.graph.EdgeSegmentLabelModel()
@@ -1501,6 +1822,7 @@ addDefaultColor();*/
 		rearrangeEdgesForLinearLayout(object.vertex_order);
 		registerEdgesInPagesArray(object.assignments);
 		registerEdgesDequeType(object.deq_edge_type);
+		registerBiarcsEdgePositions(object.Top, object.Bottom);
 		// Since edges can be re-created above we need to reload the constraints and selected constraints and highlight edges
 		// interpret constraints
 		loadConstraintsFromJSON(object.constraints);
@@ -1661,6 +1983,7 @@ addDefaultColor();*/
 						"<option value='abovePage"+i+"'>above</option>"+
 						"<option value='belowPage"+i+"'>below</option>"+
 						"<option value='dequePage"+i+"'>deque</option>"+
+						"<option value='biarcPage"+i+"'>biarc</option>"+
 						"</select>"+
 						"<div class='picker' id='picker"+i+"'></div>" +
 						"</div>"
@@ -1674,6 +1997,7 @@ addDefaultColor();*/
 						"<option value='abovePage"+i+"'>above</option>"+
 						"<option value='belowPage"+i+"' selected='selected'>below</option>"+
 						"<option value='dequePage"+i+"'>deque</option>"+
+						"<option value='biarcPage"+i+"'>biarc</option>"+
 						"</select>"+
 						"<div class='picker' id='picker"+i+"'></div>" +
 						"</div>"

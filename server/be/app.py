@@ -113,6 +113,7 @@ class App:
                                                                 'STACK',
                                                                 'RIQUE',
                                                                 'DEQUE',
+                                                                'BIARC',
                                                                 'NONE'],
                                                           required=True),
                                     'constraint': fields.String(description='Additional constraints for the page',
@@ -522,6 +523,8 @@ class App:
             entity['satisfiable'] = result.satisfiable
             entity['assignments'] = result.page_assignments
             entity['deq_edge_type'] = result.deq_edge_type
+            entity['Top'] = result.Top
+            entity['Bottom'] = result.Bottom
             entity['vertex_order'] = result.vertex_order
             entity['rawSolverResult'] = result.solver_output
             entity['finished'] = datetime.datetime.now(datetime.timezone.utc).isoformat()

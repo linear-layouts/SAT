@@ -5,6 +5,7 @@ from flask_restplus import abort
 from numpy import ndarray
 from be.custom_types import Edge, PageAssignment, EdgeType, TypeEnum
 from be.utils import get_duplicates
+from be.Biarcs import static_encode_biarc_page
 from numba import jit
 
 def static_encode_vertex_order(precedes: ndarray) -> List[List[int]]:
@@ -851,6 +852,12 @@ class SatModel(object):
         # DEQUE: tail (0), head (1), tail to head (2) or head to tail (3)
         # self._deq_edge_type[p, type_num, e] <=> edge e is assigned as edge type for page p
         self._deq_edge_type = self._create_variables(page_number * len(TypeEnum) * m).reshape((page_number, len(TypeEnum), m))
+        # Biarcs ---------- Start
+        # self._Top[e, v, p] <=> Edge e is above vertex v in page p]
+        self._Top = self._create_variables(m * n * page_number).reshape((m, n, page_number))
+        # self._Bottom[e, v, p] <=> Edge e is below vertex v in page p]
+        self._Bottom = self._create_variables(m * n * page_number).reshape((m, n, page_number))
+        # Biarcs ---------- End
 
     def _create_variables(self, number: int = 1) -> ndarray:
         assert number >= 1, "cannot create less than 1 new variables"
@@ -914,6 +921,20 @@ class SatModel(object):
                     ret_val_type.append(EdgeType(edge=edge_id, edge_type=edge_type))
             ret_val_page.append(PageAssignment(edge=edge_id, page=page_id))
         return [ret_val_page, ret_val_type]
+    
+    def get_top_bottom_result(self) -> List[np.ndarray]:
+        """
+        Get the values of "Top" and "Bottom" from the result to transfer them to app so they can be used in front end, JS code.
+        :param result: the result dictionary from the Lingeling parsing
+        :return: a 3D list containing "Top" and "Bottom" numpy arrays that can later be split in solver.py
+        """
+        if not self.result or not np.size(self.result['Top']) or not np.size(self.result['Bottom']):
+            raise Exception("Error: result not found")
+
+        top_array = self.result['Top']
+        bottom_array = self.result['Bottom']
+
+        return [top_array.tolist(), bottom_array.tolist()]
 
     def add_page_constraints(self):
         """
@@ -927,6 +948,8 @@ class SatModel(object):
         edge_to_page = self._edge_to_page
         precedes = self._precedes
         deq_edge_type = self._deq_edge_type
+        Top = self._Top
+        Bottom = self._Bottom
         for page in self.pages:
             p = self._page_id_to_idx[page['id']]
             self._add_clauses(self._add_additional_page_constraint(edge_to_page, edges, page.get('constraint', "NONE"), p))
@@ -952,6 +975,8 @@ class SatModel(object):
                 #self._add_clauses(static_encode_deque_types(deq_edge_type, p, False, True))
                 # adds page clauses
                 #self._add_clauses(static_encode_deque_page(precedes, edge_to_page, edges, p, deq_edge_type))
+            elif page['type'] == 'BIARC':
+                self._add_clauses(static_encode_biarc_page(precedes, edge_to_page, Top , Bottom, edges, p))
             elif page['type'] == 'NONE':
                 continue
             else:
@@ -1229,6 +1254,22 @@ class SatModel(object):
                                             self._edge_to_page) + np.size(
                                             self._deq_edge_type)].reshape(
                 self._deq_edge_type.shape) > 0
+            result['Top'] = vars[
+                                        np.size(self._precedes) + 
+                                        np.size(self._edge_to_page) +
+                                        np.size(self._deq_edge_type):np.size(self._precedes) + 
+                                        np.size(self._edge_to_page) + 
+                                        np.size(self._deq_edge_type) +
+                                        np.size(self._Top)].reshape(self._Top.shape) > 0 
+            result['Bottom'] = vars[
+                                        np.size(self._precedes) + 
+                                        np.size(self._edge_to_page) +
+                                        np.size(self._deq_edge_type) +
+                                        np.size(self._Top):np.size(self._precedes) + 
+                                        np.size(self._edge_to_page) + 
+                                        np.size(self._deq_edge_type) +
+                                        np.size(self._Top) +
+                                        np.size(self._Bottom)].reshape(self._Bottom.shape) > 0
             pass
 
         else:
