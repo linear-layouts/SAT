@@ -1015,42 +1015,42 @@ require([
 	 *  For the partial order constraint this function fills the dialog that shows up
 	 */
 
-	function fillOrderDialog() {
-		let miniGraphComponent = new yfiles.view.GraphComponent("#miniGraphComponent");
-		miniGraphComponent.inputMode = new yfiles.input.GraphViewerInputMode()
+	let miniGraphComponent = null; // Declare miniGraphComponent globally
 
+	function fillOrderDialog() {
+		// Check if miniGraphComponent is already initialized
+		if (!miniGraphComponent) {
+			miniGraphComponent = new yfiles.view.GraphComponent("#miniGraphComponent");
+			miniGraphComponent.inputMode = new yfiles.input.GraphViewerInputMode();
+	
+			miniGraphComponent.graph.nodeDefaults.style = new yfiles.styles.ShapeNodeStyle({
+				fill: '#FFA500',
+				shape: 'ellipse',
+				stroke: 'white',
+			});
+		}
+	
 		$("#orderingDialog").dialog({
 			width: 600,
 			resizable: false,
 			autoOpen: false,
 			beforeClose: function (event, ui) {
-				miniGraphComponent.graph.clear()
+				miniGraphComponent.graph.clear();
 			}
-		})
-
-		miniGraphComponent.graph.nodeDefaults.style = new yfiles.styles.ShapeNodeStyle({
-			fill: '#FFA500',
-			shape: 'ellipse',
-			stroke: 'white',
-		})
-
-		var selNodes = graphComponent.selection.selectedNodes.toArray()
-		var position = 0
-
+		});
+	
+		var selNodes = graphComponent.selection.selectedNodes.toArray();
+		var position = 0;
+	
 		selNodes.forEach(function (n) {
-			var newNode = miniGraphComponent.graph.createNodeAt(new yfiles.geometry.Point(position, 0))
-			miniGraphComponent.graph.addLabel(newNode, n.labels.toArray()[0].text)
-			position = position + 50
-		})
-
-
-		miniGraphComponent.fitGraphBounds()
-
-
-		$("#orderingDialog").dialog("open")
-
-
-
+			var newNode = miniGraphComponent.graph.createNodeAt(new yfiles.geometry.Point(position, 0));
+			miniGraphComponent.graph.addLabel(newNode, n.labels.toArray()[0].text);
+			position = position + 50;
+		});
+	
+		miniGraphComponent.fitGraphBounds();
+	
+		$("#orderingDialog").dialog("open");
 	}
 
 	/*

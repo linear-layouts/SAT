@@ -1143,10 +1143,11 @@ addDefaultColor();*/
 			graphComponent.graph.setStyle(edge, getEdgeArcStyle(color, height, stroke, directed));
 		} else if (type === "QUEUE_H_T") {
 			if (edge.bends.toArray().length == 0) {
-				let helper_distance = - (edge.sourceNode.layout.x / 200) * 20 - 20;
+				let max_distance = nextNodex + (nextNodex / 200) * 20;
+				let helper_distance = max_distance - (edge.targetNode.layout.x / 200) * 20;
 				const helper_node = graphComponent.graph.createNodeAt(new yfiles.geometry.Point(helper_distance, 0));
-				const above_port = graphComponent.graph.addPort(edge.sourceNode, yfiles.graph.FreeNodePortLocationModel.NODE_TOP_LEFT_ANCHORED);
-				const below_port = graphComponent.graph.addPort(edge.targetNode, yfiles.graph.FreeNodePortLocationModel.NODE_TOP_RIGHT_ANCHORED);
+				const above_port = graphComponent.graph.addPort(edge.sourceNode, yfiles.graph.FreeNodePortLocationModel.NODE_TOP_RIGHT_ANCHORED);
+				const below_port = graphComponent.graph.addPort(edge.targetNode, yfiles.graph.FreeNodePortLocationModel.NODE_TOP_LEFT_ANCHORED);
 				const helper_edge_above = graphComponent.graph.createEdge(edge.sourceNode, helper_node);
 				const helper_edge_below = graphComponent.graph.createEdge(helper_node, edge.targetNode);
 				graphComponent.graph.setEdgePorts(helper_edge_above, above_port, helper_node.ports.toArray()[0]);
@@ -1156,21 +1157,21 @@ addDefaultColor();*/
 					style = getEdgeArcStyle(color, getArcHeight(helper_edge_above), stroke, directed);
 					point_x = style.renderer.getPathGeometry(helper_edge_above, style).getPath().getPoint(i/100).x
 					point_y = style.renderer.getPathGeometry(helper_edge_above, style).getPath().getPoint(i/100).y
-					graphComponent.graph.addBend(edge, new yfiles.geometry.Point(point_x, -point_y));
+					graphComponent.graph.addBend(edge, new yfiles.geometry.Point(point_x, point_y));
 				});
 				Array.from(new Array(101), (x, i) => {
 					style = getEdgeArcStyle(color, getArcHeight(helper_edge_below), stroke, directed);
 					point_x = style.renderer.getPathGeometry(helper_edge_below, style).getPath().getPoint(i/100).x
 					point_y = style.renderer.getPathGeometry(helper_edge_below, style).getPath().getPoint(i/100).y
-					graphComponent.graph.addBend(edge, new yfiles.geometry.Point(point_x, -point_y));
+					graphComponent.graph.addBend(edge, new yfiles.geometry.Point(point_x, point_y));
 				});
 				graphComponent.graph.remove(helper_node);
 			}
 			graphComponent.graph.setStyle(edge, getEdgeBezierStyle(color, stroke, directed));
 		} else if (type === "QUEUE_T_H") {
 			if (edge.bends.toArray().length == 0) {
-				let max_distance = nextNodex + (nextNodex / 200) * 20;
-				let helper_distance = max_distance - (edge.sourceNode.layout.x / 200) * 20;
+				let max_distance = nextNodex + (nextNodex / 100) * 10;
+				let helper_distance = max_distance - (edge.sourceNode.layout.x / 100) * 10;
 				const helper_node = graphComponent.graph.createNodeAt(new yfiles.geometry.Point(helper_distance, 0));
 				const below_port = graphComponent.graph.addPort(edge.sourceNode, yfiles.graph.FreeNodePortLocationModel.NODE_TOP_LEFT_ANCHORED);
 				const above_port = graphComponent.graph.addPort(edge.targetNode, yfiles.graph.FreeNodePortLocationModel.NODE_TOP_RIGHT_ANCHORED);
