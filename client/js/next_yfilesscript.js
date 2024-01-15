@@ -406,7 +406,8 @@ addDefaultColor();*/
 	}
 
 	const CorrectedMyResults = { 'Position': [] };
-	
+	const Biarc_Edge_After_Rearangement = [];
+
 	function registerBiarcsEdgePositions(ABOVE, BELOW) {
 		respondedObject.vertex_order.forEach(function(node_tag) {
 			let My_Node = getNodeByTag(node_tag);
@@ -433,6 +434,9 @@ addDefaultColor();*/
 		}
 		const ABOVE_size = [ABOVE.length, ABOVE[0].length, ABOVE[0][0].length];
 		const [m, n, p] = ABOVE_size;
+		const Biarc_Node_Before_Rearangement = [];
+		const Biarc_Node_After_Rearangement = [];
+		let Temp_Vertex_Position = null;
 		const MyResults = { 'Position': Array.from({ length: m }, () => Array.from({ length: n }, () => Array(p).fill(null))) };
 		const RearrangedMyResults = { 'Position': Array.from({ length: m }, () => Array.from({ length: n }, () => Array(p).fill(null))) };
 		//const CorrectedMyResults = { 'Position': Array.from({ length: m }, () => Array.from({ length: n }, () => Array(p).fill(null))) };
@@ -456,16 +460,46 @@ addDefaultColor();*/
         		}
     		}
 		}
+		//Creating sorted array of the verteces (Prevents error when the number of verteces is lower than the maximum index of the verteces)
+		i=0;
+		respondedObject.vertex_order.forEach(function(node_tag) {
+			let node = getNodeByTag(node_tag);
+			Biarc_Node_Before_Rearangement[i]=Number(node);
+			//console.error(Number(node));
+			i++;
+		})
+		Biarc_Node_Before_Rearangement.sort((a, b) => a - b);
+		//console.error("Sorted Array:", Biarc_Node_Before_Rearangement);
+		for (let z = 0; z < n; z++) {
+			Biarc_Node_After_Rearangement[z] = Biarc_Node_Before_Rearangement[z];
+		}
+		//console.error("Sorted Array:", Biarc_Node_After_Rearangement);
+		i=0;
+		let edges = graphComponent.graph.edges.toArray();
+		edges.forEach(function(e) {
+			Biarc_Edge_After_Rearangement[i]=parseInt(e.toString(), 10);
+			//console.error(parseInt(e.toString(), 10));
+			i++;
+		})
+		Biarc_Edge_After_Rearangement.sort((a, b) => a - b);
+		//console.error(Biarc_Edge_After_Rearangement)
 		//Swapping Rows to much order of nodes.
     	for (let i = 0; i < m; i++) {
 			let j=0;
         	respondedObject.vertex_order.forEach(function(node_tag) {
 				let node = getNodeByTag(node_tag);
-				console.error(j.toString() + "this is vetrex" + node.toString())
-            	RearrangedMyResults['Position'][i][j] = MyResults['Position'][i][node];
+				for (let z = 0; z < n; z++) {
+					if (Biarc_Node_After_Rearangement[z] == Number(node)){
+						Temp_Vertex_Position = z;
+					}
+				}
+				//console.error(j.toString() + "this is vetrex" + node.toString())
+            	RearrangedMyResults['Position'][i][j] = MyResults['Position'][i][Temp_Vertex_Position];
 				j++;
 			})
     	}
+		//console.error(MyResults['Position'])
+		//console.error(RearrangedMyResults['Position'])
 		for (let i = 0; i < m; i++) {
     		for (let j = 0; j < n; j++) {
         		for (let z = 0; z < p; z++) {
@@ -492,62 +526,62 @@ addDefaultColor();*/
             		if (nextPos !== secNextPos && j === n - 3 && (secNextPos === "Up" || secNextPos === "Down") && (nextPos === "Up" || nextPos === "Down") && (pos === nextPos)) {
 						CorrectedMyResults['Position'][i][j + 2][z] = nextPos;
 						// ....U U D ---> ...U U U
-						console.error("this is a test"+i.toString()+j.toString()+z.toString())
+						//console.error("this is a test"+i.toString()+j.toString()+z.toString())
 					}
 		
 					if (nextPos !== secNextPos && j === n - 3 && (secNextPos === "Up" || secNextPos === "Down") && (nextPos === "Up" || nextPos === "Down") && (pos === "N/A")) {
 						CorrectedMyResults['Position'][i][j + 2][z] = nextPos;
 						// ....N/A U D ---> ...N/A U U
-						console.error("this is a test_important"+i.toString()+j.toString()+z.toString())
+						//console.error("this is a test_important"+i.toString()+j.toString()+z.toString())
 					}
 		
 					if (pos !== nextPos && (pos === "Up" || pos === "Down") && (nextPos === "Up" || nextPos === "Down")) {
 						if (j === 0 && secNextPos === nextPos) {
 							CorrectedMyResults['Position'][i][j][z] = nextPos;
 							// D U U.... --- >U U U ....
-							console.error("this is a test"+i.toString()+j.toString()+z.toString())
+							//console.error("this is a test"+i.toString()+j.toString()+z.toString())
 						}
 
 						if (j === 0 && secNextPos === "N/A") {
 							CorrectedMyResults['Position'][i][j][z] = nextPos;
 							// D U N/A.... --- >U U N/A ....
-							console.error("this is a test_LALALA"+i.toString()+j.toString()+z.toString())
+							//console.error("this is a test_LALALA"+i.toString()+j.toString()+z.toString())
 						}
 		
 						if (prevPos !== pos && nextPos === secNextPos && prevPos === "N/A") {
 							CorrectedMyResults['Position'][i][j][z] = nextPos;
 							// N/A U D D ---> N/A D D D
-							console.error("this is a test"+i.toString()+j.toString()+z.toString())
+							//console.error("this is a test"+i.toString()+j.toString()+z.toString())
 						}
 		
 						if (prevPos !== pos && nextPos !== secNextPos && prevPos === "N/A") {
 							CorrectedMyResults['Position'][i][j][z] = nextPos;
 							// N/A D U D D D  ---> N/A U U D D D
-							console.error("this is a test"+i.toString()+j.toString()+z.toString())
+							//console.error("this is a test"+i.toString()+j.toString()+z.toString())
 						}
 		
 						if (prevPos === pos && nextPos !== secNextPos && secNextPos === "N/A") {
 							CorrectedMyResults['Position'][i][j + 1][z] = pos;
 							// D D U N/A ---> D D D N/A
-							console.error("this is a test"+i.toString()+j.toString()+z.toString())
+							//console.error("this is a test"+i.toString()+j.toString()+z.toString())
 						}
 		
 						if (prevPos !== pos && nextPos !== secNextPos && secNextPos === "N/A" && (prevPos === "Up" || prevPos === "Down")) {
 							CorrectedMyResults['Position'][i][j + 1][z] = pos;
 							// D D D U D N/A  ---> D D D U U N/A
-							console.error("this is a test"+i.toString()+j.toString()+z.toString())
+							//console.error("this is a test"+i.toString()+j.toString()+z.toString())
 						}
 
 						if (j === 1 && prevPos !== pos && nextPos === secNextPos && prevPos == nextPos && (secNextPos === "Up" || secNextPos === "Down") && (prevPos === "Up" || prevPos === "Down")) {
 							CorrectedMyResults['Position'][i][j-1][z] = pos;
 							// D U D D D N/A  ---> U U D D D N/A
-							console.error("this is a testNEW"+i.toString()+j.toString()+z.toString())
+							//console.error("this is a testNEW"+i.toString()+j.toString()+z.toString())
 						}
 		
 						if (prevPos === "N/A" && secNextPos === "N/A") {
 							CorrectedMyResults['Position'][i][j][z] = nextPos;
 							// N/A U D N/A ---> N/A D D N/A 
-							console.error("this is a test"+i.toString()+j.toString()+z.toString())
+							//console.error("this is a test"+i.toString()+j.toString()+z.toString())
 						}
 					}
 				}
@@ -1199,9 +1233,14 @@ addDefaultColor();*/
 	}
 
 	function setEdgeArcStyleBiarcPage(edge, directed, color, placing, stroke){
-		console.error(edge)
-		console.error(edge.toString())
 		let Edge_As_Integer = parseInt(edge.toString(), 10);
+		let Temp_Edge_Position=null;
+		for (let i = 0; i < Biarc_Edge_After_Rearangement.length; i++) {
+			if (Biarc_Edge_After_Rearangement[i] == Edge_As_Integer) {
+				Temp_Edge_Position = i;
+			}
+			
+		}
 		const  CorrectedMyResults_size= [CorrectedMyResults['Position'].length, CorrectedMyResults['Position'][0].length, CorrectedMyResults['Position'][0][0].length];
 		const [m, n, p] = CorrectedMyResults_size;
 		let Source_Node = null;
@@ -1225,7 +1264,9 @@ addDefaultColor();*/
 		let Count_B;
 		let Count_All;
 		graphComponent.graph.clearBends(edge);
-		for (let i = Edge_As_Integer; i <Edge_As_Integer+1; i++) {
+		for (let i = Temp_Edge_Position; i <Temp_Edge_Position+1; i++) {
+			//console.error(Edge_As_Integer)
+			//console.error(Temp_Edge_Position)
 			Source_Found = false;
 			Target_Found = false;
 			Is_Biarc = false;
@@ -1241,7 +1282,7 @@ addDefaultColor();*/
 					//Simillar the Last 'Up' or 'Down' before a 'N/A' is the other endpoint
 					//First the source of the edge is found
             		if (CorrectedMyResults['Position'][i][j][z] !== "N/A" && Source_Found !== true) {
-						const Source_Node = respondedObject.vertex_order[j];
+						Source_Node = respondedObject.vertex_order[j];
 						Source_Found = true;
 						Temp_Position_A = CorrectedMyResults['Position'][i][j][z];
 					}
@@ -1269,18 +1310,17 @@ addDefaultColor();*/
 						//Count_A is how many continious 'Up' or 'Down' we have before the switch
 						if (CorrectedMyResults['Position'][i][j][z] !== "N/A" && CorrectedMyResults['Position'][i][j][z] === CorrectedMyResults['Position'][i][j+1][z] && CorrectedMyResults['Position'][i][j][z] === Temp_Position_A) {
 							Count_A = Count_A + 1;
-							console.error(Count_A+ " A at "+CorrectedMyResults['Position'][i][j][z]);
 						}
 						//Count_B is how many continious 'Up' or 'Down' we have after the switch
 						if (CorrectedMyResults['Position'][i][j][z] !== "N/A" && CorrectedMyResults['Position'][i][j][z] === CorrectedMyResults['Position'][i][j+1][z] && CorrectedMyResults['Position'][i][j][z] !== Temp_Position_A) {
 							Count_B = Count_B + 1;
-							console.error(Count_B+ " B at "+CorrectedMyResults['Position'][i][j][z]);
 						}
 					}
 					if (CorrectedMyResults['Position'][i][j][z] !== "N/A") {
 						Count_All = Count_All + 1;
 					}
 					//if both endpoints are found and edge is marked as biarc then it is represended
+					//console.error(CorrectedMyResults['Position'])
 					if (Source_Found === true && Target_Found === true && Is_Biarc === true) {
 						if (edge.bends.toArray().length == 0) {
 							//console.error("source dist : "+edge.sourceNode.layout.x +" and target dist : "+ edge.targetNode.layout.x);
@@ -1359,7 +1399,7 @@ addDefaultColor();*/
 						}
 						break;
 					}
-					
+					graphComponent.graph.setStyle(edge, getEdgeBezierStyle(color, stroke, directed));
 
         		}
     		}
@@ -1456,6 +1496,21 @@ addDefaultColor();*/
 
 	// Returns edge style for deque edges
 	function getEdgeBezierStyle(color, stroke, directed) {
+		const targetArrowStyle = new yfiles.styles.Arrow({
+            type: yfiles.styles.ArrowType.DEFAULT,
+			//fill and colour the arrowhead the same colour as the edges on the page.
+			//For Edges in Biarc, Deque and Rique
+            fill: color,
+			stroke: color
+          })
+		if(directed) {
+			
+			return new yfiles.styles.BezierEdgeStyle({
+				color: color,
+				stroke: stroke,
+				targetArrow: targetArrowStyle
+			});
+		}
 		return new yfiles.styles.BezierEdgeStyle({
 			color: color,
 			stroke: stroke
