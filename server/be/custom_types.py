@@ -31,6 +31,9 @@ class SolverResult(NamedTuple):
     page_assignments: List[PageAssignment]
     vertex_order: List[str]
     deq_edge_type: List[EdgeType]
+    Top: List[List[List[str]]]
+    Bottom: List[List[List[str]]]
+    List_of_Biarc_Pages: List[str]
     solver_output: str
     entity_id: str
 

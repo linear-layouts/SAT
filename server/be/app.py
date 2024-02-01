@@ -113,6 +113,7 @@ class App:
                                                                 'STACK',
                                                                 'RIQUE',
                                                                 'DEQUE',
+                                                                'BIARC',
                                                                 'NONE'],
                                                           required=True),
                                     'constraint': fields.String(description='Additional constraints for the page',
@@ -234,7 +235,11 @@ class App:
                                                                  "NODES_SET_NOT_LAST",
                                                                  "EDGES_SAME_PAGES_INCIDENT_NODE",
                                                                  "EDGES_DIFFERENT_PAGES_INCIDENT_NODE",
-                                                                 "EDGES_ON_PAGES_INCIDENT_NODE"
+                                                                 "EDGES_ON_PAGES_INCIDENT_NODE",
+                                                                 "EDGES_SET_STACK_ABOVE",
+                                                                 "EDGES_SET_STACK_BELOW",
+                                                                 "EDGES_SET_BIARC",
+                                                                 "EDGES_SET_STACK"
                                                              ],
                                                              example="NODES_PREDECESSOR",
                                                              required=True),
@@ -522,6 +527,9 @@ class App:
             entity['satisfiable'] = result.satisfiable
             entity['assignments'] = result.page_assignments
             entity['deq_edge_type'] = result.deq_edge_type
+            entity['Top'] = result.Top
+            entity['Bottom'] = result.Bottom
+            entity['List_of_Biarc_Pages'] = result.List_of_Biarc_Pages
             entity['vertex_order'] = result.vertex_order
             entity['rawSolverResult'] = result.solver_output
             entity['finished'] = datetime.datetime.now(datetime.timezone.utc).isoformat()

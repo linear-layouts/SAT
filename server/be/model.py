@@ -5,6 +5,8 @@ from flask_restplus import abort
 from numpy import ndarray
 from be.custom_types import Edge, PageAssignment, EdgeType, TypeEnum
 from be.utils import get_duplicates
+from be.Biarcs import static_encode_biarc_page
+from be.Biarcs import Get_Biarc_Pages
 from numba import jit
 
 def static_encode_vertex_order(precedes: ndarray) -> List[List[int]]:
@@ -851,6 +853,14 @@ class SatModel(object):
         # DEQUE: tail (0), head (1), tail to head (2) or head to tail (3)
         # self._deq_edge_type[p, type_num, e] <=> edge e is assigned as edge type for page p
         self._deq_edge_type = self._create_variables(page_number * len(TypeEnum) * m).reshape((page_number, len(TypeEnum), m))
+        # Biarcs ---------- Start
+        # self._Top[e, v, p] <=> Edge e is above vertex v in page p]
+        self._Top = self._create_variables(m * n * page_number).reshape((m, n, page_number))
+        # self._Bottom[e, v, p] <=> Edge e is below vertex v in page p]
+        self._Bottom = self._create_variables(m * n * page_number).reshape((m, n, page_number))
+        
+        self._List_of_Biarc_Pages = self._create_variables(page_number).reshape((page_number))
+        # Biarcs ---------- End
 
     def _create_variables(self, number: int = 1) -> ndarray:
         assert number >= 1, "cannot create less than 1 new variables"
@@ -914,6 +924,21 @@ class SatModel(object):
                     ret_val_type.append(EdgeType(edge=edge_id, edge_type=edge_type))
             ret_val_page.append(PageAssignment(edge=edge_id, page=page_id))
         return [ret_val_page, ret_val_type]
+    
+    def get_top_bottom_result(self) -> List[np.ndarray]:
+        """
+        Get the values of "Top" and "Bottom" from the result to transfer them to app so they can be used in front end, JS code.
+        :param result: the result dictionary from the Lingeling parsing
+        :return: a 3D list containing "Top" and "Bottom" numpy arrays that can later be split in solver.py
+        """
+        if not self.result or not np.size(self.result['Top']) or not np.size(self.result['Bottom']):
+            raise Exception("Error: result not found")
+
+        top_array = self.result['Top']
+        bottom_array = self.result['Bottom']
+        Custom_List_of_Biarc_Pages = self.result['List_of_Biarc_Pages']
+
+        return [top_array.tolist(), bottom_array.tolist(), Custom_List_of_Biarc_Pages.tolist()]
 
     def add_page_constraints(self):
         """
@@ -927,6 +952,9 @@ class SatModel(object):
         edge_to_page = self._edge_to_page
         precedes = self._precedes
         deq_edge_type = self._deq_edge_type
+        Top = self._Top
+        Bottom = self._Bottom
+        List_of_Biarc_Pages = self._List_of_Biarc_Pages
         for page in self.pages:
             p = self._page_id_to_idx[page['id']]
             self._add_clauses(self._add_additional_page_constraint(edge_to_page, edges, page.get('constraint', "NONE"), p))
@@ -952,6 +980,8 @@ class SatModel(object):
                 #self._add_clauses(static_encode_deque_types(deq_edge_type, p, False, True))
                 # adds page clauses
                 #self._add_clauses(static_encode_deque_page(precedes, edge_to_page, edges, p, deq_edge_type))
+            elif page['type'] == 'BIARC':
+                self._add_clauses(static_encode_biarc_page(precedes, edge_to_page, Top, Bottom, List_of_Biarc_Pages, edges, p))
             elif page['type'] == 'NONE':
                 continue
             else:
@@ -999,6 +1029,126 @@ class SatModel(object):
                     for p in constraint['modifier']:
                         clause.append(self._edge_to_page[self._page_id_to_idx[p], self._edge_id_to_idx[e]])
                     clauses.append(clause)
+            elif constraint['type'] == 'EDGES_SET_STACK_ABOVE':
+                if not modifier:
+                    abort(400, "EDGES_SET_STACK_ABOVE constraints need the modifier set")
+                for e in arguments:
+                    for page in self.pages:
+                        p = self._page_id_to_idx[page['id']]
+                        #Find the endpoints of a given edge
+                        Find_Edge = lambda e1: self._edge_id_to_idx[e] == self._edge_id_to_idx[e1.id]
+                        Filtered_Edge = filter(Find_Edge, self.edges)
+                        for e1 in Filtered_Edge:
+                            u = self._node_id_to_idx[e1.source]
+                            v = self._node_id_to_idx[e1.target]
+                        for w in range(self._precedes.shape[0]):
+                            if ( w !=u and w != v):
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[u,w], -self._precedes[w,v], self._Top[self._edge_id_to_idx[e],u,p]])
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[u,w], -self._precedes[w,v], self._Top[self._edge_id_to_idx[e],v,p]])
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[u,w], -self._precedes[w,v], self._Top[self._edge_id_to_idx[e],w,p]])
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[v,w], -self._precedes[w,u], self._Top[self._edge_id_to_idx[e],u,p]])
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[v,w], -self._precedes[w,u], self._Top[self._edge_id_to_idx[e],v,p]])
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[v,w], -self._precedes[w,u], self._Top[self._edge_id_to_idx[e],w,p]])
+            elif constraint['type'] == 'EDGES_SET_STACK_BELOW':
+                if not modifier:
+                    abort(400, "EDGES_SET_STACK_BELOW constraints need the modifier set")
+                for e in arguments:
+                    for page in self.pages:
+                        p = self._page_id_to_idx[page['id']]
+                        #Find the endpoints of a given edge
+                        Find_Edge = lambda e1: self._edge_id_to_idx[e] == self._edge_id_to_idx[e1.id]
+                        Filtered_Edge = filter(Find_Edge, self.edges)
+                        for e1 in Filtered_Edge:
+                            u = self._node_id_to_idx[e1.source]
+                            v = self._node_id_to_idx[e1.target]
+                        for w in range(self._precedes.shape[0]):
+                            if ( w !=u and w != v):
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[u,w], -self._precedes[w,v], self._Bottom[self._edge_id_to_idx[e],u,p]])
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[u,w], -self._precedes[w,v], self._Bottom[self._edge_id_to_idx[e],v,p]])
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[u,w], -self._precedes[w,v], self._Bottom[self._edge_id_to_idx[e],w,p]])
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[v,w], -self._precedes[w,u], self._Bottom[self._edge_id_to_idx[e],u,p]])
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[v,w], -self._precedes[w,u], self._Bottom[self._edge_id_to_idx[e],v,p]])
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[v,w], -self._precedes[w,u], self._Bottom[self._edge_id_to_idx[e],w,p]])
+            elif constraint['type'] == 'EDGES_SET_BIARC':
+                if not modifier:
+                    abort(400, "EDGES_SET_BIARC constraints need the modifier set")
+                for e in arguments:
+                    for page in self.pages:
+                        p = self._page_id_to_idx[page['id']]
+                        clause1 = []
+                        clause1_1 = []
+                        clause2 = []
+                        clause2_1 = []
+                        clause3 = []
+                        clause3_1 = []
+                        clause4 = []
+                        clause4_1 = []
+                        #Find the endpoints of a given edge
+                        Find_Edge = lambda e1: self._edge_id_to_idx[e] == self._edge_id_to_idx[e1.id]
+                        Filtered_Edge = filter(Find_Edge, self.edges)
+                        for e1 in Filtered_Edge:
+                            u = self._node_id_to_idx[e1.source]
+                            v = self._node_id_to_idx[e1.target]
+                        for w in range(self._precedes.shape[0]):
+                            if ( w !=u and w != v):
+                                clause1.extend([ self._Top[self._edge_id_to_idx[e],w,p]])
+                                clause2.extend([ self._Bottom[self._edge_id_to_idx[e],w,p]])
+                                clause3.extend([ self._Top[self._edge_id_to_idx[e],w,p]])
+                                clause4.extend([ self._Bottom[self._edge_id_to_idx[e],w,p]])
+                                clause1_1.extend([ self._Top[self._edge_id_to_idx[e],w,p]])
+                                clause2_1.extend([ self._Bottom[self._edge_id_to_idx[e],w,p]])
+                                clause3_1.extend([ self._Top[self._edge_id_to_idx[e],w,p]])
+                                clause4_1.extend([ self._Bottom[self._edge_id_to_idx[e],w,p]])
+
+                        clause1.extend([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[u, v]])
+                        clause2.extend([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[u, v]])
+                        clause1_1.extend([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[v, u]])
+                        clause2_1.extend([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[v, u]])
+                        clause3.extend([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[u, v]])
+                        clause4.extend([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[u, v]])
+                        clause3_1.extend([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[v, u]])
+                        clause4_1.extend([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[v, u]])
+                        clauses.append(clause1)
+                        clauses.append(clause2)
+                        clauses.append(clause1_1)
+                        clauses.append(clause2_1)
+                        clauses.append(clause3)
+                        clauses.append(clause4)
+                        clauses.append(clause3_1)
+                        clauses.append(clause4_1)    
+            elif constraint['type'] == 'EDGES_SET_STACK':
+                if not modifier:
+                    abort(400, "EDGES_SET_STACK constraints need the modifier set")
+                for e in arguments:
+                    for page in self.pages:
+                        p = self._page_id_to_idx[page['id']]
+                        #Find the endpoints of a given edge
+                        Find_Edge = lambda e1: self._edge_id_to_idx[e] == self._edge_id_to_idx[e1.id]
+                        Filtered_Edge = filter(Find_Edge, self.edges)
+                        for e1 in Filtered_Edge:
+                            u = self._node_id_to_idx[e1.source]
+                            v = self._node_id_to_idx[e1.target]
+                        for w in range(self._precedes.shape[0]):
+                            if ( w !=u and w != v):
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[u,w], -self._precedes[w,v], self._Top[self._edge_id_to_idx[e],u,p], self._Bottom[self._edge_id_to_idx[e],u,p]])
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[u,w], -self._precedes[w,v], self._Top[self._edge_id_to_idx[e],u,p], self._Bottom[self._edge_id_to_idx[e],v,p]])
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[u,w], -self._precedes[w,v], self._Top[self._edge_id_to_idx[e],u,p], self._Bottom[self._edge_id_to_idx[e],w,p]])
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[u,w], -self._precedes[w,v], self._Top[self._edge_id_to_idx[e],v,p], self._Bottom[self._edge_id_to_idx[e],u,p]])
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[u,w], -self._precedes[w,v], self._Top[self._edge_id_to_idx[e],v,p], self._Bottom[self._edge_id_to_idx[e],v,p]])
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[u,w], -self._precedes[w,v], self._Top[self._edge_id_to_idx[e],v,p], self._Bottom[self._edge_id_to_idx[e],w,p]])
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[u,w], -self._precedes[w,v], self._Top[self._edge_id_to_idx[e],w,p], self._Bottom[self._edge_id_to_idx[e],u,p]])
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[u,w], -self._precedes[w,v], self._Top[self._edge_id_to_idx[e],w,p], self._Bottom[self._edge_id_to_idx[e],v,p]])
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[u,w], -self._precedes[w,v], self._Top[self._edge_id_to_idx[e],w,p], self._Bottom[self._edge_id_to_idx[e],w,p]])
+
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[v,w], -self._precedes[w,u], self._Top[self._edge_id_to_idx[e],u,p], self._Bottom[self._edge_id_to_idx[e],u,p]]) 
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[v,w], -self._precedes[w,u], self._Top[self._edge_id_to_idx[e],u,p], self._Bottom[self._edge_id_to_idx[e],v,p]])
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[v,w], -self._precedes[w,u], self._Top[self._edge_id_to_idx[e],u,p], self._Bottom[self._edge_id_to_idx[e],w,p]])
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[v,w], -self._precedes[w,u], self._Top[self._edge_id_to_idx[e],v,p], self._Bottom[self._edge_id_to_idx[e],u,p]])
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[v,w], -self._precedes[w,u], self._Top[self._edge_id_to_idx[e],v,p], self._Bottom[self._edge_id_to_idx[e],v,p]])
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[v,w], -self._precedes[w,u], self._Top[self._edge_id_to_idx[e],v,p], self._Bottom[self._edge_id_to_idx[e],w,p]])
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[v,w], -self._precedes[w,u], self._Top[self._edge_id_to_idx[e],w,p], self._Bottom[self._edge_id_to_idx[e],u,p]])
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[v,w], -self._precedes[w,u], self._Top[self._edge_id_to_idx[e],w,p], self._Bottom[self._edge_id_to_idx[e],v,p]])
+                                clauses.append([-self._edge_to_page[p,self._edge_id_to_idx[e]], -self._precedes[v,w], -self._precedes[w,u], self._Top[self._edge_id_to_idx[e],w,p], self._Bottom[self._edge_id_to_idx[e],w,p]])
 
             elif constraint['type'] == 'EDGES_SAME_PAGES_INCIDENT_NODE':
                 node_tag = arguments[0]
@@ -1229,13 +1379,39 @@ class SatModel(object):
                                             self._edge_to_page) + np.size(
                                             self._deq_edge_type)].reshape(
                 self._deq_edge_type.shape) > 0
+            result['Top'] = vars[
+                                        np.size(self._precedes) + 
+                                        np.size(self._edge_to_page) +
+                                        np.size(self._deq_edge_type):np.size(self._precedes) + 
+                                        np.size(self._edge_to_page) + 
+                                        np.size(self._deq_edge_type) +
+                                        np.size(self._Top)].reshape(self._Top.shape) > 0 
+            result['Bottom'] = vars[
+                                        np.size(self._precedes) + 
+                                        np.size(self._edge_to_page) +
+                                        np.size(self._deq_edge_type) +
+                                        np.size(self._Top):np.size(self._precedes) + 
+                                        np.size(self._edge_to_page) + 
+                                        np.size(self._deq_edge_type) +
+                                        np.size(self._Top) +
+                                        np.size(self._Bottom)].reshape(self._Bottom.shape) > 0
+            result['List_of_Biarc_Pages'] = vars[
+                                        np.size(self._precedes) + 
+                                        np.size(self._edge_to_page) +
+                                        np.size(self._deq_edge_type) +
+                                        np.size(self._Top) +
+                                        np.size(self._Bottom):np.size(self._precedes) + 
+                                        np.size(self._edge_to_page) + 
+                                        np.size(self._deq_edge_type) +
+                                        np.size(self._Top) +
+                                        np.size(self._Bottom) +
+                                        np.size(self._List_of_Biarc_Pages)].reshape(self._List_of_Biarc_Pages.shape) > 0
             pass
 
         else:
             result['satisfiable'] = False
 
         self.result = result
-
         return result
 
     def _add_additional_page_constraint(self, edge_to_page: ndarray, edges: ndarray, constraint: str, p: int):

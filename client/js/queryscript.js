@@ -15,6 +15,7 @@ function fillPages() {
 					'<option value="QUEUE">queue</option>'+
 					'<option value="RIQUE">rique</option>'+
 					'<option value="DEQUE">deque</option>'+
+					'<option value="BIARC">biarc</option>'+
 					//'<option value="MONQUE">monque</option>'+
 					'<option value="NONE">undefined</option>' +
 					'</select> <select id="layoutP'+j+'" name="layoutP'+j+'">'+
@@ -360,7 +361,83 @@ function fillAssignDialogForNodes(graphComponent) {
 }
 
 
+function fillAssignDialogForBiarcs() {
+	var avPages = [1];
+	var numberOfPages = parseInt(window.localStorage.getItem("numberOfPages"));
+	$("#BiarcDialog").append(
+		'<input type="checkbox" id="SetStackAbove"> <label for="SetStackAbove">Arc Above</label><br>'
+	);
+	$("#SetStackAbove").checkboxradio();
+	$("#BiarcDialog").append(
+		'<input type="checkbox" id="SetStackBelow"> <label for="SetStackBelow">Arc Below</label><br>'
+	);
+	$("#SetStackBelow").checkboxradio();
+	$("#BiarcDialog").append(
+		'<input type="checkbox" id="SetBiarc"> <label for="SetBiarc">Biarc</label><br>'
+	);
+	$("#SetBiarc").checkboxradio();
+	$("#BiarcDialog").append(
+		'<input type="checkbox" id="SetStack"> <label for="SetStack">Arc</label><br>'
+	);
+	$("#SetStack").checkboxradio();
+	
+	//Disable the ability to choose more than one option
+	$("#SetStackAbove, #SetStackBelow, #SetBiarc, #SetStack").on('change', function() {
+		//Uncheck other checkboxes
+		$("#SetStackAbove, #SetStackBelow, #SetBiarc, #SetStack").not(this).prop('checked', false).checkboxradio('refresh');
+		//Check the last checkbox that was clicked
+		$(this).prop('checked', true).checkboxradio('refresh');
+	});
+	$("#BiarcDialog").append('<button id="SetEdgeBiarcType" class="ui-button ui-widget ui-corner-all">Set</button>')
 
+
+
+	$("#SetEdgeBiarcType").click(function() {
+
+		var selPages = [];
+		let k;
+		for (k=1; k<=numberOfPages; k++) {
+			selPages.push("P"+k)
+		}
+
+		var arr = []
+
+		selEdges.forEach(function(a) {
+			arr.push(a.toString())
+		})
+		//console.log(selPages)
+		if ($("#SetStackAbove").prop("checked")) {
+			if (selPages.length != 0) {
+				let constr = new SetAsStackAbove([selEdges, selPages])
+				constraintsArray.push(constr);
+				$("#constraintTags").tagit("createTag", constr.getPrintable())
+			}
+		}
+		if ($("#SetStackBelow").prop("checked")) {
+			if (selPages.length != 0) {
+				let constr = new SetAsStackBelow([selEdges, selPages])
+				constraintsArray.push(constr);
+				$("#constraintTags").tagit("createTag", constr.getPrintable())
+			}
+		}
+		if ($("#SetBiarc").prop("checked")) {
+			if (selPages.length != 0) {
+				let constr = new SetAsBiarc([selEdges, selPages])
+				constraintsArray.push(constr);
+				$("#constraintTags").tagit("createTag", constr.getPrintable())
+			}
+		}
+		if ($("#SetStack").prop("checked")) {
+			if (selPages.length != 0) {
+				let constr = new SetAsStack([selEdges, selPages])
+				constraintsArray.push(constr);
+				$("#constraintTags").tagit("createTag", constr.getPrintable())
+			}
+		}
+		$("#BiarcDialog").dialog("close")
+
+	})
+}
 
 
 function fillAssignDialog() {
@@ -541,6 +618,22 @@ $( function() {
 		},
 		beforeClose: function( event, ui ) {
 			$("#pageDialog").empty();
+			$("#greyDiv").hide();
+
+		}
+	})
+
+	$("#BiarcDialog").dialog({
+		width: 170,
+		modal: true,
+		resizable: false,
+		autoOpen: false,
+		modal: true,
+		open: function( event, ui ) {
+			$("#greyDiv").show()
+		},
+		beforeClose: function( event, ui ) {
+			$("#BiarcDialog").empty();
 			$("#greyDiv").hide();
 
 		}

@@ -337,3 +337,102 @@ class RestrictEdgesToArc extends Constraint {
 		return "\t\t<constraint>\r\n\t\t\t<type>" + this.type + "</type>\r\n\t\t\t<objects>\r\n\t\t\t\t<objectsA>"+ tags.toString()+"</objectsA>\r\n\t\t\t\t<objectsB>" + this.objects[1]+ "</objectsB>\r\n\t\t\t</objects>\r\n\t\t</constraint>"
 	}
 }
+
+class SetAsStackAbove extends Constraint {
+	constructor(_objects) {
+		super("EDGES_SET_STACK_ABOVE",_objects)
+
+		this.printable = "SetAsArcAbove(" + this.objects[0].toString() + ")"
+	}
+
+
+
+	serialize() {
+		var edges = this.objects[0];
+
+		var tags = []
+
+		edges.forEach(function(e) {
+			tags.push(e.tag)
+		})
+
+		return "\t\t<constraint>\r\n\t\t\t<type>" + this.type + "</type>\r\n\t\t\t<objects>\r\n\t\t\t\t<objectsA>"+ tags.toString()+"</objectsA>\r\n\t\t\t</objects>\r\n\t\t</constraint>"
+	}
+
+	updatePrintable() {
+		this.printable = "SetAsArcAbove(" + this.objects[0].toString() + ")"
+	}
+}
+
+
+class SetAsStackBelow extends Constraint {
+	constructor(_objects) {
+		super("EDGES_SET_STACK_BELOW",_objects)
+
+		this.printable = "SetAsArcBelow(" + this.objects[0].toString() + ")"
+	}
+	serialize() {
+		var edges = this.objects[0];
+
+		var tags = []
+
+		edges.forEach(function(e) {
+			tags.push(e.tag)
+		})
+
+		return "\t\t<constraint>\r\n\t\t\t<type>" + this.type + "</type>\r\n\t\t\t<objects>\r\n\t\t\t\t<objectsA>"+ tags.toString()+"</objectsA>\r\n\t\t\t</objects>\r\n\t\t</constraint>"
+	}
+
+	updatePrintable() {
+		this.printable = "SetAsArcBelow(" + this.objects.toString() + ")"
+	}
+
+}
+
+class SetAsBiarc extends Constraint {
+	constructor(_objects) {
+		super("EDGES_SET_BIARC",_objects)
+
+		this.printable = "SetAsBiarc(" + this.objects[0].toString() + ")"
+	}
+	serialize() {
+		var edges = this.objects[0];
+
+		var tags = []
+
+		edges.forEach(function(e) {
+			tags.push(e.tag)
+		})
+
+		return "\t\t<constraint>\r\n\t\t\t<type>" + this.type + "</type>\r\n\t\t\t<objects>\r\n\t\t\t\t<objectsA>"+ tags.toString()+"</objectsA>\r\n\t\t\t</objects>\r\n\t\t</constraint>"
+	}
+
+	updatePrintable() {
+		this.printable = "SetAsBiarc(" + this.objects.toString() + ")"
+	}
+
+}
+
+class SetAsStack extends Constraint {
+	constructor(_objects) {
+		super("EDGES_SET_STACK",_objects)
+
+		this.printable = "SetAsArc(" + this.objects[0].toString() + ")"
+	}
+	serialize() {
+		var edges = this.objects[0];
+
+		var tags = []
+
+		edges.forEach(function(e) {
+			tags.push(e.tag)
+		})
+
+		return "\t\t<constraint>\r\n\t\t\t<type>" + this.type + "</type>\r\n\t\t\t<objects>\r\n\t\t\t\t<objectsA>"+ tags.toString()+"</objectsA>\r\n\t\t\t</objects>\r\n\t\t</constraint>"
+	}
+
+	updatePrintable() {
+		this.printable = "SetAsArc(" + this.objects.toString() + ")"
+	}
+
+}

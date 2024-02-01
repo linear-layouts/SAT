@@ -456,7 +456,7 @@ require([
 					constraintsArrayOfClipboard.push(c)
 				}
 			}
-			else if (["EDGES_ON_PAGES"].includes(c.type)) {
+			else if (["EDGES_ON_PAGES", "EDGES_SET_STACK_ABOVE", "EDGES_SET_STACK_BELOW", "EDGES_SET_BIARC", "EDGES_SET_STACK"].includes(c.type)) {
 				var constraintsEdgesTagsSet = new Set();
 				c.objects[0].forEach(function (e) {
 					constraintsEdgesTagsSet.add(e.tag)
@@ -532,6 +532,14 @@ require([
 				break;
 			case "EDGES_ON_PAGES_INCIDENT_NODE": constraint = new IncidentEdgesOfVertexTo(constraintArguments)
 				break;
+			case "EDGES_SET_STACK_ABOVE": constraint = new SetAsStackAbove(constraintArguments)
+				break;
+			case "EDGES_SET_STACK_BELOW": constraint = new SetAsStackBelow(constraintArguments)
+				break;
+			case "EDGES_SET_BIARC": constraint = new SetAsBiarc(constraintArguments)
+				break;
+			case "EDGES_SET_STACK": constraint = new SetAsStack(constraintArguments)
+				break;
 		}
 		if (constraint != null) {
 			constraintsArray.push(constraint)
@@ -592,6 +600,10 @@ require([
 				case "EDGES_TO_SUB_ARC_ON_PAGES":
 				case "EDGES_ON_PAGES":
 				case "EDGES_ON_PAGES_INCIDENT_NODE":
+				case "EDGES_SET_STACK_ABOVE":
+				case "EDGES_SET_STACK_BELOW":
+				case "EDGES_SET_BIARC":
+				case "EDGES_SET_STACK":
 					c.objects[0].forEach(function (n) {
 						if (isConstraintRelatedToNodes(c.type)) {
 							tempArray.push(getPastedNodeUsingBaseIndex(base, n.tag, nodes))
@@ -745,6 +757,10 @@ require([
 			$("#pageDialog").empty()
 			contextMenu.close()
 		})
+		inputMode.contextMenuInputMode.addCloseMenuListener(() => {
+			$("#BiarcDialog").empty()
+			contextMenu.close()
+		})
 		contextMenu.onClosedCallback = () => {
 			inputMode.contextMenuInputMode.menuClosed()
 		}
@@ -761,11 +777,26 @@ require([
 
 		var avPages = [1];
 
+		var Biarc_Page_Count = 0;
+
 		if (graphComponent.selection.selectedNodes.size > 0 && graphComponent.selection.selectedEdges.size > 0) {
 			// do nothing
 		} else if (graphComponent.selection.selectedEdges.size == 1) {
 			selEdges = graphComponent.selection.selectedEdges.toArray();
-			contextMenu.addMenuItem('Assign to...', () => $("#pageDialog").dialog("open"), fillAssignDialog());
+			contextMenu.addMenuItem('Assign to...', () => {
+				$("#pageDialog").dialog("open"), fillAssignDialog()
+			});
+			for (i=1; i<numberOfPages+1; i++) {
+				if ($("#page" + i).prop("checked") && $("#typeP" + i).val() == "BIARC"){
+					Biarc_Page_Count++;
+				}
+			}
+			if (Biarc_Page_Count > 0) {
+				contextMenu.addMenuItem('Set edge type for biarc pages...', () => {
+					$("#BiarcDialog").dialog("open"), fillAssignDialogForBiarcs()
+				});
+				Biarc_Page_Count = 0;
+			}
 
 			//contextMenu.addMenuItem("tag", () => alert(selEdges[0].tag))
 		} else if (graphComponent.selection.selectedNodes.size == 1) {
@@ -1015,42 +1046,42 @@ require([
 	 *  For the partial order constraint this function fills the dialog that shows up
 	 */
 
-	function fillOrderDialog() {
-		let miniGraphComponent = new yfiles.view.GraphComponent("#miniGraphComponent");
-		miniGraphComponent.inputMode = new yfiles.input.GraphViewerInputMode()
+	let miniGraphComponent = null; // Declare miniGraphComponent globally
 
+	function fillOrderDialog() {
+		// Check if miniGraphComponent is already initialized
+		if (!miniGraphComponent) {
+			miniGraphComponent = new yfiles.view.GraphComponent("#miniGraphComponent");
+			miniGraphComponent.inputMode = new yfiles.input.GraphViewerInputMode();
+	
+			miniGraphComponent.graph.nodeDefaults.style = new yfiles.styles.ShapeNodeStyle({
+				fill: '#FFA500',
+				shape: 'ellipse',
+				stroke: 'white',
+			});
+		}
+	
 		$("#orderingDialog").dialog({
 			width: 600,
 			resizable: false,
 			autoOpen: false,
 			beforeClose: function (event, ui) {
-				miniGraphComponent.graph.clear()
+				miniGraphComponent.graph.clear();
 			}
-		})
-
-		miniGraphComponent.graph.nodeDefaults.style = new yfiles.styles.ShapeNodeStyle({
-			fill: '#FFA500',
-			shape: 'ellipse',
-			stroke: 'white',
-		})
-
-		var selNodes = graphComponent.selection.selectedNodes.toArray()
-		var position = 0
-
+		});
+	
+		var selNodes = graphComponent.selection.selectedNodes.toArray();
+		var position = 0;
+	
 		selNodes.forEach(function (n) {
-			var newNode = miniGraphComponent.graph.createNodeAt(new yfiles.geometry.Point(position, 0))
-			miniGraphComponent.graph.addLabel(newNode, n.labels.toArray()[0].text)
-			position = position + 50
-		})
-
-
-		miniGraphComponent.fitGraphBounds()
-
-
-		$("#orderingDialog").dialog("open")
-
-
-
+			var newNode = miniGraphComponent.graph.createNodeAt(new yfiles.geometry.Point(position, 0));
+			miniGraphComponent.graph.addLabel(newNode, n.labels.toArray()[0].text);
+			position = position + 50;
+		});
+	
+		miniGraphComponent.fitGraphBounds();
+	
+		$("#orderingDialog").dialog("open");
 	}
 
 	/*
@@ -1425,6 +1456,74 @@ require([
 				constraintsArray.push(con)
 				$("#constraintTags").tagit("createTag", con.getPrintable())
 
+				break;
+			case "EDGES_SET_STACK_ABOVE":
+				var objString = filterStringByTag(objects, "objectsA")[0]
+				objString = objString.split(",")
+				var pages = filterStringByTag(objects, "objectsB")[0]
+				pages = pages.split(",")
+	
+				var objItems = [];
+	
+				objString.forEach(function (os) {
+					objItems = objItems.concat(findObjectByTag(os, "edge"))
+				})
+	
+				var con = new SetAsStackAbove([objItems, pages])
+				constraintsArray.push(con);
+				$("#constraintTags").tagit("createTag", con.getPrintable())
+	
+				break;
+			case "EDGES_SET_STACK_BELOW":
+				var objString = filterStringByTag(objects, "objectsA")[0]
+				objString = objString.split(",")
+				var pages = filterStringByTag(objects, "objectsB")[0]
+				pages = pages.split(",")
+	
+				var objItems = [];
+	
+				objString.forEach(function (os) {
+					objItems = objItems.concat(findObjectByTag(os, "edge"))
+				})
+	
+				var con = new SetAsStackBelow([objItems, pages])
+				constraintsArray.push(con);
+				$("#constraintTags").tagit("createTag", con.getPrintable())
+	
+				break;
+			case "EDGES_SET_BIARC":
+				var objString = filterStringByTag(objects, "objectsA")[0]
+				objString = objString.split(",")
+				var pages = filterStringByTag(objects, "objectsB")[0]
+				pages = pages.split(",")
+	
+				var objItems = [];
+	
+				objString.forEach(function (os) {
+					objItems = objItems.concat(findObjectByTag(os, "edge"))
+				})
+	
+				var con = new SetAsBiarc([objItems, pages])
+				constraintsArray.push(con);
+				$("#constraintTags").tagit("createTag", con.getPrintable())
+	
+				break;
+			case "EDGES_SET_STACK":
+				var objString = filterStringByTag(objects, "objectsA")[0]
+				objString = objString.split(",")
+				var pages = filterStringByTag(objects, "objectsB")[0]
+				pages = pages.split(",")
+		
+				var objItems = [];
+		
+				objString.forEach(function (os) {
+					objItems = objItems.concat(findObjectByTag(os, "edge"))
+				})
+		
+				var con = new SetAsStack([objItems, pages])
+				constraintsArray.push(con);
+				$("#constraintTags").tagit("createTag", con.getPrintable())
+		
 				break;
 		}
 	}
@@ -2658,6 +2757,7 @@ require([
 				'<option value="QUEUE">queue</option>'+
 				'<option value="RIQUE">rique</option>'+
 				'<option value="DEQUE">deque</option>'+
+				'<option value="BIARC">biarc</option>'+
 				//'<option value="MONQUE">monque</option>'+
 				'<option value="NONE">undefined</option>' +
 				'</select> <select id="layoutP'+numberOfPages+'" name="layoutP'+numberOfPages+'">'+
@@ -3543,7 +3643,7 @@ require([
 		var constraints = []
 		constraintsArray.forEach(function (c) {
 
-			if (c.type == "EDGES_ON_PAGES" || c.type == "EDGES_ON_PAGES_INCIDENT_NODE") {
+			if (c.type == "EDGES_ON_PAGES" || c.type == "EDGES_ON_PAGES_INCIDENT_NODE"|| c.type == "EDGES_ON_PAGES_INCIDENT_NODE" || c.type == "EDGES_SET_STACK_ABOVE" || c.type == "EDGES_SET_STACK_BELOW" || c.type == "EDGES_SET_BIARC" || c.type == "EDGES_SET_STACK") {
 
 				var constraintArguments = []
 				c.getObjects()[0].forEach(function (o) {
@@ -4205,6 +4305,70 @@ require([
 					constraintsArray.push(con)
 					$("#constraintTags").tagit("createTag", con.getPrintable())
 
+					break;
+				case "EDGES_SET_STACK_ABOVE":
+					var objItems = [];
+	
+					c.arguments.forEach(function (a) {
+						graphComponent.graph.edges.toArray().forEach(function (e) {
+							if (e.tag == a) {
+								objItems.push(e)
+							}
+						})
+					})
+	
+					var con = new SetAsStackAbove([objItems, c.modifier])
+					constraintsArray.push(con);
+					$("#constraintTags").tagit("createTag", con.getPrintable())
+	
+					break;
+				case "EDGES_SET_STACK_BELOW":
+					var objItems = [];
+	
+					c.arguments.forEach(function (a) {
+						graphComponent.graph.edges.toArray().forEach(function (e) {
+							if (e.tag == a) {
+								objItems.push(e)
+							}
+						})
+					})
+	
+					var con = new SetAsStackBelow([objItems, c.modifier])
+					constraintsArray.push(con);
+					$("#constraintTags").tagit("createTag", con.getPrintable())
+	
+					break;
+				case "EDGES_SET_BIARC":
+					var objItems = [];
+	
+					c.arguments.forEach(function (a) {
+						graphComponent.graph.edges.toArray().forEach(function (e) {
+							if (e.tag == a) {
+								objItems.push(e)
+							}
+						})
+					})
+	
+					var con = new SetAsBiarc([objItems, c.modifier])
+					constraintsArray.push(con);
+					$("#constraintTags").tagit("createTag", con.getPrintable())
+	
+					break;
+				case "EDGES_SET_STACK":
+					var objItems = [];
+		
+					c.arguments.forEach(function (a) {
+						graphComponent.graph.edges.toArray().forEach(function (e) {
+							if (e.tag == a) {
+								objItems.push(e)
+							}
+						})
+					})
+		
+					var con = new SetAsStack([objItems, c.modifier])
+					constraintsArray.push(con);
+					$("#constraintTags").tagit("createTag", con.getPrintable())
+		
 					break;
 			}
 		})
