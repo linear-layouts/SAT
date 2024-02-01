@@ -1547,6 +1547,21 @@ addDefaultColor();*/
 
 	// Returns edge style for deque edges
 	function getEdgeBezierStyle(color, stroke, directed) {
+		const targetArrowStyle = new yfiles.styles.Arrow({
+            type: yfiles.styles.ArrowType.DEFAULT,
+			//fill and colour the arrowhead the same colour as the edges on the page.
+			//For Edges in Biarc, Deque and Rique
+            fill: color,
+			stroke: color
+          })
+		if(directed) {
+			
+			return new yfiles.styles.BezierEdgeStyle({
+				color: color,
+				stroke: stroke,
+				targetArrow: targetArrowStyle
+			});
+		}
 		return new yfiles.styles.BezierEdgeStyle({
 			color: color,
 			stroke: stroke
@@ -2244,6 +2259,7 @@ addDefaultColor();*/
 						"<option value='abovePage"+i+"'>above</option>"+
 						"<option value='belowPage"+i+"'>below</option>"+
 						"<option value='dequePage"+i+"'>deque</option>"+
+						"<option value='biarcPage"+i+"'>biarc</option>"+
 						"</select>"+
 						"<div class='picker' id='picker"+i+"'></div>" +
 						"</div>"
@@ -2272,6 +2288,7 @@ addDefaultColor();*/
 						"<option value='abovePage"+i+"'>above</option>"+
 						"<option value='belowPage"+i+"' selected='selected'>below</option>"+
 						"<option value='dequePage"+i+"'>deque</option>"+
+						"<option value='biarcPage"+i+"'>biarc</option>"+
 						"</select>"+
 						"<div class='picker' id='picker"+i+"'></div>" +
 						"</div>"
