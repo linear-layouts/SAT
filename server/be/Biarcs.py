@@ -24,7 +24,7 @@ def static_encode_not_all_in_page(edge_to_page: ndarray, edges: ndarray, p: int)
         clause.append(-edge_to_page[p, e])
     return clause
 
-def static_encode_biarc_page(precedes: ndarray, edge_to_page: ndarray, Top: ndarray, Bottom: ndarray, edges: ndarray, p: int) -> List[List[int]]:
+def static_encode_biarc_page(precedes: ndarray, edge_to_page: ndarray, Top: ndarray, Bottom: ndarray, List_of_Biarc_Pages: ndarray, edges: ndarray, p: int) -> List[List[int]]:
     """
     Encodes a biarc page
 
@@ -36,6 +36,7 @@ def static_encode_biarc_page(precedes: ndarray, edge_to_page: ndarray, Top: ndar
     :param Bottom[e, v ,p] <=> Edge e is below vertex v in page p.
             """
     clauses = []
+    clauses.append([List_of_Biarc_Pages[p]])
 
     #Processes_Number represends how many Edges will be calculated simultaneously (number of threads), can either match cpu cores or set to None for maximum performance
     #4 is the recommended value
