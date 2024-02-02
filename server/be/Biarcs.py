@@ -7,6 +7,9 @@ from be.custom_types import Edge, PageAssignment, EdgeType, TypeEnum
 from numba import jit
 from concurrent.futures import ProcessPoolExecutor
 
+def Get_Biarc_Pages():
+    return(List_of_Biarc_Pages)
+
 def static_encode_not_all_in_page(edge_to_page: ndarray, edges: ndarray, p: int) -> List[List[int]]:
     """
     Encodes the constraint that not all given edges go to the same given page.
