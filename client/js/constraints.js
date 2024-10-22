@@ -93,6 +93,19 @@ class Consecutive extends Constraint {
 
 }
 
+class NonConsecutive extends Constraint {
+	constructor(_objects) {
+		super("NODES_NON_CONSECUTIVE",_objects)
+
+		this.printable = "nonconsecutive(" + this.objects.toString() + ")"
+	}
+
+	updatePrintable() {
+		this.printable = "nonconsecutive(" + this.objects.toString() + ")"
+	}
+
+}
+
 class SetAsFirst extends Constraint {
 	constructor(_objects) {
 		super("NODES_SET_FIRST",_objects)

@@ -177,6 +177,18 @@ addDefaultColor();*/
 					var con = new Consecutive(objItems);
 					constraintsArray.push(con);
 					break;
+				case "NODES_NON_CONSECUTIVE":
+					var objItems = [];
+					c.arguments.forEach(function(a) {
+						graphComponent.graph.nodes.toArray().forEach(function(n) {
+							if (n.tag.toString() === a) {
+								objItems.push(n);
+							}
+						});
+					});
+					var con = new NonConsecutive(objItems);
+					constraintsArray.push(con);
+					break;
 				case "NODES_SET_FIRST":
 					var objItems = [];
 					c.arguments.forEach(function(a) {
