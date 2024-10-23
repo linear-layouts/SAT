@@ -555,7 +555,7 @@ class App:
                 pool.stop()
                 pool.join(timeout=2)
             finally:
-                original_sigint_handler()
+                original_sigint_handler(sig, frame)
 
         signal.signal(signal.SIGINT, signal_handler)
 
