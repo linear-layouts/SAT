@@ -307,6 +307,34 @@ def static_encode_non_consecutivity(inbetween, precedes, v1, v2) -> List[List[in
     clauses.extend([clause])
     return clauses
 
+def static_encode_non_extremes(precedes, v1, v2) -> List[List[int]]:
+    """
+    Encodes that two vertices are non extremes, i.e., given the two vertices one cannot be first and the other last at the same time.
+    Forbids two vertices to be extremes simultaneously.
+    There is no requiring a particular order between v1 and v2.
+
+    :param precedes: precedes[i, j] <=> vertex i precedes vertex j
+    :param v1: the index of the first vertex
+    :param v2: the index of the second vertex
+    :return: the generated clauses
+        """
+    clause1 = []
+    clause2 = []
+    clause3 = []
+    clause4 = []
+    clauses = []
+    for v in range(precedes.shape[0]):
+        if v == v1 or v == v2:
+            continue
+        clause1.extend([-precedes[v1,v], -precedes[v,v2]])
+        clause2.extend([-precedes[v1,v], -precedes[v2,v]])
+        clause3.extend([-precedes[v,v1], -precedes[v,v2]])
+        clause4.extend([-precedes[v,v1], -precedes[v2,v]])
+    clauses.extend([clause1])
+    clauses.extend([clause2])
+    clauses.extend([clause3])
+    clauses.extend([clause4])
+    return clauses
 
 def static_encode_first_vertex(precedes, v) -> List[List[int]]:
     """
@@ -1336,6 +1364,13 @@ class SatModel(object):
                 if len(arguments) != 2:
                     abort(400, "The NODES_NON_CONSECUTIVE constraint only allows exactly two arguments")
                 clauses.extend(static_encode_non_consecutivity(self._inbetween, self._precedes,
+                                                           self._node_id_to_idx[arguments[0]],
+                                                           self._node_id_to_idx[arguments[1]]))
+
+            elif constraint['type'] == 'NODES_NON_EXTREMES':
+                if len(arguments) != 2:
+                    abort(400, "The NODES_NON_EXTREMES constraint only allows exactly two arguments")
+                clauses.extend(static_encode_non_extremes(self._precedes,
                                                            self._node_id_to_idx[arguments[0]],
                                                            self._node_id_to_idx[arguments[1]]))
 

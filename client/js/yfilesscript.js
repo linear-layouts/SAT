@@ -422,7 +422,7 @@ require([
 
 		constraintsArray.forEach(function (c) {
 			if (["NODES_SET_FIRST", "NODES_SET_NOT_FIRST", "NODES_SET_LAST", "NODES_SET_NOT_LAST", "NODES_PREDECESSOR", "NODES_CONSECUTIVE", "NODES_NON_CONSECUTIVE",
-				"NODES_REQUIRE_PARTIAL_ORDER", "NODES_FORBID_PARTIAL_ORDER", "EDGES_SAME_PAGES_INCIDENT_NODE",
+				"NODES_NON_EXTREMES", "NODES_REQUIRE_PARTIAL_ORDER", "NODES_FORBID_PARTIAL_ORDER", "EDGES_SAME_PAGES_INCIDENT_NODE",
 				"EDGES_DIFFERENT_PAGES_INCIDENT_NODE"].includes(c.type)) {
 				var constraintsNodesTagsSet = new Set();
 				c.objects.forEach(function (n) {
@@ -487,7 +487,7 @@ require([
 		var constraintsEnumRelatedToNodes = ["EDGES_ON_PAGES_INCIDENT_NODE", "EDGES_DIFFERENT_PAGES_INCIDENT_NODE",
 			"EDGES_SAME_PAGES_INCIDENT_NODE",
 			"EDGES_TO_SUB_ARC_ON_PAGES", "EDGES_FROM_NODES_ON_PAGES",
-			"NODES_FORBID_PARTIAL_ORDER", "NODES_CONSECUTIVE", "NODES_NON_CONSECUTIVE",
+			"NODES_FORBID_PARTIAL_ORDER", "NODES_CONSECUTIVE", "NODES_NON_CONSECUTIVE", "NODES_NON_EXTREMES",
 			"NODES_REQUIRE_PARTIAL_ORDER", "NODES_SET_FIRST", "NODES_SET_NOT_FIRST", "NODES_SET_LAST", "NODES_SET_NOT_LAST", "NODES_PREDECESSOR"]
 		if (constraintsEnumRelatedToNodes.includes(constraintEnum)) {
 			return true
@@ -511,6 +511,8 @@ require([
 			case "NODES_CONSECUTIVE": constraint = new Consecutive(constraintArguments)
 				break;
 			case "NODES_NON_CONSECUTIVE": constraint = new NonConsecutive(constraintArguments)
+				break;
+			case "NODES_NON_EXTREMES": constraint = new NonExtremes(constraintArguments)
 				break;
 			case "NODES_REQUIRE_PARTIAL_ORDER": constraint = new RequirePartialOrder(constraintArguments)
 				break;
@@ -584,6 +586,7 @@ require([
 				case "NODES_PREDECESSOR":
 				case "NODES_CONSECUTIVE":
 				case "NODES_NON_CONSECUTIVE":
+				case "NODES_NON_EXTREMES":
 				case "NODES_REQUIRE_PARTIAL_ORDER":
 				case "NODES_FORBID_PARTIAL_ORDER":
 				case "EDGES_SAME_PAGES":
@@ -871,6 +874,13 @@ require([
 				contextMenu.addMenuItem('Make non consecutive', () => {
 
 					let constr = new NonConsecutive(nodesArr);
+					constraintsArray.push(constr)
+					$("#constraintTags").tagit("createTag", constr.getPrintable())
+				});
+
+				contextMenu.addMenuItem('Make non extremes', () => {
+
+					let constr = new NonExtremes(nodesArr);
 					constraintsArray.push(constr)
 					$("#constraintTags").tagit("createTag", constr.getPrintable())
 				});
@@ -1257,6 +1267,20 @@ require([
 				constraintsArray.push(con);
 				$("#constraintTags").tagit("createTag", con.getPrintable())
 		
+				break;
+			case "NODES_NON_EXTREMES":
+				var objString = objects.split(",")
+			
+				var objItems = [];
+			
+				objString.forEach(function (os) {
+					objItems = objItems.concat(findObjectByTag(os, "node"))
+				})
+			
+				var con = new NonExtremes(objItems)
+				constraintsArray.push(con);
+				$("#constraintTags").tagit("createTag", con.getPrintable())
+			
 				break;
 			case "NODES_SET_FIRST":
 				var objString = objects.split(",")
@@ -2711,6 +2735,18 @@ require([
 			var isTree = yfiles.algorithms.Trees.isTree(ygraph)
 			var isBipartite = yfiles.algorithms.GraphChecker.isBipartite(ygraph)
 
+			var maxdegree = 0
+			var mindegree = nrOfVertices
+			for (const v of ygraph.nodes) {				
+				if (v.edges.size > maxdegree) {
+					maxdegree = v.edges.size;
+				}				
+				if (v.edges.size < mindegree) {
+					mindegree = v.edges.size;
+				}
+			}
+			//console.log(maxdegree)
+	
 			document.getElementById("nrOfVertices").innerHTML = nrOfVertices
 			document.getElementById("nrOfEdges").innerHTML = nrOfEdges
 			document.getElementById("isPlanar").innerHTML = isPlanar
@@ -2724,6 +2760,9 @@ require([
 
 			document.getElementById("isBipartite").innerHTML = isBipartite
 			if (isBipartite) { document.getElementById("isBipartite").style.color = "green" } else { document.getElementById("isBipartite").style.color = "red" }
+
+			document.getElementById("maxDegree").innerHTML = maxdegree
+			document.getElementById("minDegree").innerHTML = mindegree
 
 			if (treatEdgesAsDirected) {
 				document.getElementById("reducedTr").style.display = "table-row";
@@ -4108,7 +4147,24 @@ require([
 					$("#constraintTags").tagit("createTag", con.getPrintable())
 		
 					break;
-					
+
+				case "NODES_NON_EXTREMES":
+					var objItems = []
+			
+					c.arguments.forEach(function (a) {
+						graphComponent.graph.nodes.toArray().forEach(function (n) {
+							if (n.tag == a) {
+								objItems.push(n)
+							}
+						})
+					})
+			
+					var con = new NonExtremes(objItems)
+					constraintsArray.push(con);
+					$("#constraintTags").tagit("createTag", con.getPrintable())
+			
+					break;	
+
 				case "NODES_SET_FIRST":
 					var objItems = []
 

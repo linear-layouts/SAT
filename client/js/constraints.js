@@ -106,6 +106,19 @@ class NonConsecutive extends Constraint {
 
 }
 
+class NonExtremes extends Constraint {
+	constructor(_objects) {
+		super("NODES_NON_EXTREMES",_objects)
+
+		this.printable = "nonextremes(" + this.objects.toString() + ")"
+	}
+
+	updatePrintable() {
+		this.printable = "nonextremes(" + this.objects.toString() + ")"
+	}
+
+}
+
 class SetAsFirst extends Constraint {
 	constructor(_objects) {
 		super("NODES_SET_FIRST",_objects)
