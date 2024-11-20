@@ -421,6 +421,7 @@ require([
 		})
 
 		constraintsArray.forEach(function (c) {
+
 			if (["NODES_SET_FIRST", "NODES_SET_NOT_FIRST", "NODES_SET_LAST", "NODES_SET_NOT_LAST", "NODES_PREDECESSOR", "NODES_CONSECUTIVE", "NODES_NON_CONSECUTIVE",
 				"NODES_NON_EXTREMES", "NODES_REQUIRE_PARTIAL_ORDER", "NODES_FORBID_PARTIAL_ORDER", "EDGES_SAME_PAGES_INCIDENT_NODE",
 				"EDGES_DIFFERENT_PAGES_INCIDENT_NODE"].includes(c.type)) {
@@ -2499,18 +2500,42 @@ require([
 				document.getElementById("divEdges").hidden = true;
 				document.getElementById("divBipartiteVerticesM").hidden = true;
 				document.getElementById("divBipartiteVerticesN").hidden = true;
+				document.getElementById("divOuterPlanarCurvature").hidden = true;
+				document.getElementById("divTypeOfOuterPlanar").hidden = true;
 			}
 			else if (option=="completeBipartite") {
 				document.getElementById("divBipartiteVerticesM").hidden = false;
 				document.getElementById("divBipartiteVerticesN").hidden = false;
 				document.getElementById("divVertices").hidden = true;
 				document.getElementById("divEdges").hidden = true;
+				document.getElementById("divOuterPlanarCurvature").hidden = true;
+				document.getElementById("divTypeOfOuterPlanar").hidden = true;
+			}
+			else if (option == "outerPlanar") {
+				document.getElementById("divVertices").hidden = false;
+				document.getElementById("divTypeOfOuterPlanar").hidden = false;
+				document.getElementById("divEdges").hidden = true;
+				document.getElementById("divBipartiteVerticesM").hidden = true;
+				document.getElementById("divBipartiteVerticesN").hidden = true;
+
+				document.getElementById("divOuterPlanarCurvature").hidden = true;
 			}
 			else {
 				document.getElementById("divVertices").hidden = false;
 				document.getElementById("divEdges").hidden = false;
 				document.getElementById("divBipartiteVerticesM").hidden = true;
 				document.getElementById("divBipartiteVerticesN").hidden = true;
+				document.getElementById("divOuterPlanarCurvature").hidden = true;
+				document.getElementById("divTypeOfOuterPlanar").hidden = true;
+			}
+		}
+		document.getElementById("outerPlanarType").onchange = function () {
+			var option = document.getElementById("outerPlanarType").value;
+			if (option == "path") {
+				document.getElementById("divOuterPlanarCurvature").hidden = false;
+			}
+			else {
+				document.getElementById("divOuterPlanarCurvature").hidden = true;
 			}
 		}
 
@@ -2821,6 +2846,7 @@ require([
 				'<option value="RIQUE">rique</option>'+
 				'<option value="DEQUE">deque</option>'+
 				'<option value="BIARC">biarc</option>'+
+				'<option value="PQUEUE">pqueue</option>' +
 				//'<option value="MONQUE">monque</option>'+
 				'<option value="NONE">undefined</option>' +
 				'</select> <select id="layoutP'+numberOfPages+'" name="layoutP'+numberOfPages+'">'+
@@ -3204,6 +3230,198 @@ require([
 		graphComponent.fitGraphBounds();
 	}
 
+	function typeOuterPlanar() { 
+		var numberOfVertices = document.getElementById("numberOfVertices").value;
+		var typeOfGraph = document.getElementById("outerPlanarType").value;
+		var curvatureOfPath = document.getElementById("outerPlanarCurvature").value;
+		var numberOfEdges = ((numberOfVertices - 3) * 2) + 3;
+		var allEdgeLabels = [];
+		for (var i = 0; i <= numberOfEdges - 1; i++) {
+			allEdgeLabels[i] = i;
+		}
+		allEdgeLabels = shuffle(allEdgeLabels);
+		var nodeSize = 30;
+		var widthCanvas = numberOfVertices * nodeSize;
+		var vertices = [];
+		var edges = [];
+		var freeEdgeIndeces = [];
+
+		for (var i = 0; i <= 2; i++) {
+			var newVertex = computeRandomVertex(vertices, widthCanvas);
+			var x = newVertex.x;
+			var y = newVertex.y;
+			vertices[i] = graphComponent.graph.createNode({
+				layout: new yfiles.geometry.Rect(x, y, nodeSize, nodeSize),
+				tag: getNextTag()
+			})
+			graphComponent.graph.addLabel(vertices[i], getNextLabel("node").toString());
+		}
+		edges[0] = graphComponent.graph.createEdge({   
+			source: vertices[0],
+			target: vertices[1],
+			tag: vertices[0].tag + "-" + vertices[1].tag
+		});
+		freeEdgeIndeces[0] = 0;
+		graphComponent.graph.addLabel(edges[0], allEdgeLabels[0].toString());
+
+		edges[1] = graphComponent.graph.createEdge({    
+			source: vertices[0],
+			target: vertices[2],
+			tag: vertices[0].tag + "-" + vertices[2].tag
+		});
+		freeEdgeIndeces[1] = 1;
+		graphComponent.graph.addLabel(edges[1], allEdgeLabels[1].toString());
+
+		var source = vertices[1]
+		var target = vertices[2]
+		edges[2] = graphComponent.graph.createEdge({  
+			source: source,
+			target: target,
+			tag: source.tag + "-" + target.tag
+		});
+		freeEdgeIndeces[2] = 2;
+		graphComponent.graph.addLabel(edges[2], allEdgeLabels[2].toString());
+
+		if (typeOfGraph == "random") {
+			for (var i = 3, j = 3; i <= numberOfVertices - 1; i++, j += 2) {
+				//(freeEdgeIndeces);
+				var random = Math.floor(Math.random() * freeEdgeIndeces.length);
+				var nextEdgeIndex = freeEdgeIndeces[random];
+				var nextEdge = edges[nextEdgeIndex]; // reference
+				freeEdgeIndeces.splice(random, 1);
+
+				var newVertex = computeRandomVertex(vertices, widthCanvas);
+				var x = newVertex.x;
+				var y = newVertex.y;
+				vertices[i] = graphComponent.graph.createNode({
+					layout: new yfiles.geometry.Rect(x, y, nodeSize, nodeSize),
+					tag: getNextTag()
+				})
+				graphComponent.graph.addLabel(vertices[i], getNextLabel("node").toString());
+
+				edges[j] = graphComponent.graph.createEdge({
+					source: nextEdge.sourceNode,
+					target: vertices[i],
+					tag: nextEdge.sourceNode.tag + "-" + vertices[i].tag
+				});
+				graphComponent.graph.addLabel(edges[j], allEdgeLabels[j].toString());
+				edges[j + 1] = graphComponent.graph.createEdge({
+					source: nextEdge.targetNode,
+					target: vertices[i],
+					tag: nextEdge.targetNode.tag + "-" + vertices[i].tag
+				});
+				graphComponent.graph.addLabel(edges[j + 1], allEdgeLabels[j + 1].toString());
+
+				freeEdgeIndeces.push(j, j + 1);
+			}
+		}
+		else if (typeOfGraph == "balanced") {
+			var i = 3;
+			while (i <= numberOfVertices - 1) {
+				var countOfNewEdgeIndeces = freeEdgeIndeces.length;
+				var countOfEdges = edges.length;
+				for (var j = 0, l = countOfEdges; j <= countOfNewEdgeIndeces - 1; j++, l += 2) {
+					if (i > numberOfVertices - 1) {
+						break
+					}
+					else {
+						var nextEdgeIndex = freeEdgeIndeces[0];
+						var nextEdge = edges[nextEdgeIndex];
+						freeEdgeIndeces.splice(0, 1);
+
+						var newVertex = computeRandomVertex(vertices, widthCanvas);
+						var x = newVertex.x;
+						var y = newVertex.y;
+						vertices[i] = graphComponent.graph.createNode({
+							layout: new yfiles.geometry.Rect(x, y, nodeSize, nodeSize),
+							tag: getNextTag()
+						})
+						graphComponent.graph.addLabel(vertices[i], getNextLabel("node").toString());
+
+						edges[l] = graphComponent.graph.createEdge({
+							source: nextEdge.sourceNode,
+							target: vertices[i],
+							tag: nextEdge.sourceNode.tag + "-" + vertices[i].tag
+						});
+						graphComponent.graph.addLabel(edges[l], allEdgeLabels[l].toString());
+						edges[l + 1] = graphComponent.graph.createEdge({
+							source: nextEdge.targetNode,
+							target: vertices[i],
+							tag: nextEdge.targetNode.tag + "-" + vertices[i].tag
+						});
+						graphComponent.graph.addLabel(edges[l + 1], allEdgeLabels[l + 1].toString());
+						freeEdgeIndeces.push(l, l + 1);
+						i++;
+						console.log(j);
+						console.log("Test");
+					}
+				}
+			}
+		}
+		else if (typeOfGraph == "path") {
+			var firstVertice = vertices[0];
+			var secondVertice = vertices[1];
+			var direction = 'STRAIGHT';
+			var gap = true;
+			for (var i = 3, j = 3; i <= numberOfVertices - 1; i++, j += 2) {
+				var newVertex = computeRandomVertex(vertices, widthCanvas);
+				var x = newVertex.x;
+				var y = newVertex.y;
+				vertices[i] = graphComponent.graph.createNode({
+					layout: new yfiles.geometry.Rect(x, y, nodeSize, nodeSize),
+					tag: getNextTag()
+				})
+				graphComponent.graph.addLabel(vertices[i], getNextLabel("node").toString());
+				if (curvatureOfPath > Math.random() * 10) {
+					direction = 'TURN';
+				}
+				else {
+					direction = 'STRAIGHT';
+				}
+				if (direction == 'STRAIGHT') {
+					edges[j] = graphComponent.graph.createEdge({
+						source: firstVertice,
+						target: vertices[i],
+						tag: firstVertice.tag + "-" + vertices[i].tag
+					});
+					graphComponent.graph.addLabel(edges[j], allEdgeLabels[j].toString());
+					edges[j + 1] = graphComponent.graph.createEdge({
+						source: secondVertice,
+						target: vertices[i],
+						tag: secondVertice.tag + "-" + vertices[i].tag
+					});
+					graphComponent.graph.addLabel(edges[j + 1], allEdgeLabels[j + 1].toString());
+					firstVertice = secondVertice;
+					secondVertice = vertices[i];
+				}
+				else if ('TURN') {
+					edges[j] = graphComponent.graph.createEdge({
+						source: firstVertice,
+						target: vertices[i],
+						tag: firstVertice.tag + "-" + vertices[i].tag
+					});
+					graphComponent.graph.addLabel(edges[j], allEdgeLabels[j].toString());
+					edges[j + 1] = graphComponent.graph.createEdge({
+						source: secondVertice,
+						target: vertices[i],
+						tag: secondVertice.tag + "-" + vertices[i].tag
+					});
+					graphComponent.graph.addLabel(edges[j + 1], allEdgeLabels[j + 1].toString());
+					firstVertice = firstVertice;
+					secondVertice = vertices[i];
+				}
+			}
+		}
+		else {
+			console.log("No valid option (outerplanar)")
+		}
+		const radialLayout = new yfiles.radial.RadialLayout({
+			edgeRoutingStrategy: 'POLYLINE' // Set the edge routing style
+		});
+		graphComponent.morphLayout(radialLayout);
+		graphComponent.fitGraphBounds();
+	}
+
 	function typePlanar() {
 		var numberOfVertices = document.getElementById("numberOfVertices").value;
 		var numberOfEdges = document.getElementById("numberOfEdges").value;
@@ -3565,6 +3783,9 @@ require([
 				break;
 			case "completeBipartite":
 				typeCompleteBipartite();
+				break;
+			case "outerPlanar":
+				typeOuterPlanar();
 				break;
 		}
 	}

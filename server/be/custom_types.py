@@ -9,7 +9,7 @@ class Edge(NamedTuple):
     id: str
     source: str
     target: str
-
+    weight: int # PQ
 
 class PageAssignment(NamedTuple):
     edge: str
