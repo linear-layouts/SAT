@@ -185,6 +185,16 @@ class App:
                                                          Currently only implemented for 2 Nodes
                                       arguments: the two nodes to be made consecutive
                                       modifier: none 
+                                                             
+                                      NODES_NON_CONSECUTIVE: The given two nodes must not be next to each other in any order. 
+                                                         Currently only implemented for 2 Nodes
+                                      arguments: the two nodes to be made non consecutive
+                                      modifier: none 
+
+                                      NODES_NON_EXTREMES: The given two nodes must not be first and last simultaneously. 
+                                                         Currently only implemented for 2 Nodes
+                                      arguments: the two nodes to be made non extremes
+                                      modifier: none                     
                                       
                                       NODES_SET_FIRST: The given node has to be the first in any order.
                                       arguments: the node to be the first
@@ -230,6 +240,8 @@ class App:
                                                                  "NODES_REQUIRE_PARTIAL_ORDER",
                                                                  "NODES_FORBID_PARTIAL_ORDER",
                                                                  "NODES_CONSECUTIVE",
+                                                                 "NODES_NON_CONSECUTIVE",
+                                                                 "NODES_NON_EXTREMES",
                                                                  "NODES_SET_FIRST",
                                                                  "NODES_SET_NOT_FIRST",
                                                                  "NODES_SET_LAST",
@@ -550,7 +562,7 @@ class App:
                 pool.stop()
                 pool.join(timeout=2)
             finally:
-                original_sigint_handler()
+                original_sigint_handler(sig, frame)
 
         signal.signal(signal.SIGINT, signal_handler)
 

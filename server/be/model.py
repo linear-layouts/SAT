@@ -38,6 +38,7 @@ def static_encode_vertex_order(precedes: ndarray) -> List[List[int]]:
 
     return clauses
 
+
 def static_encode_weight_order(is_heavier: ndarray, edges: ndarray) -> List[List[int]]:
     """
     Generates the clauses to ensure that the variables displaying the relative weight order of the edges are correct.
@@ -57,6 +58,26 @@ def static_encode_weight_order(is_heavier: ndarray, edges: ndarray) -> List[List
                     clauses.append([is_heavier[u][v]])
                 elif w1 < w2:
                     clauses.append([-is_heavier[u][v]])
+    return clauses
+
+def static_encode_inbetweenness(inbetween: ndarray, precedes: ndarray) -> List[List[int]]:
+    """
+    Generates the clauses to ensure that inbetweenness is correctly defined.
+    It is static in order to make optimizing more easy.
+
+    :param precedes: precedes[i, j] <=> the vertex i precedes vertex j
+    :param inbetween: inbetween[i, k, j] => the vertex k is inbetween vertices i, j
+    :return: the list of generated clauses
+    """
+    clauses = []
+    # Ensure asymmetry
+    for u in range(precedes.shape[0]):
+        for v in range(precedes.shape[0]):
+            for w in range(precedes.shape[0]):
+                if u == v or v == w or w == u:
+                    continue
+                clauses.append([-inbetween[u, v, w], precedes[u,v]])
+                clauses.append([-inbetween[u, v, w], precedes[v,w]])
     return clauses
 
 def static_encode_page_assignment(edge_to_page: ndarray) -> List[List[int]]:
@@ -287,6 +308,55 @@ def static_encode_consecutivity(precedes, v1, v2) -> List[List[int]]:
         clauses.append([precedes[v1, v2], -precedes[v, v1], -precedes[v2, v]])
     return clauses
 
+def static_encode_non_consecutivity(inbetween, precedes, v1, v2) -> List[List[int]]:
+    """
+    Encodes that two vertices are non consecutive, i.e., the vertices are not next to each other in any order.
+    There is no requiring a particular order between v1 and v2.
+
+    :param precedes: precedes[i, j] <=> vertex i precedes vertex j
+    :param inbetween: inbetween[i, k, j] => the vertex k is inbetween vertices i, j
+    :param v1: the index of the first vertex
+    :param v2: the index of the second vertex
+    :return: the generated clauses
+        """
+    clause = []
+    clauses = []
+    for v in range(precedes.shape[0]):
+        if v == v1 or v == v2:
+            continue
+        clause.extend([inbetween[v1,v,v2]])
+        clause.extend([inbetween[v2,v,v1]])
+    clauses.extend([clause])
+    return clauses
+
+def static_encode_non_extremes(precedes, v1, v2) -> List[List[int]]:
+    """
+    Encodes that two vertices are non extremes, i.e., given the two vertices one cannot be first and the other last at the same time.
+    Forbids two vertices to be extremes simultaneously.
+    There is no requiring a particular order between v1 and v2.
+
+    :param precedes: precedes[i, j] <=> vertex i precedes vertex j
+    :param v1: the index of the first vertex
+    :param v2: the index of the second vertex
+    :return: the generated clauses
+        """
+    clause1 = []
+    clause2 = []
+    clause3 = []
+    clause4 = []
+    clauses = []
+    for v in range(precedes.shape[0]):
+        if v == v1 or v == v2:
+            continue
+        clause1.extend([-precedes[v1,v], -precedes[v,v2]])
+        clause2.extend([-precedes[v1,v], -precedes[v2,v]])
+        clause3.extend([-precedes[v,v1], -precedes[v,v2]])
+        clause4.extend([-precedes[v,v1], -precedes[v2,v]])
+    clauses.extend([clause1])
+    clauses.extend([clause2])
+    clauses.extend([clause3])
+    clauses.extend([clause4])
+    return clauses
 
 def static_encode_first_vertex(precedes, v) -> List[List[int]]:
     """
@@ -947,8 +1017,13 @@ class SatModel(object):
         self._List_of_Biarc_Pages = self._create_variables(page_number).reshape((page_number))
         # Biarcs ---------- End
 
+
         #PQ-Layout
         self._is_heavier = self._create_variables(m * m).reshape((m, m))
+
+        # self._inbetween[i,k,j] => vertex k is inbetween vertices i, j
+        self._inbetween = self._create_variables(n * n * n).reshape((n, n, n))
+
 
     def _create_variables(self, number: int = 1) -> ndarray:
         assert number >= 1, "cannot create less than 1 new variables"
@@ -971,6 +1046,13 @@ class SatModel(object):
 
         """
         self._add_clauses(static_encode_vertex_order(self._precedes))
+
+    def add_inbetweenness_clauses(self):
+        """
+        Ensures that inbetweenness is encoded.
+
+        """
+        self._add_clauses(static_encode_inbetweenness(self._inbetween, self._precedes))
 
     def add_page_assignment_clauses(self):
         """
@@ -1383,6 +1465,20 @@ class SatModel(object):
                 if len(arguments) != 2:
                     abort(400, "The NODES_CONSECUTIVE constraint only allows exactly two arguments")
                 clauses.extend(static_encode_consecutivity(self._precedes,
+                                                           self._node_id_to_idx[arguments[0]],
+                                                           self._node_id_to_idx[arguments[1]]))
+                
+            elif constraint['type'] == 'NODES_NON_CONSECUTIVE':
+                if len(arguments) != 2:
+                    abort(400, "The NODES_NON_CONSECUTIVE constraint only allows exactly two arguments")
+                clauses.extend(static_encode_non_consecutivity(self._inbetween, self._precedes,
+                                                           self._node_id_to_idx[arguments[0]],
+                                                           self._node_id_to_idx[arguments[1]]))
+
+            elif constraint['type'] == 'NODES_NON_EXTREMES':
+                if len(arguments) != 2:
+                    abort(400, "The NODES_NON_EXTREMES constraint only allows exactly two arguments")
+                clauses.extend(static_encode_non_extremes(self._precedes,
                                                            self._node_id_to_idx[arguments[0]],
                                                            self._node_id_to_idx[arguments[1]]))
 

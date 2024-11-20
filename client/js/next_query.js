@@ -155,6 +155,8 @@ $("#cancelledNotificationDialog").dialog({
 			$("#isAcyclic").empty()
 			$("#isTree").empty()
 			$("#isBipartite").empty()
+			$("#maxDegree").empty()
+			$("#minDegree").empty()
 		}
 	})
 	

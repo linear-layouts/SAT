@@ -177,6 +177,30 @@ addDefaultColor();*/
 					var con = new Consecutive(objItems);
 					constraintsArray.push(con);
 					break;
+				case "NODES_NON_CONSECUTIVE":
+					var objItems = [];
+					c.arguments.forEach(function(a) {
+						graphComponent.graph.nodes.toArray().forEach(function(n) {
+							if (n.tag.toString() === a) {
+								objItems.push(n);
+							}
+						});
+					});
+					var con = new NonConsecutive(objItems);
+					constraintsArray.push(con);
+					break;
+				case "NODES_NON_EXTREMES":
+					var objItems = [];
+					c.arguments.forEach(function(a) {
+						graphComponent.graph.nodes.toArray().forEach(function(n) {
+							if (n.tag.toString() === a) {
+								objItems.push(n);
+							}
+						});
+					});
+					var con = new NonExtremes(objItems);
+					constraintsArray.push(con);
+					break;
 				case "NODES_SET_FIRST":
 					var objItems = [];
 					c.arguments.forEach(function(a) {
@@ -1986,6 +2010,19 @@ addDefaultColor();*/
 		let isTree = yfiles.algorithms.Trees.isTree(ygraph);
 		let isBipartite = yfiles.algorithms.GraphChecker.isBipartite(ygraph);
 
+		var maxdegree = 0
+		var maxdegree = 0
+		var mindegree = nrOfVertices
+		for (const v of ygraph.nodes) {				
+			if (v.edges.size > maxdegree) {
+				maxdegree = v.edges.size;
+			}				
+			if (v.edges.size < mindegree) {
+				mindegree = v.edges.size;
+			}
+		}
+		//console.log(maxdegree)nsole.log(maxdegree)
+
 		document.getElementById("nrOfVertices").innerHTML =  nrOfVertices;
 		document.getElementById("nrOfEdges").innerHTML = nrOfEdges;
 		document.getElementById("isPlanar").innerHTML = isPlanar;
@@ -1998,6 +2035,9 @@ addDefaultColor();*/
 		if (isTree) {document.getElementById("isTree").style.color = "green"} else {document.getElementById("isTree").style.color = "red"}
 		document.getElementById("isBipartite").innerHTML = isBipartite;
 		if (isBipartite) {document.getElementById("isBipartite").style.color = "green"} else {document.getElementById("isBipartite").style.color = "red"}
+		
+		document.getElementById("maxDegree").innerHTML = maxdegree
+		document.getElementById("minDegree").innerHTML = mindegree
 
 		if(treatEdgesAsDirected){
 			document.getElementById("reducedTr").style.display = "table-row";
