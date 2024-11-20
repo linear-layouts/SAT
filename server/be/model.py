@@ -18,7 +18,6 @@ def static_encode_vertex_order(precedes: ndarray) -> List[List[int]]:
     :param precedes: precedes[i, j] <=> the vertex i precedes vertex j
     :return: the list of generated clauses
     """
-    
     clauses = []
     # Ensure asymmetry
     for u in range(precedes.shape[0]):
@@ -39,6 +38,26 @@ def static_encode_vertex_order(precedes: ndarray) -> List[List[int]]:
 
     return clauses
 
+def static_encode_weight_order(is_heavier: ndarray, edges: ndarray) -> List[List[int]]:
+    """
+    Generates the clauses to ensure that the variables displaying the relative weight order of the edges are correct.
+    It is static in order to make optimizing more easy
+
+    :param is_heavier: is_heavier[i, j] <=> the edge i is heavier than edge j
+    :param edges: the given edges
+    :return: the list of generated clauses
+    """
+    clauses = []
+    for u in range(is_heavier.shape[0]):
+        for v in range(is_heavier.shape[0]): 
+            if u < v:
+                w1 = edges[u][1]
+                w2 = edges[v][1]
+                if w1 > w2:
+                    clauses.append([is_heavier[u][v]])
+                elif w1 < w2:
+                    clauses.append([-is_heavier[u][v]])
+    return clauses
 
 def static_encode_page_assignment(edge_to_page: ndarray) -> List[List[int]]:
     """
@@ -107,6 +126,7 @@ def static_to_dimacs(clauses: list, first_line: str) -> str:
     :param first_line: the header of the generated file
     :return: a string which encodes all given clauses in DIMACS format
     """
+    
     ret_val = first_line
     # Code block 'str translate' took: 26281.30907699233 ms
     s = str(clauses)[2:-2].translate(
@@ -431,6 +451,71 @@ def static_encode_stack_page(precedes: ndarray, edge_to_page: ndarray, edges: nd
                                                                           map[v][w], map[v][z], map[w][z]]), p))
     return clauses
 
+def static_encode_pq_page(precedes: ndarray, is_heavier: ndarray, edge_to_page: ndarray, edges: ndarray, p: int) -> List[List[int]]:
+    """
+    Encodes a stack page
+
+    :param precedes: precedes[i, j] <=> vertex i precedes vertex j
+    :param edge_to_page: edge_to_page[p, e] <=> edge e is assigned to page p
+    :param edges: all edges
+    :param p: the index of the current page
+            """
+    clauses = []
+    for e in range(edges.shape[0]):
+        e1 = edges[e][0]   
+        e1_weight = edges[e][3]
+        e1v1 = edges[e][1] 
+        e1v2 = edges[e][2] 
+        for f in range(edges.shape[0]): 
+            e2 = edges[f][0]      
+            e2_weight = edges[f][3]
+            if e < f:
+                if e1 == e2:
+                    continue
+                elif e1_weight == e2_weight:
+                    continue
+                elif e1 < e2: 
+                    e1_heavier_e2 =  [is_heavier[e1][e2]]
+                    e2_heavier_e1 =  [-is_heavier[e1][e2]]
+                else:
+                    e1_heavier_e2 = [-is_heavier[e2][e1]]
+                    e2_heavier_e1 =  [is_heavier[e2][e1]]
+                
+                e2v1 = edges[f][1]       
+                e2v2 = edges[f][2]      
+                
+                duplicates = get_duplicates([e1v1, e1v2, e2v1, e2v2])
+
+                if len(duplicates) > 1:
+                    continue
+                
+                elif len(duplicates) == 1:
+                    duplicate = duplicates[0]
+                    a = [x for x in [e1v1, e1v2, e2v1, e2v2] if x != duplicate][0]
+                    b = [x for x in [e1v1, e1v2, e2v1, e2v2] if x != duplicate][1]
+                    if b in [e1v1, e1v2] or a in [e2v1, e2v2]:
+                        continue
+                    forbidden_patterns = np.array([
+                        [edge_to_page[p, e1], edge_to_page[p, e2]] + static_encode_partial_order(precedes, a, b, duplicate) + e2_heavier_e1, # FÜR ORIGINALE DEFINITION AUSKOMMENTIEREN
+                        [edge_to_page[p, e1], edge_to_page[p, e2]] + static_encode_partial_order(precedes, duplicate, b, a) + e2_heavier_e1,
+
+                        [edge_to_page[p, e1], edge_to_page[p, e2]] + static_encode_partial_order(precedes, b, a, duplicate) + e1_heavier_e2, # FÜR ORIGINALE DEFINITION AUSKOMMENTIEREN
+                        [edge_to_page[p, e1], edge_to_page[p, e2]] + static_encode_partial_order(precedes, duplicate, a, b) + e1_heavier_e2
+                    ])
+                else:
+                    forbidden_patterns = np.array([
+                        [edge_to_page[p, e1], edge_to_page[p, e2]] + static_encode_partial_order(precedes, e1v1, e2v1, e1v2) + [precedes[e2v2, e1v2]] + e2_heavier_e1, 
+                        [edge_to_page[p, e1], edge_to_page[p, e2]] + static_encode_partial_order(precedes, e1v1, e2v2, e1v2) + [precedes[e2v1, e1v2]] + e2_heavier_e1,
+                        [edge_to_page[p, e1], edge_to_page[p, e2]] + static_encode_partial_order(precedes, e1v2, e2v1, e1v1) + [precedes[e2v2, e1v1]] + e2_heavier_e1,
+                        [edge_to_page[p, e1], edge_to_page[p, e2]] + static_encode_partial_order(precedes, e1v2, e2v2, e1v1) + [precedes[e2v1, e1v1]] + e2_heavier_e1,
+
+                        [edge_to_page[p, e1], edge_to_page[p, e2]] + static_encode_partial_order(precedes, e2v1, e1v1, e2v2) + [precedes[e1v2, e2v2]] + e1_heavier_e2,
+                        [edge_to_page[p, e1], edge_to_page[p, e2]] + static_encode_partial_order(precedes, e2v1, e1v2, e2v2) + [precedes[e1v1, e2v2]] + e1_heavier_e2,
+                        [edge_to_page[p, e1], edge_to_page[p, e2]] + static_encode_partial_order(precedes, e2v2, e1v1, e2v1) + [precedes[e1v2, e2v1]] + e1_heavier_e2,
+                        [edge_to_page[p, e1], edge_to_page[p, e2]] + static_encode_partial_order(precedes, e2v2, e1v2, e2v1) + [precedes[e1v1, e2v1]] + e1_heavier_e2
+                    ])
+                clauses.extend((forbidden_patterns * -1).tolist())
+    return clauses
 
 def static_encode_queue_page(precedes: ndarray, edge_to_page: ndarray, edges: ndarray, p: int) -> List[List[int]]:
     """
@@ -862,11 +947,23 @@ class SatModel(object):
         self._List_of_Biarc_Pages = self._create_variables(page_number).reshape((page_number))
         # Biarcs ---------- End
 
+        #PQ-Layout
+        self._is_heavier = self._create_variables(m * m).reshape((m, m))
+
     def _create_variables(self, number: int = 1) -> ndarray:
         assert number >= 1, "cannot create less than 1 new variables"
         new_vars = np.arange(self.max_var + 1, self.max_var + 1 + number)
         self.max_var = np.max(new_vars)
         return new_vars
+
+    def _add_relative_weight_order_clauses(self):
+        """
+        Ensures that weight order is encoded
+        
+        """
+        edges = np.array([[self._edge_id_to_idx[e.id], e.weight] for e in self.edges])
+
+        self._add_clauses(static_encode_weight_order(self._is_heavier, edges))
 
     def add_relative_order_clauses(self):
         """
@@ -947,15 +1044,20 @@ class SatModel(object):
         edges = np.array([
             [self._edge_id_to_idx[e.id],
              self._node_id_to_idx[e.source],
-             self._node_id_to_idx[e.target]] for
-            e in self.edges])
+             self._node_id_to_idx[e.target],
+             e.weight
+             ] for e in self.edges])
         edge_to_page = self._edge_to_page
         precedes = self._precedes
         deq_edge_type = self._deq_edge_type
         Top = self._Top
         Bottom = self._Bottom
         List_of_Biarc_Pages = self._List_of_Biarc_Pages
-        for page in self.pages:
+
+        is_heavier = self._is_heavier
+        self._add_relative_weight_order_clauses() 
+
+        for page in self.pages:    
             p = self._page_id_to_idx[page['id']]
             self._add_clauses(self._add_additional_page_constraint(edge_to_page, edges, page.get('constraint', "NONE"), p))
 
@@ -982,6 +1084,8 @@ class SatModel(object):
                 #self._add_clauses(static_encode_deque_page(precedes, edge_to_page, edges, p, deq_edge_type))
             elif page['type'] == 'BIARC':
                 self._add_clauses(static_encode_biarc_page(precedes, edge_to_page, Top, Bottom, List_of_Biarc_Pages, edges, p))
+            elif page['type'] == 'PQUEUE':
+                self._add_clauses(static_encode_pq_page(precedes, is_heavier, edge_to_page, edges, p))
             elif page['type'] == 'NONE':
                 continue
             else:

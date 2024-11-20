@@ -114,6 +114,7 @@ class App:
                                                                 'RIQUE',
                                                                 'DEQUE',
                                                                 'BIARC',
+                                                                'PQUEUE',
                                                                 'NONE'],
                                                           required=True),
                                     'constraint': fields.String(description='Additional constraints for the page',

@@ -178,6 +178,7 @@
 					<option value="RIQUE">rique</option>
 					<option value="DEQUE">deque</option>
 					<option value="BIARC">biarc</option>
+					<option value="PQUEUE">pqueue</option>
 					<!--<option value="MONQUE">monque</option>-->
 					<option value="NONE">undefined</option>
 				</select> <select id="layoutP1" name="layoutP1">
@@ -261,6 +262,7 @@
 			<option value="tree">Tree</option>
 			<option value="complete">Complete Graph</option>
 			<option value="completeBipartite">Complete Bipartite Graph</option>
+			<option value="outerPlanar">Outer Planar Graph</option>
 		</select><br><br>
 		<div id="divVertices">Number of vertices:
 		<input type="number" id="numberOfVertices" name="numberOfVertices" min="0" placeholder="10" value="10" required><br>
@@ -273,6 +275,16 @@
 		</div>
 		<div id="divBipartiteVerticesN" hidden>Number of vertices in partition B:
 		<input type="number" id="numberOfBipartiteVerticesN" name="numberOfBipartiteVerticesN" min="0" placeholder="5" value="5" required><br>
+		</div>
+		<div id="divTypeOfOuterPlanar" hidden>Type of Outer Planar Graph:
+			<select name="outerPlanarType" id="outerPlanarType">
+				<option value="random">Random</option>
+				<option value="balanced">Balanced</option>
+				<option value="path">Path</option>
+			</select>
+		</div>
+		<div id="divOuterPlanarCurvature" hidden>Curvature of path:
+			<input id="outerPlanarCurvature" type="range" min="0" max="10" value="5">
 		</div>
 		<br><br>
 		<button class="ui-button ui-widget ui-corner-all" id="computeRandomGraph">Create</button>

@@ -18,13 +18,16 @@ def get_nodes_and_edges_from_graph(string: str) -> (List[str], List[Edge]):
     parser = etree.XMLParser(remove_blank_text=True)
 
     id_tag_key = None
+    id_edge_label_key = None
     root = etree.XML(string, parser=parser)
     for child in root:
         if child.get('attr.name') == "UserTags":
             id_tag_key = child.get('id')
-            break
+        if child.get('attr.name') == "EdgeLabels":
+            id_edge_label_key = child.get('id')
 
     graph_ns = '{http://graphml.graphdrawing.org/xmlns}'
+    graph_ns_y = '{http://www.yworks.com/xml/yfiles-common/3.0}'
     graph_root = root.findall('{}graph'.format(graph_ns))
     if len(graph_root) == 0:
         graph_ns = ""
@@ -53,15 +56,18 @@ def get_nodes_and_edges_from_graph(string: str) -> (List[str], List[Edge]):
         custom_id = xml_edge.get('id')
         source = xml_edge.get('source')
         target = xml_edge.get('target')
+        weight = 0
 
         if id_tag_key:
             for data_element in xml_edge.findall('{}data'.format(graph_ns)):
                 if data_element.get('key') == id_tag_key:
                     custom_id = data_element[0].text
-                    break
+                elif data_element.get('key') == id_edge_label_key:
+                    for child in data_element.iter('{}Label.Text'.format(graph_ns_y)):
+                        weight = int(child.text)   
         if not custom_id:
             custom_id = "{}-{}".format(source, target)
 
-        edges.append(Edge(custom_id, node_id_mapping[source], node_id_mapping[target]))
+        edges.append(Edge(custom_id, node_id_mapping[source], node_id_mapping[target], weight))
 
     return list(node_id_mapping.values()), edges
