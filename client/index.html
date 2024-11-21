@@ -67,6 +67,8 @@
 					<button id="ExportButton"></button>
 					<label for="ExportButton" title="Export Graph as...">
 						<img src="style/icons/ic_exit_to_app_24px.svg"></label><span></span>
+					<button id="statsButton"></button>
+					<label for="statsButton" title="Stats"><img src="style/icons/ic_stats_24px.svg"></label><span></span>
 					<button id="ServerButton"></button>
 					<label for="ServerButton" title="Change Server"><img src="style/icons/ic_laptop_windows_24px.svg"></label>
 				</div>
@@ -162,8 +164,12 @@
 				</div>
 				<div id="rightTools">
 					<button class="ui-button ui-widget ui-corner-all" id="submitButton" style="width: 100px">Compute</button>
-					<button class="ui-button ui-widget ui-corner-all" style="position: absolute; right: 130px;"id="statsButton">Stats</button>
-					<div id="displayCurrentServer" style="position:absolute; width: 100px; right: 250px; font-family: arial; font-size: 8pt"></div>
+					<select class="ui-button ui-widget ui-corner-all" id="chooseServer" style="position:absolute; width: 170px; right: 120px;">
+						<option value="http://alice.cs.uni-tuebingen.de:5555">U. Tuebingen</option>
+						<option value="http://orgrimmar.uni-trier.de:5555">U. Trier</option>
+						<option value="">Other</option>
+					  </select>					
+					<div id="displayCurrentServer" style="position:absolute; width: 170px; right: 250px;"></div>
 				</div>
 			</div>
 		</div>

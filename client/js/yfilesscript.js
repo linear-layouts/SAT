@@ -1825,6 +1825,15 @@ require([
 			$("#saveDialog").dialog("close")
 		})
 
+		$('#chooseServer').change(
+			function() {
+				var server = this.value;
+				$('#serverUrl').val(server);
+				$("#serverDialog").dialog("open");
+				
+			}
+		);
+
 		document.querySelector("#ServerButton").addEventListener("click", () => {
 			if (typeof (window.localStorage) !== "undefined") {
 				$("#serverDialog").dialog("open")
