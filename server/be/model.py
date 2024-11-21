@@ -49,14 +49,28 @@ def static_encode_inbetweenness(inbetween: ndarray, precedes: ndarray) -> List[L
     :return: the list of generated clauses
     """
     clauses = []
-    # Ensure asymmetry
+    
     for u in range(precedes.shape[0]):
         for v in range(precedes.shape[0]):
             for w in range(precedes.shape[0]):
                 if u == v or v == w or w == u:
-                    continue
+                    continue  
+                # Ensure asymmetry
+                #clauses.append([-inbetween[u, w, v], -inbetween[v, w, u]])
+                #clauses.append([-inbetween[v, w, u], -inbetween[u, w, v]])
+                # Ensure compatibility with precedes
+                clauses.append([-precedes[u, v], -inbetween[v, w, u]])
+                clauses.append([-precedes[v, u], -inbetween[u, w, v]])
+                # Actual definition
                 clauses.append([-inbetween[u, v, w], precedes[u,v]])
                 clauses.append([-inbetween[u, v, w], precedes[v,w]])
+                # Ensure transitivity
+                #for z in range(precedes.shape[0]):
+                #   if z == v or z == w or z == u:
+                #        continue 
+                #    clauses.append([-inbetween[u, v, w], -inbetween[v, w, z], inbetween[u, v, z]])
+                #    clauses.append([-inbetween[u, v, w], -inbetween[v, w, z], inbetween[u, w, z]])
+
     return clauses
 
 def static_encode_page_assignment(edge_to_page: ndarray) -> List[List[int]]:
@@ -286,7 +300,7 @@ def static_encode_consecutivity(precedes, v1, v2) -> List[List[int]]:
         clauses.append([precedes[v1, v2], -precedes[v, v1], -precedes[v2, v]])
     return clauses
 
-def static_encode_non_consecutivity(inbetween, precedes, v1, v2) -> List[List[int]]:
+def static_encode_non_consecutivity(inbetween, precedes, v1, v2, v1_neighbors = []) -> List[List[int]]:
     """
     Encodes that two vertices are non consecutive, i.e., the vertices are not next to each other in any order.
     There is no requiring a particular order between v1 and v2.
@@ -297,17 +311,22 @@ def static_encode_non_consecutivity(inbetween, precedes, v1, v2) -> List[List[in
     :param v2: the index of the second vertex
     :return: the generated clauses
         """
-    clause = []
+    clause1 = []
+    clause2 = []
     clauses = []
-    for v in range(precedes.shape[0]):
+    clause1.extend([-precedes[v1,v2]])
+    clause2.extend([-precedes[v2,v1]])
+    if len(v1_neighbors) == 0 :
+        v1_neighbors = range(precedes.shape[0])
+    for v in v1_neighbors:
         if v == v1 or v == v2:
             continue
-        clause.extend([inbetween[v1,v,v2]])
-        clause.extend([inbetween[v2,v,v1]])
-    clauses.extend([clause])
+        clause1.extend([inbetween[v1,v,v2]])
+        clause2.extend([inbetween[v2,v,v1]])
+    clauses.extend([clause1, clause2])        
     return clauses
 
-def static_encode_non_extremes(precedes, v1, v2) -> List[List[int]]:
+def static_encode_non_extremes(precedes, v1, v2, v1_neighbors = [], v2_neighbors = []) -> List[List[int]]:
     """
     Encodes that two vertices are non extremes, i.e., given the two vertices one cannot be first and the other last at the same time.
     Forbids two vertices to be extremes simultaneously.
@@ -318,22 +337,34 @@ def static_encode_non_extremes(precedes, v1, v2) -> List[List[int]]:
     :param v2: the index of the second vertex
     :return: the generated clauses
         """
-    clause1 = []
-    clause2 = []
-    clause3 = []
-    clause4 = []
+    # If v1 is first then v2 cannot be last.
+    
     clauses = []
-    for v in range(precedes.shape[0]):
-        if v == v1 or v == v2:
-            continue
-        clause1.extend([-precedes[v1,v], -precedes[v,v2]])
-        clause2.extend([-precedes[v1,v], -precedes[v2,v]])
-        clause3.extend([-precedes[v,v1], -precedes[v,v2]])
-        clause4.extend([-precedes[v,v1], -precedes[v2,v]])
-    clauses.extend([clause1])
-    clauses.extend([clause2])
-    clauses.extend([clause3])
-    clauses.extend([clause4])
+    if len(v1_neighbors) == 0 or len(v2_neighbors) == 0:
+        clause1 = [-precedes[v1,v2]]    
+        clause2 = [-precedes[v1,v2]]    
+        clause3 = [-precedes[v2,v1]]    
+        clause4 = [-precedes[v2,v1]]
+        for v in range(precedes.shape[0]):
+            if v == v1 or v == v2:
+                continue
+            clause1.extend([-precedes[v1,v], -precedes[v,v2]])
+            clause2.extend([-precedes[v1,v], -precedes[v2,v]])
+            clause3.extend([-precedes[v,v1], -precedes[v,v2]])
+            clause4.extend([-precedes[v,v1], -precedes[v2,v]])
+    else:
+        clause1, clause2, clause3, clause4 = [], [], [], []
+        for v in v1_neighbors:
+            clause1.extend([-precedes[v1, v]])
+            clause2.extend([precedes[v1, v]])
+            clause3.extend([-precedes[v, v1]])
+            clause4.extend([precedes[v, v1]])
+        for v in v2_neighbors:
+            clause1.extend([precedes[v2, v]])
+            clause2.extend([-precedes[v2, v]])
+            clause3.extend([precedes[v, v2]])
+            clause4.extend([-precedes[v, v2]])            
+    clauses.extend([clause1, clause2, clause3, clause4])
     return clauses
 
 def static_encode_first_vertex(precedes, v) -> List[List[int]]:
@@ -422,7 +453,6 @@ def static_encode_treat_graph_directed(precedes, edges) -> List[List[int]]:
     #     clauses.append([precedes[w, v]])
     #print(f"Clauses {clauses}")  # TODO: Nikadi de
     return clauses
-
 
 
 def static_encode_stack_page(precedes: ndarray, edge_to_page: ndarray, edges: ndarray, p: int) -> List[List[int]]:
@@ -1394,6 +1424,33 @@ class SatModel(object):
                 if len(arguments) != 1:
                     abort(400, "The NODES_SET_NOT_LAST constraint only allows exactly one argument")
                 clauses.extend(static_encode_not_last_vertex(self._precedes, self._node_id_to_idx[arguments[0]]))
+
+            elif constraint['type'] == 'HAMILTONIAN_CYCLE' or constraint['type'] == 'HAMILTONIAN_PATH':
+                #non_edges = []
+                print("Hi!")
+                # Compute for each vertex its neighbors
+                neighbors = {}
+                for v in self.vertices:
+                    neighbors[v] = []
+                for e in self.edges:
+                    neighbors[e.source].append(self._node_id_to_idx[e.target])
+                    neighbors[e.target].append(self._node_id_to_idx[e.source])
+
+                # If (v1, v2) is not an edge then neighbor of v1  must be in between 
+                for v1 in self.vertices:
+                    for v2 in self.vertices:
+                        if v1 == v2 or v2 < v1:
+                            continue
+                        if self._node_id_to_idx[v2] not in neighbors[v1]:
+                            #non_edges.append((v1,v2))
+                            if constraint['type'] == 'HAMILTONIAN_CYCLE':
+                                clauses.extend(static_encode_non_extremes(self._precedes,
+                                                                        self._node_id_to_idx[v1],
+                                                                        self._node_id_to_idx[v2], neighbors[v1], neighbors[v2]))
+                            clauses.extend(static_encode_non_consecutivity(self._inbetween, self._precedes,
+                                                                    self._node_id_to_idx[v1],
+                                                                    self._node_id_to_idx[v2], neighbors[v1]))
+                #print(non_edges)
 
             elif constraint['type'] == 'TREAT_GRAPH_DIRECTED':
                 edges = np.array([

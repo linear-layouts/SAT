@@ -386,18 +386,26 @@ addDefaultColor();*/
 					var con = new TreatGraphDirected(graphComponent.graph.edges.toArray());
 					constraintsArray.push(con);
 					break;
-					case "EDGES_SET_STACK_ABOVE":
-						var objItems = [];
-						c.arguments.forEach(function(a) {
-							graphComponent.graph.edges.toArray().forEach(function(e) {
-								if (e.tag.toString() === a) {
-									objItems.push(e);
-								}
-							});
+				case "HAMILTONIAN_CYCLE":
+					var con = new HamiltonianCycle(graphComponent.graph.edges.toArray());
+					constraintsArray.push(con);
+					break;
+				case "HAMILTONIAN_PATH":
+					var con = new HamiltonianPath(graphComponent.graph.edges.toArray());
+					constraintsArray.push(con);
+					break;
+				case "EDGES_SET_STACK_ABOVE":
+					var objItems = [];
+					c.arguments.forEach(function(a) {
+						graphComponent.graph.edges.toArray().forEach(function(e) {
+							if (e.tag.toString() === a) {
+								objItems.push(e);
+							}
 						});
-						var con = new SetAsStackAbove([objItems, c.modifier]);
-						constraintsArray.push(con);
-						break;
+					});
+					var con = new SetAsStackAbove([objItems, c.modifier]);
+					constraintsArray.push(con);
+					break;
 				case "EDGES_SET_STACK_BELOW":
 					var objItems = [];
 					c.arguments.forEach(function(a) {

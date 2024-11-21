@@ -163,6 +163,14 @@ class App:
                                       modifier: the node ids to be after
                                       
                                       TREAT_GRAPH_DIRECTED: Treat the graph according to direction
+                                                             
+                                      HAMILTONIAN_CYCLE: Computes the Hamilton Cycle of the given graph.
+                                      arguments: the given graph
+                                      modifier: none
+                                                             
+                                      HAMILTONIAN_PATH: Computes the Hamilton Path of the given graph.
+                                      arguments: the given graph
+                                      modifier: none
                                       
                                       NODES_ABSOLUTE_ORDER: deprecated. see NODES_REQUIRE_ABSOLUTE_ORDER
                                       
@@ -234,6 +242,8 @@ class App:
                                                                  "EDGES_FROM_NODES_ON_PAGES",
                                                                  "NODES_PREDECESSOR",
                                                                  "TREAT_GRAPH_DIRECTED",
+                                                                 "HAMILTONIAN_CYCLE",
+                                                                 "HAMILTONIAN_PATH",
                                                                  "NODES_ABSOLUTE_ORDER",
                                                                  "NODES_REQUIRE_ABSOLUTE_ORDER",
                                                                  "NODES_REQUIRE_PARTIAL_ORDER",
@@ -359,8 +369,25 @@ class App:
                     try:
                         graph_str = base64.b64decode(b64_graph_str)
                         node_ids, edges = get_nodes_and_edges_from_graph(graph_str)
+                        #print(node_ids)
+                        #print(edges)
                         # node_ids ==> List(str)
                         # edges ==> List(Edge)
+
+                        """non_edges = []
+                        for v1 in node_ids:
+                            for v2 in node_ids:
+                                if v1 == v2 or v2 < v1:
+                                    continue
+                                found = False
+                                for e in edges:
+                                    if (e.source == v1 and e.target == v2) or (e.source == v2 and e.target == v1):
+                                        found = True
+                                        break
+                                if found == False:
+                                    non_edges.append((v1,v2))
+                        print(non_edges)"""
+
 
                     except Exception as e:
                         app.logger.exception(e)

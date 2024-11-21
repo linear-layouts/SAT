@@ -51,6 +51,8 @@ require([
 	var nodesStableSize = true;
 	var allowDoubleEdges = false;
 	var treatEdgesAsDirected = false;
+	var hamiltonCycle = false;
+	var hamiltonPath = false;
 	var removedTagManually = false;
 	var constraintsArrayOfClipboard = [];
 	var nodesIndexPositionInClipboardUsingTag = {};
@@ -1240,6 +1242,24 @@ require([
 				$("#constraintTags").tagit("createTag", con.getPrintable())
 
 				break;
+			case "HAMILTONIAN_CYCLE":
+				objString = objects;
+				var objString = objects.split(",")
+				var objItems = [];
+				var con = new HamiltonianCycle(objItems)
+				constraintsArray.push(con);
+				$("#constraintTags").tagit("createTag", con.getPrintable())
+
+				break;
+			case "HAMILTONIAN_PATH":
+				objString = objects;
+				var objString = objects.split(",")
+				var objItems = [];
+				var con = new HamiltonianPath(objItems)
+				constraintsArray.push(con);
+				$("#constraintTags").tagit("createTag", con.getPrintable())
+
+				break;
 			case "NODES_CONSECUTIVE":
 				var objString = objects.split(",")
 
@@ -2158,6 +2178,96 @@ require([
 			allowDoubleEdges = !allowDoubleEdges;
 		})
 
+		document.querySelector("#Hamiltonian").addEventListener("click", () => {
+			hamiltonCycle = !hamiltonCycle;
+			if (hamiltonCycle) {
+				var con = new HamiltonianCycle([graphComponent.graph.nodes.toArray()[0]]);
+				constraintsArray.push(con);
+				$("#constraintTags").tagit("createTag", con.getPrintable())
+				$("#constraintTags").tagit({
+					afterTagRemoved: function (event, ui) {
+						if (ui.tagLabel == "HamiltonianCycle") {
+							removedTagManually = !removedTagManually
+							if (removedTagManually) {
+								document.getElementById('Hamiltonian').click();
+								let color = 'black';
+								resetDefaultEdgesStyle(false, color)
+								removedTagManually = false;
+							}
+						}
+					}
+				});
+				//let color = 'black';
+				//resetDefaultEdgesStyle(false, color);
+			}
+			else {
+				var con = new HamiltonianCycle([])
+				//constraintsArray = [];
+				var newConstraintsArray = []
+				let t;
+				for (t = 0; t < constraintsArray.length; t++) {
+					if (constraintsArray[t].type != "HAMILTONIAN_CYCLE") {
+						newConstraintsArray.push(constraintsArray[t])
+					}
+				}
+				constraintsArray = newConstraintsArray
+				try {
+					$("#constraintTags").tagit("removeTagByLabel", con.getPrintable())
+					removedTagManually = true;
+				}
+				catch (error) {
+					removedTagManually = false;
+				}
+				let color = 'black';
+				resetDefaultEdgesStyle(false, color);
+			}
+		})
+
+		document.querySelector("#HamiltonianP").addEventListener("click", () => {
+			hamiltonPath = !hamiltonPath;
+			if (hamiltonPath) {
+				var con = new HamiltonianPath([graphComponent.graph.nodes.toArray()[0]]);
+				constraintsArray.push(con);
+				$("#constraintTags").tagit("createTag", con.getPrintable())
+				$("#constraintTags").tagit({
+					afterTagRemoved: function (event, ui) {
+						if (ui.tagLabel == "HamiltonianPath") {
+							removedTagManually = !removedTagManually
+							if (removedTagManually) {
+								document.getElementById('HamiltonianP').click();
+								let color = 'black';
+								resetDefaultEdgesStyle(false, color)
+								removedTagManually = false;
+							}
+						}
+					}
+				});
+				//let color = 'black';
+				//resetDefaultEdgesStyle(false, color);
+			}
+			else {
+				var con = new HamiltonianPath([])
+				//constraintsArray = [];
+				var newConstraintsArray = []
+				let t;
+				for (t = 0; t < constraintsArray.length; t++) {
+					if (constraintsArray[t].type != "HAMILTONIAN_PATH") {
+						newConstraintsArray.push(constraintsArray[t])
+					}
+				}
+				constraintsArray = newConstraintsArray
+				try {
+					$("#constraintTags").tagit("removeTagByLabel", con.getPrintable())
+					removedTagManually = true;
+				}
+				catch (error) {
+					removedTagManually = false;
+				}
+				let color = 'black';
+				resetDefaultEdgesStyle(false, color);
+			}
+		})
+
 		document.querySelector("#directedEdges").addEventListener("click", () => {
 			treatEdgesAsDirected = !treatEdgesAsDirected;
 			if (treatEdgesAsDirected) {
@@ -2276,6 +2386,188 @@ require([
 				graphComponent.graph.setNodeCenter(stellate, new yfiles.geometry.Point(x, y));
 			}
 		})
+
+		document.querySelector("#BarnetteOne").addEventListener("click", () => {
+
+			var selectedEdges = graphComponent.selection.selectedEdges.toArray();
+			
+			//var selectedNodes = graphComponents.selection.selectedNodes.toArray();
+			
+			if (selectedEdges.length == 2) {
+				var e1 = selectedEdges[0];
+				var e2 = selectedEdges[1];
+				console.log(e1.sourceNode);
+				console.log(e1.targetNode);
+				console.log(e2.sourceNode);
+				console.log(e2.targetNode);
+
+				var v11 = e1.sourceNode;
+				var v12 = e1.targetNode;
+				var v21 = e2.sourceNode;
+				var v22 = e2.targetNode;
+				//var len1 = e1.length;
+				//var len2 = e2.length;
+
+				// delete the selected edges
+				graphComponent.inputMode.deleteSelection();
+	
+				var x11 = v11.layout.center.x;
+				var y11 = v11.layout.center.y;
+				var x12 = v12.layout.center.x;
+				var y12 = v12.layout.center.y;
+				var x21 = v21.layout.center.x;
+				var y21 = v21.layout.center.y;
+				var x22 = v22.layout.center.x;
+				var y22 = v22.layout.center.y;
+
+				var x1 = (2*x11 + x12)/3;
+				var y1 = (2*y11+ y12)/3;
+				var x2 = (x11  + 2*x12)/3;
+				var y2 = (y11 + 2*y12)/3;
+				var x3 = (2*x21 + x22)/3;
+				var y3 = (2*y21 + y22)/3;
+				var x4 = (x21 + 2*x22)/3;
+				var y4 = (y21 + 2*y22)/3;
+
+				// create 4 new nodes
+				var node1 = graphComponent.graph.createNode({
+					layout: new yfiles.geometry.Rect(x1, y1, 20, 20),
+					tag: getNextTag()
+				})
+				graphComponent.graph.addLabel(node1, getNextLabel("node").toString());
+				graphComponent.graph.setNodeCenter(node1, new yfiles.geometry.Point(x1, y1));
+
+				var node2 = graphComponent.graph.createNode({
+					layout: new yfiles.geometry.Rect(x2, y2, 20, 20),
+					tag: getNextTag()
+				})
+				graphComponent.graph.addLabel(node2, getNextLabel("node").toString());
+				graphComponent.graph.setNodeCenter(node2, new yfiles.geometry.Point(x2, y2));
+
+				var node3 = graphComponent.graph.createNode({
+					layout: new yfiles.geometry.Rect(x3, y3, 20, 20),
+					tag: getNextTag()
+				})
+				graphComponent.graph.addLabel(node3, getNextLabel("node").toString());
+				graphComponent.graph.setNodeCenter(node3, new yfiles.geometry.Point(x3, y3));
+
+				var node4 = graphComponent.graph.createNode({
+					layout: new yfiles.geometry.Rect(x4, y4, 20, 20),
+					tag: getNextTag()
+				})
+				graphComponent.graph.addLabel(node4, getNextLabel("node").toString());
+				graphComponent.graph.setNodeCenter(node4, new yfiles.geometry.Point(x4, y4));
+
+				// create new edges
+				var edge1 = graphComponent.graph.createEdge({
+					source: node1,
+					target: node2,
+					tag: node1.tag + "-" + node2.tag
+				})
+				graphComponent.graph.addLabel(edge1, getNextLabel("edge").toString())
+				
+				var edge2 = graphComponent.graph.createEdge({
+					source: node3,
+					target: node4,
+					tag: node3.tag + "-" + node4.tag
+				})
+				graphComponent.graph.addLabel(edge2, getNextLabel("edge").toString())
+
+				if (Math.sqrt(Math.pow(x11-x1,2) +  Math.pow(y11-y1,2))  < Math.sqrt(Math.pow(x11-x2,2) +  Math.pow(y11-y2,2))) {
+					var edge3 = graphComponent.graph.createEdge({
+						source: v11,
+						target: node1,
+						tag: v11.tag + "-" + node1.tag
+					})
+					graphComponent.graph.addLabel(edge3, getNextLabel("edge").toString())
+
+					var edge4 = graphComponent.graph.createEdge({
+						source: node2,
+						target: v12,
+						tag: node2.tag + "-" + v12.tag
+					})
+					graphComponent.graph.addLabel(edge4, getNextLabel("edge").toString())
+				}
+				else {
+					var edge3 = graphComponent.graph.createEdge({
+						source: v11,
+						target: node2,
+						tag: v11.tag + "-" + node2.tag
+					})
+					graphComponent.graph.addLabel(edge3, getNextLabel("edge").toString())
+
+					var edge4 = graphComponent.graph.createEdge({
+						source: node1,
+						target: v12,
+						tag: node1.tag + "-" + v12.tag
+					})
+					graphComponent.graph.addLabel(edge4, getNextLabel("edge").toString())
+				}
+
+				if (Math.sqrt(Math.pow(x21-x3,2) +  Math.pow(y21-y3,2)) < Math.sqrt(Math.pow(x21-x4,2) +  Math.pow(y21-y4,2))) {
+					var edge5 = graphComponent.graph.createEdge({
+						source: v21,
+						target: node3,
+						tag: v21.tag + "-" + node3.tag
+					})
+					graphComponent.graph.addLabel(edge5, getNextLabel("edge").toString())
+
+					var edge6 = graphComponent.graph.createEdge({
+						source: node4,
+						target: v22,
+						tag: node4.tag + "-" + v22.tag
+					})
+					graphComponent.graph.addLabel(edge6, getNextLabel("edge").toString())
+				}
+				else {
+					var edge5 = graphComponent.graph.createEdge({
+						source: v21,
+						target: node4,
+						tag: v21.tag + "-" + node4.tag
+					})
+					graphComponent.graph.addLabel(edge5, getNextLabel("edge").toString())
+
+					var edge6 = graphComponent.graph.createEdge({
+						source: node3,
+						target: v22,
+						tag: node3.tag + "-" + v22.tag
+					})
+					graphComponent.graph.addLabel(edge6, getNextLabel("edge").toString())
+				}
+				
+				if (Math.sqrt(Math.pow(x1-x3,2) +  Math.pow(y1-y3,2)) + Math.sqrt(Math.pow(x2-x4,2) +  Math.pow(y2-y4,2)) < Math.sqrt(Math.pow(x1-x4,2) +  Math.pow(y1-y4,2)) + Math.sqrt(Math.pow(x2-x3,2) +  Math.pow(y2-y3,2))) {
+					var edge7 = graphComponent.graph.createEdge({
+						source: node1,
+						target: node3,
+						tag: node1.tag + "-" + node3.tag
+					})
+					graphComponent.graph.addLabel(edge7, getNextLabel("edge").toString())
+
+					var edge8 = graphComponent.graph.createEdge({
+						source: node2,
+						target: node4,
+						tag: node2.tag + "-" + node4.tag
+					})
+					graphComponent.graph.addLabel(edge8, getNextLabel("edge").toString())
+				}
+				else {
+					var edge7 = graphComponent.graph.createEdge({
+						source: node1,
+						target: node4,
+						tag: node1.tag + "-" + node4.tag
+					})
+					graphComponent.graph.addLabel(edge7, getNextLabel("edge").toString())
+
+					var edge8 = graphComponent.graph.createEdge({
+						source: node2,
+						target: node3,
+						tag: node2.tag + "-" + node3.tag
+					})
+					graphComponent.graph.addLabel(edge8, getNextLabel("edge").toString())
+				}
+			} 
+			
+		}) 
 
 		document.querySelector("#threeStellation").addEventListener("click", () => {
 			var selectedNodes = graphComponent.selection.selectedNodes.toArray();
@@ -2878,7 +3170,7 @@ require([
 		var removePage = document.getElementById("page"+numberOfPages);
 		var label = document.getElementById("labelP"+numberOfPages);
 		$("#labelP"+currentNOP).remove();
-	  $("#page"+currentNOP).remove();
+	    $("#page"+currentNOP).remove();
 		$("#typeP"+currentNOP).remove();
 		$("#layoutP"+currentNOP).remove();
 		numberOfPages = currentNOP-1;
@@ -4113,6 +4405,13 @@ require([
 					window.sessionStorage.setItem("directedEdgesStatus", document.getElementById('directedEdges').checked);
 
 					break;
+
+				case "HAMILTONIAN_CYCLE":
+
+					document.getElementById('Hamiltonian').click();
+					window.sessionStorage.setItem("Hamiltonian", document.getElementById('Hamiltonian').checked);
+
+				break;
 
 				case "NODES_CONSECUTIVE":
 					var objItems = []

@@ -237,6 +237,48 @@ function deleteRelatedConstraintsDeluxe(item) {
 	//})
 }
 
+function deleteRelatedConstraintsDeluxeHam(item) {
+	var arr = constraintsArray;
+
+	var constrToDelete = []
+
+	arr.forEach(function(constr) {
+		if (constr.getObjects().includes(item) && constr.type != "HAMILTONIAN_CYCLE") {
+			constrToDelete.push(constr)
+		} else if (Array.isArray(constr.objects[0])) {
+			let i;
+			for(i=0; i<constr.getObjects().length; i++) {
+				if (constr.objects[i].includes(item)) {
+					constrToDelete.push(constr)
+				}
+			}
+		}
+	})
+
+	return constrToDelete;
+}
+
+function deleteRelatedConstraintsDeluxeHamP(item) {
+	var arr = constraintsArray;
+
+	var constrToDelete = []
+
+	arr.forEach(function(constr) {
+		if (constr.getObjects().includes(item) && constr.type != "HAMILTONIAN_PATH") {
+			constrToDelete.push(constr)
+		} else if (Array.isArray(constr.objects[0])) {
+			let i;
+			for(i=0; i<constr.getObjects().length; i++) {
+				if (constr.objects[i].includes(item)) {
+					constrToDelete.push(constr)
+				}
+			}
+		}
+	})
+
+	return constrToDelete;
+}
+
 function deleteAllConstraints() {
 	$("#constraintTags").tagit("removeAll");
 

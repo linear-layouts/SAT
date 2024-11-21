@@ -34,8 +34,9 @@ class SolverInterface(object):
 
             model.add_relative_order_clauses()
 
+            print("Ciao")
             model.add_inbetweenness_clauses()
-
+            print("Bye")
             model.add_page_assignment_clauses()
 
             model.add_page_constraints()

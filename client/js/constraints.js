@@ -80,6 +80,34 @@ class TreatGraphDirected extends Constraint {
 	}
 }
 
+class HamiltonianCycle extends Constraint {
+	constructor(_objects) {
+		super("HAMILTONIAN_CYCLE",_objects)
+
+		this.printable = "HamiltonianCycle" 
+
+		}
+	
+	updatePrintable() {
+		this.printable = "HamiltonianCycle"
+	}
+
+}
+
+class HamiltonianPath extends Constraint {
+	constructor(_objects) {
+		super("HAMILTONIAN_PATH",_objects)
+
+		this.printable = "HamiltonianPath" 
+
+		}
+	
+	updatePrintable() {
+		this.printable = "HamiltonianPath"
+	}
+
+}
+
 class Consecutive extends Constraint {
 	constructor(_objects) {
 		super("NODES_CONSECUTIVE",_objects)
