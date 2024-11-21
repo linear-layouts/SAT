@@ -1844,12 +1844,14 @@ require([
 
 		document.querySelector("#okChangeServer").addEventListener("click", () => {
 			var newurl = $("#serverUrl").val()
+			
 
-			if (newurl.split("")[newurl.length - 1] == "/") {
-				newurl = newurl.split("")
-				newurl.pop()
-				newurl = newurl.join("")
-			}
+
+			//if (newurl.split("")[newurl.length - 1] == "/") {
+			//	newurl = newurl.split("")
+			//	newurl.pop()
+			//	newurl = newurl.join("")
+			//}
 
 			// check if server is answering correctly
 			$.ajax({
@@ -1860,7 +1862,18 @@ require([
 				},
 				error: function () {
 					alert("This server does not host functionality for computation of linear layouts. Please try a different server.")
+
+					let currentServer = window.localStorage.getItem("currentServer");
+					var lastval = $("#chooseServer option:last" ).val() 
+					$("#chooseServer").val(lastval)
+					$("#chooseServer > option" ).each(function() {
+						if (this.value + "/embeddings" == currentServer )
+						{
+							$("#chooseServer").val(this.value)
+						}
+					});
 				}
+
 			})
 
 
@@ -1873,7 +1886,7 @@ require([
 
 		document.querySelector("#resetServer").addEventListener("click", () => {
 			window.localStorage.setItem("currentServer", standardServer)
-			document.getElementById("displayCurrentServer").innerHTML = currentServer;
+			document.getElementById("displayCurrentServer").innerHTML = standardServer;
 			$("#serverDialog").dialog("close")
 		})
 
@@ -4783,3 +4796,16 @@ require([
 	// run main method
 	run()
 })
+
+$(document).ready(function(){
+	let currentServer = window.localStorage.getItem("currentServer");
+	//window.alert(currentServer);
+	var lastval = $("#chooseServer option:last").val()
+	$("#chooseServer").val(lastval)
+	$("#chooseServer > option" ).each(function() {
+		if (this.value + "/embeddings" == currentServer )
+		{
+			$("#chooseServer").val(this.value)
+		}
+	});
+});
