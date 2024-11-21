@@ -35,7 +35,7 @@ require([
 
 	let graph = null;
 
-	var standardServer = "http://alice.cs.uni-tuebingen.de:5555/embeddings"
+	var standardServer = "http://alice.cs.uni-tuebingen.de:5555"
 	//var standardServer = "http://0.0.0.0:5555/embeddings"
 
 	var numberOfPages = parseInt(window.localStorage.getItem("numberOfPages"));
@@ -307,10 +307,15 @@ require([
 			var currentServer = window.localStorage.getItem("currentServer")
 			if (currentServer == null) {
 				//document.getElementById("displayCurrentServer").innerHTML = "http://sofa.fsi.uni-tuebingen.de:5555/embeddings/"
-				link = standardServer + "/" + embeddingID
+				link = standardServer + "/embeddings/" + embeddingID 
 			} else {
 				//document.getElementById("displayCurrentServer").innerHTML = currentServer
-				link = currentServer + "/embeddings/" + embeddingID
+				if (embeddingID != ''){
+					link = currentServer + "/embeddings/" + embeddingID 
+				}
+				else{
+					link = currentServer 
+				}	
 			}
 
 
@@ -1855,7 +1860,7 @@ require([
 
 			// check if server is answering correctly
 			$.ajax({
-				url: newurl + "/embeddings",
+				url: newurl,
 				success: function () {
 					document.getElementById("displayCurrentServer").innerHTML = newurl;
 					window.localStorage.setItem("currentServer", newurl)
@@ -1867,7 +1872,7 @@ require([
 					var lastval = $("#chooseServer option:last" ).val() 
 					$("#chooseServer").val(lastval)
 					$("#chooseServer > option" ).each(function() {
-						if (this.value + "/embeddings" == currentServer )
+						if (this.value == currentServer )
 						{
 							$("#chooseServer").val(this.value)
 						}
@@ -3975,7 +3980,7 @@ require([
 			var currentServer = window.localStorage.getItem("currentServer")
 
 			if (currentServer == null) {
-				currentServer = standardServer;
+				currentServer = standardServer + "/embeddings";
 			} else {
 				currentServer = currentServer + "/embeddings"
 			}
@@ -4803,7 +4808,7 @@ $(document).ready(function(){
 	var lastval = $("#chooseServer option:last").val()
 	$("#chooseServer").val(lastval)
 	$("#chooseServer > option" ).each(function() {
-		if (this.value + "/embeddings" == currentServer )
+		if (this.value == currentServer )
 		{
 			$("#chooseServer").val(this.value)
 		}
