@@ -15,239 +15,252 @@
 <link type="text/css" rel="stylesheet" href="libs/ColorPick/src/colorPick.css">
 
 <style>
-	.picker {
-	border-radius: 5px;
-	width: 36px;
-	height: 36px;
-	cursor: pointer;
-	-webkit-transition: all linear .2s;
-	-moz-transition: all linear .2s;
-	-ms-transition: all linear .2s;
-	-o-transition: all linear .2s;
-	transition: all linear .2s;
-	border: thin solid #eee;
-	}
+  .picker {
+  border-radius: 5px;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  -webkit-transition: all linear .2s;
+  -moz-transition: all linear .2s;
+  -ms-transition: all linear .2s;
+  -o-transition: all linear .2s;
+  transition: all linear .2s;
+  border: thin solid #eee;
+  }
 
-	.picker:hover {
-	transform: scale(1.1);
-	}
+  .picker:hover {
+  transform: scale(1.1);
+  }
 
-	#constraintTags li {
-	cursor: pointer;
-	}
+  #constraintTags li {
+  cursor: pointer;
+  }
 </style>
 </head>
 <body>
-	<div id="loadingDiv">
-		<div id="ProgressDialog" style="text-align: left" title="Computation is in progress...">
-			<div id="progressbar" style="width: 100%"></div>
-			<p>The linear layout is being computed. This might take a while.
-			<p><button class="ui-button ui-widget ui-corner-all" id="cancelComputation">Cancel and back to edit</button>
-		</div>
-	</div>
-	<div id="greyDiv"></div>
-	<div class="container-0">
-		<div class="container-1">
-			<div class="toolbar">
-				<div id="leftTools">
-					<div class="extraButton">
-						<button id="fileSettings"></button>
-						<label for="fileSettings">File</label><span class="wtf"></span>
-					</div>
-					<div class="extraButton">
-						<button id="viewSettings"></button>
-						<label for="viewSettings">View</label><span></span>
-					</div>
-					<div class="extraButton">
-						<button id="layoutSettings"></button>
-						<label for="layoutSettings">Layout</label><span></span>
-					</div>
-					<div class="extraButton">
-						<button id="about"></button>
-						<label for="about">About</label><span></span>
-					</div>
-					<div class="extraButton">
-						<button id="displaySettings"></button>
-						<label for="displaySettings"><img src="./style/icons/ic_tune_24px.svg"></label>
-					</div>
-				</div>
-				<div id="file">
-					<button id="SaveDialogButton"></button>
-					<label for="SaveDialogButton" title="Save Graph"><img src="./style/icons/ic_file_download_24px.svg"></label><span></span>
-					<button id="ExportButton"></button>
-					<label for="ExportButton" title="Export Graph as..."><img src="./style/icons/ic_exit_to_app_24px.svg"></label>
-				</div>
-				<div id="view">
-					<button id="ZoomInButton"></button>
-					<label for="ZoomInButton" title="Zoom In"><img src="./style/icons/ic_control_zoomin_24px.svg"></label><span></span>
-					<button id="ZoomOutButton"></button>
-					<label for="ZoomOutButton" title="Zoom Out"><img src="./style/icons/ic_control_zoomout_24px.svg"></label><span></span>
-					<button id="FitButton"></button>
-					<label for="FitButton" title="Fit Content"><img src="./style/icons/ic_center_focus_strong_24px.svg"></label><span></span>
-					<input type="checkbox" id="GridButton">
-					<label for="GridButton" title="Toggle Grid"><img src="./style/icons/ic_grid_on_24px.svg"></label><span></span>
-					<button id="nodeNeighborhoodView"></button>
-					<label for="nodeNeighborhoodView" title="Node Neighborhood"><img src="./style/icons/node_neighborhood_24px.svg"></label><span></span>
-					<button id="edgeNeighborhoodView"></button>
-					<label for="edgeNeighborhoodView" title="Edge Neighborhood"><img src="./style/icons/edge_neighborhood_24px.svg"></label><span></span>
-				</div>
-				<div id="layout">
-					<button id="lineLayoutButton"></button>
-					<label for="lineLayoutButton" id="lineLayoutButtonLabel">Linear</label><span></span>
-					<button id="circLayoutButton"></button>
-					<label for="circLayoutButton" id="circLayoutButtonLabel">Circular</label><span></span>
-					<button id="consLayoutButton"></button>
-					<label for="consLayoutButton" id="consLayoutButtonLabel">Constrained</label><span></span>
-					<button id="matrixLayoutButton"></button>
-					<label for="matrixLayoutButton" id="matrixLayoutButtonLabel">Matrix</label><span></span>
-				</div>
-				<div id="rightTools">
-					<button class="ui-button ui-widget ui-corner-all" style="position: absolute; right: 140px;" id="statsButton">Stats</button>
-					<button class="ui-button ui-widget ui-corner-all" id="backButton">Back to Edit</button>
-					<div id="displayCurrentServer" style="position:absolute; width: 100px; right: 250px; font-family: arial; font-size: 8pt"></div>
-				</div>
-			</div>
-		</div>
-		<div class="mainbox">
-			<!--  Graph Input via YFILES -->
-			<div id="graphComponent" style="height: 97%"></div>
-		</div>
-	</div>
-	<div id="settings" class="settings">
-		<div id="display"></div>
-		<div class="constraints">
-			<h4>Constraints</h4>
-			<ul id="constraintTags">
-			</ul>
-		</div>
-	</div>
-	<div id="exportDialog" title="Export as...">
-		<p><button class="ui-button ui-widget ui-corner-all" id="ExportAsPdf">Pdf</button></p>
-		<p><button class="ui-button ui-widget ui-corner-all" id="ExportAsImage">Image</button></p>
-	</div>
+  <div id="loadingDiv">
+    <div id="ProgressDialog" style="text-align: left" title="Computation is in progress...">
+      <div id="progressbar" style="width: 100%"></div>
+      <p>The linear layout is being computed. This might take a while.
+      <p><button class="ui-button ui-widget ui-corner-all" id="cancelComputation">Cancel and back to edit</button>
+    </div>
+  </div>
+  <div id="greyDiv"></div>
+  <div class="container-0">
+    <div class="container-1">
+      <div class="toolbar">
+        <div id="leftTools">
+          <div class="extraButton">
+            <button id="fileSettings"></button>
+            <label for="fileSettings">File</label><span></span>
+          </div>
+          <div class="extraButton">
+            <button id="viewSettings"></button>
+            <label for="viewSettings">View</label><span></span>
+          </div>
+          <div class="extraButton">
+            <button id="layoutSettings"></button>
+            <label for="layoutSettings">Layout</label><span></span>
+          </div>
+          <div class="extraButton">
+            <button id="about"></button>
+            <label for="about">About</label><span></span>
+          </div>
+          <div class="extraButton">
+            <button id="displaySettings"></button>
+            <label for="displaySettings"><img src="./style/icons/ic_tune_24px.svg"></label>
+          </div>
+        </div>
+        <div id="file">
+          <button id="SaveDialogButton"></button>
+          <label for="SaveDialogButton" title="Save Graph"><img src="./style/icons/ic_file_download_24px.svg"></label>
+		  <span></span>
+          <button id="ExportButton"></button>
+          <label for="ExportButton" title="Export Graph as..."><img src="./style/icons/ic_exit_to_app_24px.svg"></label>
+		  <span></span>
+		  <button id="statsButton"></button>
+		  <label for="statsButton" title="Stats"><img src="style/icons/ic_stats_24px.svg"></label>
+		  <span></span>
+        </div>
+        <div id="view">
+          <button id="ZoomInButton"></button>
+          <label for="ZoomInButton" title="Zoom In"><img src="./style/icons/ic_control_zoomin_24px.svg"></label>
+		  <span></span>
+          <button id="ZoomOutButton"></button>
+          <label for="ZoomOutButton" title="Zoom Out"><img src="./style/icons/ic_control_zoomout_24px.svg"></label>
+		  <span></span>
+          <button id="FitButton"></button>
+          <label for="FitButton" title="Fit Content"><img src="./style/icons/ic_center_focus_strong_24px.svg"></label>
+		  <span></span>
+          <input type="checkbox" id="GridButton">
+          <label for="GridButton" title="Toggle Grid"><img src="./style/icons/ic_grid_on_24px.svg"></label>
+		  <span></span>
+          <button id="nodeNeighborhoodView"></button>
+          <label for="nodeNeighborhoodView" title="Node Neighborhood"><img src="./style/icons/node_neighborhood_24px.svg"></label>
+		  <span></span>
+          <button id="edgeNeighborhoodView"></button>
+          <label for="edgeNeighborhoodView" title="Edge Neighborhood"><img src="./style/icons/edge_neighborhood_24px.svg"></label>
+		  <span></span>
+        </div>
+        <div id="layout">
+          <button id="lineLayoutButton"></button>
+          <label for="lineLayoutButton" id="lineLayoutButtonLabel">Linear</label>
+		  <span></span>
+          <button id="circLayoutButton"></button>
+          <label for="circLayoutButton" id="circLayoutButtonLabel">Circular</label>
+		  <span></span>
+          <button id="consLayoutButton"></button>
+          <label for="consLayoutButton" id="consLayoutButtonLabel">Constrained</label>
+		  <span></span>
+          <button id="matrixLayoutButton"></button>
+          <label for="matrixLayoutButton" id="matrixLayoutButtonLabel">Matrix</label>
+		  <span></span>
+        </div>
+        <div id="rightTools">
+          <button class="ui-button ui-widget ui-corner-all" id="backButton" style="z-index: 1;">Back to Edit</button>
+          <div id="displayCurrentServer" style="position:absolute; padding-top:28pt; width: 200px; font-size:8pt; text-align: right; z-index: 0; font-family:Arial, Helvetica, sans-serif;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="mainbox">
+      <!--  Graph Input via YFILES -->
+      <div id="graphComponent" style="height: 97%"></div>
+    </div>
+  </div>
+  <div id="settings" class="settings">
+    <div id="display"></div>
+    <div class="constraints">
+      <h4>Constraints</h4>
+      <ul id="constraintTags">
+      </ul>
+    </div>
+  </div>
+  <div id="exportDialog" title="Export as...">
+    <p><button class="ui-button ui-widget ui-corner-all" id="ExportAsPdf">Pdf</button></p>
+    <p><button class="ui-button ui-widget ui-corner-all" id="ExportAsImage">Image</button></p>
+  </div>
 
-	<div id="EditDialog" title="Edit...">
-		<p>
-			<input type=hidden name="hidden" id="hiddenOriginal">
-			<button class="ui-button ui-widget ui-corner-all" id="editOriginalLayout">Original layout</button>
-		</p>
-		<p>
-			<input type=hidden name="hidden" id="hiddenBE">
-			<button class="ui-button ui-widget ui-corner-all" id="editBookEmbedding">Linear layout</button>
-		</p>
-	</div>
+  <div id="EditDialog" title="Edit...">
+    <p>
+      <input type=hidden name="hidden" id="hiddenOriginal">
+      <button class="ui-button ui-widget ui-corner-all" id="editOriginalLayout">Original layout</button>
+    </p>
+    <p>
+      <input type=hidden name="hidden" id="hiddenBE">
+      <button class="ui-button ui-widget ui-corner-all" id="editBookEmbedding">Linear layout</button>
+    </p>
+  </div>
 
-	<div id="notSatisfiableDialog" title="Not satisfiable">
-		The graph you proposed is <span style="color: red; font-weight: 700">not
-		embeddable</span> in <span id="notSatisfiableNrPages"></span> pages under
-		the constraints you made. Would you like to go back to further edit
-		your graph?<br> <br>
+  <div id="notSatisfiableDialog" title="Not satisfiable">
+    The graph you proposed is <span style="color: red; font-weight: 700">not
+    embeddable</span> in <span id="notSatisfiableNrPages"></span> pages under
+    the constraints you made. Would you like to go back to further edit
+    your graph?<br> <br>
+    <button class="ui-button ui-widget ui-corner-all" id="yesBackToEdit">Yes, back to edit</button>
+  </div>
 
-		<button class="ui-button ui-widget ui-corner-all" id="yesBackToEdit">Yes, back to edit</button>
-	</div>
+  <div id="noIDDialog" title="No ID specified">
+    <p style="font-family: Courier New">Error: No ID specified</p>
+    <p style="font-size: 12px">Please add "#id" to the url to view the linear layout with your desired id</p>
+  </div>
 
-	<div id="noIDDialog" title="No ID specified">
-		<p style="font-family: Courier New">Error: No ID specified</p>
-		<p style="font-size: 12px">Please add "#id" to the url to view the linear layout with your desired id</p>
-	</div>
+  <div id="errorDialog" title="ID not found">
+    <p style="font-family: Courier New">Error: No linear layout with this ID</p>
+    <p style="font-size: 12px"> The ID you specified in the url is not linked to a linear layout yet.<br>Maybe a typo?
+    </p>
+  </div>
 
-	<div id="errorDialog" title="ID not found">
-		<p style="font-family: Courier New">Error: No linear layout with this ID</p>
-		<p style="font-size: 12px"> The ID you specified in the url is not linked to a linear layout yet.<br>Maybe a typo?
-		</p>
-	</div>
+  <div id="statsDialog" title="Stats">
+    <table style="font-weight: bold">
+      <tr>
+        <td width="200px">Vertices:</td>
+        <td id="nrOfVertices"></td>
+      </tr>
+      <tr>
+        <td>Edges:</td>
+        <td id="nrOfEdges"></td>
+      </tr>      
+      <tr>
+        <td>Min degree:</td><td id="minDegree"></td></tr>
+      <tr>
+        <td>Max degree:</td><td id="maxDegree"></td></tr>
+      <tr>
+        <td>Planar:</td>
+        <td id="isPlanar"></td>
+      </tr>
+      <tr>
+        <td>Connected:</td>
+        <td id="isConnected"></td>
+      </tr>
+      <tr>
+        <td>Acyclic:</td>
+        <td id="isAcyclic"></td>
+      </tr>
+      <tr>
+        <td>Tree:</td>
+        <td id="isTree"></td>
+      </tr>
+      <tr>
+        <td>Bipartite:</td>
+        <td id="isBipartite"></td>
+      </tr>
+      <tr id="reducedTr" style="display:none">
+        <td>Reduced:</td>
+        <td id="isReduced"></td>
+      </tr>
+    </table>
+  </div>
 
-	<div id="statsDialog" title="Stats">
-		<table style="font-weight: bold">
-			<tr>
-				<td width="200px">Vertices:</td>
-				<td id="nrOfVertices"></td>
-			</tr>
-			<tr>
-				<td>Edges:</td>
-				<td id="nrOfEdges"></td>
-			</tr>			
-			<tr>
-				<td>Min degree:</td><td id="minDegree"></td></tr>
-			<tr>
-				<td>Max degree:</td><td id="maxDegree"></td></tr>
-			<tr>
-				<td>Planar:</td>
-				<td id="isPlanar"></td>
-			</tr>
-			<tr>
-				<td>Connected:</td>
-				<td id="isConnected"></td>
-			</tr>
-			<tr>
-				<td>Acyclic:</td>
-				<td id="isAcyclic"></td>
-			</tr>
-			<tr>
-				<td>Tree:</td>
-				<td id="isTree"></td>
-			</tr>
-			<tr>
-				<td>Bipartite:</td>
-				<td id="isBipartite"></td>
-			</tr>
-			<tr id="reducedTr" style="display:none">
-				<td>Reduced:</td>
-				<td id="isReduced"></td>
-			</tr>
-		</table>
-	</div>
+  <div id="aboutDialog" title="About" class="ui-dialog">
+    <span style="font-size: 18px">This system aims at automating the procedure of computing different types of linear layouts of graphs under a set of user-specific constraints. The system has been developed using jQuery (including <a href="https://jqueryui.com/">jQuery UI</a>, <a href="https://github.com/philzet/ColorPick.js">ColorPicker</a> and <a href="https://github.com/aehlke/tag-it">TagIt</a>) in conjunction with <a href="https://www.yworks.com/">yFiles for HTML</a> under an academic license, which restricts the usage of the system for strictly non-commercial purposes only (research, teaching, university projects, courses and application development).</span>
+  </div>
 
-	<div id="aboutDialog" title="About" class="ui-dialog">
-		<span style="font-size: 18px">This system aims at automating the procedure of computing different types of linear layouts of graphs under a set of user-specific constraints. The system has been developed using jQuery (including <a href="https://jqueryui.com/">jQuery UI</a>, <a href="https://github.com/philzet/ColorPick.js">ColorPicker</a> and <a href="https://github.com/aehlke/tag-it">TagIt</a>) in conjunction with <a href="https://www.yworks.com/">yFiles for HTML</a> under an academic license, which restricts the usage of the system for strictly non-commercial purposes only (research, teaching, university projects, courses and application development).</span>
-	</div>
+  <div id="saveDialog" title="Save as...">
+    Specify a name below <br><br>
+    <input type="text" name="name" id="fileName" value="" class="ui-corner-all" style="width: 90%; height: 25px; font-size: 20px">
+    <p>
+      <button class="ui-button ui-widget ui-corner-all" id="saveButton">Save</button>
+      <button class="ui-button ui-widget ui-corner-all" id="cancelSaveDialog">Cancel</button>
+    </p>
+  </div>
 
-	<div id="saveDialog" title="Save as...">
-		Specify a name below <br><br>
-		<input type="text" name="name" id="fileName" value="" class="ui-corner-all" style="width: 90%; height: 25px; font-size: 20px">
-		<p>
-			<button class="ui-button ui-widget ui-corner-all" id="saveButton">Save</button>
-			<button class="ui-button ui-widget ui-corner-all" id="cancelSaveDialog">Cancel</button>
-		</p>
-	</div>
+  <div id="nodeNeighborhood" title="Neighborhood of vertex">
+    <div id="nodeNeighborhoodDescription">Select a vertex</div>
+    <p><button class="ui-button ui-widget ui-corner-all" id="closeNodeNeighborhood">Close</button></p>
+  </div>
 
-	<div id="nodeNeighborhood" title="Neighborhood of vertex">
-		<div id="nodeNeighborhoodDescription">Select a vertex</div>
-		<p><button class="ui-button ui-widget ui-corner-all" id="closeNodeNeighborhood">Close</button></p>
-	</div>
+  <div id="edgeNeighborhood" title="Edge adjacency">
+    <div id="edgeNeighborhoodDescription">Select an edge</div>
+    <p><button class="ui-button ui-widget ui-corner-all" id="closeEdgeNeighborhood">Close</button></p>
+  </div>
 
-	<div id="edgeNeighborhood" title="Edge adjacency">
-		<div id="edgeNeighborhoodDescription">Select an edge</div>
-		<p><button class="ui-button ui-widget ui-corner-all" id="closeEdgeNeighborhood">Close</button></p>
-	</div>
+  <div id="failedComputationDialog" title="Computation failed">
+    The computation failed, due to the following reason:
+    <p id="errorMessage"></p>
+    <p><button class="ui-button ui-widget ui-corner-all" id="yesBackToEdit2">Back to edit</button>
+  </div>
 
-	<div id="failedComputationDialog" title="Computation failed">
-		The computation failed, due to the following reason:
-		<p id="errorMessage"></p>
-		<p><button class="ui-button ui-widget ui-corner-all" id="yesBackToEdit2">Back to edit</button>
-	</div>
+  <div id="cancelledNotificationDialog" title="Notice">
+    <p id="infoMessage"></p>
+    <p><button class="ui-button ui-widget ui-corner-all" id="yesBackToEdit3">Back to edit</button>
+  </div>
 
-	<div id="cancelledNotificationDialog" title="Notice">
-		<p id="infoMessage"></p>
-		<p><button class="ui-button ui-widget ui-corner-all" id="yesBackToEdit3">Back to edit</button>
-	</div>
+  <!--  Necessary  -->
+  <script src="libs/jquery/external/jquery/jquery.js"></script>
+  <script src="libs/jquery/jquery-ui.js"></script>
 
-	<!--  Necessary  -->
-	<script src="libs/jquery/external/jquery/jquery.js"></script>
-	<script src="libs/jquery/jquery-ui.js"></script>
+  <!--  Necessary for pdf-Export -->
+  <script src="https://www.yworks.com/resources/scripts/jspdf.min.dfa618c.js"></script>
+  <script src="https://www.yworks.com/resources/scripts/svg2pdf.min.a955ee8.js"></script>
 
-	<!--  Necessary for pdf-Export -->
-	<script src="https://www.yworks.com/resources/scripts/jspdf.min.dfa618c.js"></script>
-	<script src="https://www.yworks.com/resources/scripts/svg2pdf.min.a955ee8.js"></script>
+  <script src="libs/yFiles/demos/resources/require.js"></script>
+  <script src="libs/tags/js/tag-it.js" type="text/javascript" charset="utf-8"></script>
 
-	<script src="libs/yFiles/demos/resources/require.js"></script>
-	<script src="libs/tags/js/tag-it.js" type="text/javascript" charset="utf-8"></script>
+  <script src="js/constraints.js"></script>
+  <script src="js/globalVariables.js"></script>
+  <script src="libs/ColorPick/src/colorPick.js"></script>
 
-	<script src="js/constraints.js"></script>
-	<script src="js/globalVariables.js"></script>
-	<script src="libs/ColorPick/src/colorPick.js"></script>
-
-	<!--  Script: getting the values from the hashtag -->
-	<script src="js/next_yfilesscript.js"></script>
+  <!--  Script: getting the values from the hashtag -->
+  <script src="js/next_yfilesscript.js"></script>
 </body>
 </html>
