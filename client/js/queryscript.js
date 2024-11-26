@@ -16,7 +16,6 @@ function fillPages() {
 					'<option value="RIQUE">rique</option>'+
 					'<option value="DEQUE">deque</option>'+
 					'<option value="BIARC">biarc</option>'+
-					//'<option value="MONQUE">monque</option>'+
 					'<option value="NONE">undefined</option>' +
 					'</select> <select id="layoutP'+j+'" name="layoutP'+j+'">'+
 					'<option value="NONE">maximal</option>'+
@@ -933,6 +932,17 @@ $( function() {
             var temp1 = constraintsArray.slice(0,i)
             var temp2 = constraintsArray.slice(i+1, constraintsArray.length)
             constraintsArray = temp1.concat(temp2)
+		}
+	});
+
+	let currentServer = window.localStorage.getItem("currentServer");
+	//window.alert(currentServer);
+	var lastval = $("#chooseServer option:last").val()
+	$("#chooseServer").val(lastval)
+	$("#chooseServer > option" ).each(function() {
+		if (this.value == currentServer )
+		{
+			$("#chooseServer").val(this.value)
 		}
 	});
 

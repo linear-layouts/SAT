@@ -4801,16 +4801,3 @@ require([
 	// run main method
 	run()
 })
-
-$(document).ready(function(){
-	let currentServer = window.localStorage.getItem("currentServer");
-	//window.alert(currentServer);
-	var lastval = $("#chooseServer option:last").val()
-	$("#chooseServer").val(lastval)
-	$("#chooseServer > option" ).each(function() {
-		if (this.value == currentServer )
-		{
-			$("#chooseServer").val(this.value)
-		}
-	});
-});
