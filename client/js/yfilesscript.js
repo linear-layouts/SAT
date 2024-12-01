@@ -2217,8 +2217,8 @@ require([
 							removedTagManually = !removedTagManually
 							if (removedTagManually) {
 								document.getElementById('Hamiltonian').click();
-								let color = 'black';
-								resetDefaultEdgesStyle(false, color)
+								//let color = 'black';
+								//resetDefaultEdgesStyle(false, color)
 								removedTagManually = false;
 							}
 						}
@@ -2245,8 +2245,8 @@ require([
 				catch (error) {
 					removedTagManually = false;
 				}
-				let color = 'black';
-				resetDefaultEdgesStyle(false, color);
+				//let color = 'black';
+				//resetDefaultEdgesStyle(false, color);
 			}
 		})
 
@@ -2262,8 +2262,8 @@ require([
 							removedTagManually = !removedTagManually
 							if (removedTagManually) {
 								document.getElementById('HamiltonianP').click();
-								let color = 'black';
-								resetDefaultEdgesStyle(false, color)
+								//let color = 'black';
+								//resetDefaultEdgesStyle(false, color)
 								removedTagManually = false;
 							}
 						}
@@ -2290,8 +2290,8 @@ require([
 				catch (error) {
 					removedTagManually = false;
 				}
-				let color = 'black';
-				resetDefaultEdgesStyle(false, color);
+				//let color = 'black';
+				//resetDefaultEdgesStyle(false, color);
 			}
 		})
 
@@ -4361,7 +4361,7 @@ require([
 				let predecessors = new Map();
 				let predecessor = null;
 				orderedNodes.forEach(function (node) {
-					console.log(node + " " + predecessor);
+					//console.log(node + " " + predecessor);
 					predecessors.set(node, predecessor);
 					predecessor = node;
 				})
