@@ -45,7 +45,7 @@ require([
 		Global Variables
 	----------------------------------------------------------------------------------------------
 	*/
-		var numberOfPages = parseInt(window.localStorage.getItem("numberOfPages"));
+	var numberOfPages = parseInt(window.localStorage.getItem("numberOfPages"));
 
     let pagesArray = [];
     let DeqTypesMap = new Map([["TAIL", []], ["HEAD", []], ["QUEUE_H_T", []], ["QUEUE_T_H", []]]);
@@ -113,6 +113,8 @@ require([
             colors[i] = "#000000"
         }
     }
+
+	let predecessors = new Map();
 
   /*  function addDefaultColor() {
    if (colors.length < numberOfPages) {
@@ -1236,7 +1238,11 @@ addDefaultColor();*/
 		let pageNumber = getPageIndex(edge) + 1;
 		let color = colorsOfPages[pageNumber - 1];
 		let placing = $("#placingPage" + pageNumber).val().slice(0,5);
-		let stroke = getStrokeString(getEdgeStrokeDefaultThickness(), getEdgeStrokeDefaultLineStyle(), color);
+		let factor = 1;
+		if (edge.sourceNode == predecessors.get(edge.targetNode) || edge.targetNode == predecessors.get(edge.sourceNode)) {
+			factor *= 1.5; 
+		}
+		let stroke = getStrokeString(factor * getEdgeStrokeDefaultThickness(), getEdgeStrokeDefaultLineStyle(), color);
 		if (placing === "deque") {
 			setEdgeArcStyleDequePage(edge, directed, color, placing, stroke);
 		} else if (placing === "biarc") {
@@ -1499,7 +1505,11 @@ addDefaultColor();*/
 	function setEdgePolylineStyle(edge, directed) {
 		let pageNumber = getPageIndex(edge) + 1;
 		let color = colorsOfPages[pageNumber - 1];
-		let stroke = getStrokeString(getEdgeStrokeDefaultThickness(), getEdgeStrokeDefaultLineStyle(), color);
+		let factor = 1;
+		if (edge.sourceNode == predecessors.get(edge.targetNode) || edge.targetNode == predecessors.get(edge.sourceNode)) {
+			factor *= 2; 
+		}
+		let stroke = getStrokeString(factor * getEdgeStrokeDefaultThickness(), getEdgeStrokeDefaultLineStyle(), color);
 		graphComponent.graph.setStyle(edge, getEdgePolylineStyle(color, stroke, directed));
 	}
 	
@@ -1688,6 +1698,17 @@ addDefaultColor();*/
 			x = x + node_distance;
 			nextNodex = x - 100; // needed for deque
 		}
+	}
+
+	// Computes for each note in the order its predecessors
+	function computePredecessors(orderedTagsOfNodes){
+		let predecessor = null;
+		for(let tag of orderedTagsOfNodes){
+			let node = getNodeByTag(tag);
+			predecessors.set(node, predecessor);
+			predecessor = node;
+		}
+		predecessors.set(getNodeByTag(orderedTagsOfNodes[0]),getNodeByTag(orderedTagsOfNodes[orderedTagsOfNodes.length-1]))
 	}
 
     // arranges the nodes according to the calculated circular layout
@@ -2091,8 +2112,9 @@ addDefaultColor();*/
 		.then(() => {
 			graphComponent.fitGraphBounds();
 		});
-
+		
 		linearNodesArrangement(object.vertex_order);
+		computePredecessors(object.vertex_order);
 		rearrangeEdgesForLinearLayout(object.vertex_order);
 		registerEdgesInPagesArray(object.assignments); // REGISTERING WHICH EDGES GO TO WHICH PAGES
 		registerEdgesDequeType(object.deq_edge_type);
@@ -2127,6 +2149,7 @@ addDefaultColor();*/
 
 	function interpretResultAsLinearLayout(object) {
 		linearNodesArrangement(object.vertex_order);
+		computePredecessors(object.vertex_order);
 		rearrangeEdgesForLinearLayout(object.vertex_order);
 		registerEdgesInPagesArray(object.assignments);
 		registerEdgesDequeType(object.deq_edge_type);

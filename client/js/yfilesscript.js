@@ -4356,6 +4356,16 @@ require([
 					})
 				})
 
+				// Compute the predecessor of each node.
+				var orderedNodes = object.vertex_order;
+				let predecessors = new Map();
+				let predecessor = null;
+				orderedNodes.forEach(function (node) {
+					console.log(node + " " + predecessor);
+					predecessors.set(node, predecessor);
+					predecessor = node;
+				})
+				predecessors.set(orderedNodes[0], orderedNodes[orderedNodes.length-1])
 
 
 				//var colors = ["#FF0000", "#0000FF", "#00FF00", "#000000"]
@@ -4368,8 +4378,13 @@ require([
 								stroke: colors[i],
 								fill: colors[i]
 							})
+							const thickness = 1
+							let factor = 1
+							if (e.sourceNode.tag == predecessors.get(e.targetNode.tag+"") || e.targetNode.tag == predecessors.get(e.sourceNode.tag+"")) {
+								factor *= 2; 
+							}
 							var polyStyle = new yfiles.styles.PolylineEdgeStyle({
-								stroke: colors[i],
+								stroke: `${factor*thickness}px ${colors[i]}`,
 								targetArrow: targetArrowStyle //yfiles.styles.IArrow.DEFAULT,
 								//                                targetArrow: true
 							})
@@ -4379,8 +4394,14 @@ require([
 					}
 					else {
 						pagesArray[i].forEach(function (e) {
+							const thickness = 1
+							let factor = 1
+							//console.log(e.sourceNode.tag + " " + e.targetNode.tag + " " + predecessors.get(e.targetNode.tag+"") + " " + predecessors.get(e.sourceNode.tag+""))
+							if (e.sourceNode.tag == predecessors.get(e.targetNode.tag+"") || e.targetNode.tag == predecessors.get(e.sourceNode.tag+"")) {
+								factor *= 2; 
+							}
 							var polyStyle = new yfiles.styles.PolylineEdgeStyle({
-								stroke: colors[i],
+								stroke: `${factor*thickness}px ${colors[i]}`,
 								targetArrow: yfiles.styles.IArrow.NONE
 							})
 
