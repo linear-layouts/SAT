@@ -2494,19 +2494,44 @@ require([
 					alert("Barnette Two cannot be applied to the input graph as it is not planar.");
 					return
 				}
-				var outgoingEdges = [];
-				var incomingEdges = [];
+				var node = selectedNodes[0];
+				var neighbors = graphComponent.graph.neighbors(node).toArray();
+				console.log(neighbors.length);
 
-				/*selectedNodes.forEach(function(node) {
-					var outgoing = outEdges(node);
-					outgoing.forEach(function(edge) {
-						outgoingEdges.push(edge);
-					});
-					var incoming = inEdges(node);
-					incoming.forEach(function(edge) {
-						incomingEdges.push(edge);
-					});
-				});*/
+				if (neighbors.length != 3) {
+					alert("Barnette Two cannot be applied on a vertex with degree different than three.");
+					return
+				}
+				var v1 = neighbors[0];
+				var v2 = neighbors[1];
+				var v3 = neighbors[2];
+
+				var x = node.layout.center.x;
+				var y = node.layout.center.y;
+
+				graphComponent.inputMode.deleteSelection();
+
+				var x1 = createNode(graphComponent, x, y);
+				var x2 = createNode(graphComponent, x, y);
+				var x3 = createNode(graphComponent, x, y);
+				var x4 = createNode(graphComponent, x, y);
+				var x5 = createNode(graphComponent, x, y);
+				var x6 = createNode(graphComponent, x, y);
+				var x7 = createNode(graphComponent, x, y);
+
+				createEdge(graphComponent, x1, x2);
+				createEdge(graphComponent, x1, x3);
+				createEdge(graphComponent, x2, x4);
+				createEdge(graphComponent, x3, x4);
+				createEdge(graphComponent, x2, x5);
+				createEdge(graphComponent, x4, x7);
+				createEdge(graphComponent, x3, x6);
+				createEdge(graphComponent, x5, x7);
+				createEdge(graphComponent, x6, x7);
+				createEdge(graphComponent, x1, v1);
+				createEdge(graphComponent, x5, v2);
+				createEdge(graphComponent, x6, v3);
+
 			}
 		})
 
@@ -3625,13 +3650,7 @@ require([
 	}
 
 	function typeBarnette() {
-		var numberOfVertices = document.getElementById("numberOfVertices").value;
-		var numberOfVerticesInt = parseInt(numberOfVertices);
-		var nodeSize = 30;
-		var sideOuterSquare = numberOfVerticesInt*nodeSize;
-		var sideOuterSquare1 = numberOfVerticesInt*nodeSize/2;
-		var heightOuterSquare = (Math.sqrt(1)/2)*sideOuterSquare;
-		var heightOuterSquare1 = (Math.sqrt(2)/3)*sideOuterSquare1;
+		var numberOfVertices = document.getElementById("numberOfVertices").value;	
 		var vertices = []; //n
 		var edges = []; //(3*n)/2
 		if (numberOfVertices <= 7) {
@@ -3640,9 +3659,9 @@ require([
 		else {
 			//creates vertices for outer square
 			vertices[0] = createNode(graphComponent, 0, 0);
-			vertices[1] = createNode(graphComponent, sideOuterSquare, 0);
-			vertices[2] = createNode(graphComponent, sideOuterSquare, heightOuterSquare);
-			vertices[3] = createNode(graphComponent, 0, heightOuterSquare);
+			vertices[1] = createNode(graphComponent, 600, 0);
+			vertices[2] = createNode(graphComponent, 600, 600);
+			vertices[3] = createNode(graphComponent, 0, 600);
 
 			//create edges for outer square
 			createEdge(graphComponent, vertices[0], vertices[1]);
@@ -3651,10 +3670,10 @@ require([
 			createEdge(graphComponent, vertices[3], vertices[0]);
 
 			//creates vertices for inner square
-			vertices[4] = createNode(graphComponent, 150, 100);
-			vertices[5] = createNode(graphComponent, sideOuterSquare1, 100);
-			vertices[6] = createNode(graphComponent, sideOuterSquare1, heightOuterSquare1);
-			vertices[7] = createNode(graphComponent, 150, heightOuterSquare1);
+			vertices[4] = createNode(graphComponent, 200, 200);
+			vertices[5] = createNode(graphComponent, 400, 200);
+			vertices[6] = createNode(graphComponent, 400, 400);
+			vertices[7] = createNode(graphComponent, 200, 400);
 
 			//create edges for inner square
 			createEdge(graphComponent, vertices[4], vertices[5]);
@@ -3745,6 +3764,7 @@ require([
 				createEdge(graphComponent, node2, node3);	
 			}
 		}	
+		graphComponent.fitGraphBounds();
 	}
 
 	//Select the right type of graph
