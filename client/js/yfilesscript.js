@@ -1968,15 +1968,16 @@ require([
 		 */
 
 		document.querySelector("#ZoomInButton").addEventListener("click", () => {
-			yfiles.input.ICommand.INCREASE_ZOOM.execute({ target: graphComponent });
+			yfiles.input.ICommand.INCREASE_ZOOM.execute(null, graphComponent);
 		})
 
 		document.querySelector("#ZoomOutButton").addEventListener("click", () => {
-			yfiles.input.ICommand.DECREASE_ZOOM.execute({ target: graphComponent });
+			yfiles.input.ICommand.DECREASE_ZOOM.execute(null, graphComponent);
 		})
 
 		document.querySelector("#FitButton").addEventListener("click", () => {
-			yfiles.input.ICommand.FIT_GRAPH_BOUNDS.execute({ target: graphComponent });
+			graphComponent.fitGraphBounds();
+			//yfiles.input.ICommand.FIT_GRAPH_BOUNDS.execute({ target: graphComponent });
 		})
 
 		document.querySelector('#GridButton').addEventListener("click", () => {
@@ -2919,30 +2920,27 @@ require([
 				}
 			}
 			//console.log(maxdegree)
+			var is2Connected = true;
+			const bc = new yfiles.analysis.BiconnectedComponents();
+			const result = bc.run(graph);
+			if (result.components.size != 1) {
+				is2Connected = false;
+			}
 
-			/*var is3Connected = true;
-			if (nrOfVertices < 4 || nrOfVertices > 50) {
+			var is3Connected = true;
+			if (nrOfVertices < 4) {
 				is3Connected = false;
 			} else {
-				for (let i = 0; i < nrOfVertices; i++) {
-					for (let j = i + 1; j < nrOfVertices; j++) {
-						
-						var gc = new yfiles.view.GraphComponent();
-						var graphCopy = gc.graph;
-						const copier = new yfiles.graph.GraphCopier();
-						copier.copy(graph, graphCopy);
-						var nodes = graphCopy.nodes.toArray();
-						graphCopy.remove(nodes[i]);
-						graphCopy.remove(nodes[j]);
-						const adapter = new yfiles.layout.YGraphAdapter(graphCopy);
-						var ygraphCopy = adapter.yGraph;
-						if (!yfiles.algorithms.GraphChecker.isConnected(ygraphCopy)) {							
-							is3Connected = false;
-							break;
-						}
+				for (const node of graph.nodes) {
+					const bc = new yfiles.analysis.BiconnectedComponents();
+					bc.subgraphNodes.excludes = node;
+					const result = bc.run(graph);
+					if (result.components.size != 1) {
+						is3Connected = false;
+						break;
 					}
 				}
-			}*/
+			}
 	
 			document.getElementById("nrOfVertices").innerHTML = nrOfVertices
 			document.getElementById("nrOfEdges").innerHTML = nrOfEdges
@@ -2950,8 +2948,10 @@ require([
 			if (isPlanar) { document.getElementById("isPlanar").style.color = "green" } else { document.getElementById("isPlanar").style.color = "red" }
 			document.getElementById("isConnected").innerHTML = isConnected
 			if (isConnected) { document.getElementById("isConnected").style.color = "green" } else { document.getElementById("isConnected").style.color = "red" }
-			//document.getElementById("is3Connected").innerHTML = is3Connected
-			//if (is3Connected) { document.getElementById("is3Connected").style.color = "green" } else { document.getElementById("is3Connected").style.color = "red" }
+			document.getElementById("is2Connected").innerHTML = is2Connected;
+			if (is2Connected) {document.getElementById("is2Connected").style.color = "green"} else {document.getElementById("is2Connected").style.color = "red"}
+			document.getElementById("is3Connected").innerHTML = is3Connected
+			if (is3Connected) { document.getElementById("is3Connected").style.color = "green" } else { document.getElementById("is3Connected").style.color = "red" }
 			document.getElementById("isAcyclic").innerHTML = isAcyclic
 			if (isAcyclic) { document.getElementById("isAcyclic").style.color = "green" } else { document.getElementById("isAcyclic").style.color = "red" }
 			document.getElementById("isTree").innerHTML = isTree
