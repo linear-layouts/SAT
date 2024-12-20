@@ -48,6 +48,7 @@ def static_encode_inbetweenness(inbetween: ndarray, precedes: ndarray) -> List[L
     :param inbetween: inbetween[i, k, j] => the vertex k is inbetween vertices i, j
     :return: the list of generated clauses
     """
+    print("Starting adding inbetweenness constraints")
     clauses = []
     
     for u in range(precedes.shape[0]):
@@ -59,8 +60,8 @@ def static_encode_inbetweenness(inbetween: ndarray, precedes: ndarray) -> List[L
                 #clauses.append([-inbetween[u, w, v], -inbetween[v, w, u]])
                 #clauses.append([-inbetween[v, w, u], -inbetween[u, w, v]])
                 # Ensure compatibility with precedes
-                clauses.append([-precedes[u, v], -inbetween[v, w, u]])
-                clauses.append([-precedes[v, u], -inbetween[u, w, v]])
+                #clauses.append([-precedes[u, v], -inbetween[v, w, u]])
+                #clauses.append([-precedes[v, u], -inbetween[u, w, v]])
                 # Actual definition
                 clauses.append([-inbetween[u, v, w], precedes[u,v]])
                 clauses.append([-inbetween[u, v, w], precedes[v,w]])
@@ -70,6 +71,7 @@ def static_encode_inbetweenness(inbetween: ndarray, precedes: ndarray) -> List[L
                 #        continue 
                 #    clauses.append([-inbetween[u, v, w], -inbetween[v, w, z], inbetween[u, v, z]])
                 #    clauses.append([-inbetween[u, v, w], -inbetween[v, w, z], inbetween[u, w, z]])
+    print("Ending adding inbetweenness constraints")
 
     return clauses
 
@@ -309,6 +311,7 @@ def static_encode_non_consecutivity(inbetween, precedes, v1, v2, v1_neighbors = 
     :param inbetween: inbetween[i, k, j] => the vertex k is inbetween vertices i, j
     :param v1: the index of the first vertex
     :param v2: the index of the second vertex
+    :param v1_neighbors: list that contains the neighbors of the vertex v1
     :return: the generated clauses
         """
     clause1 = []
@@ -335,6 +338,8 @@ def static_encode_non_extremes(precedes, v1, v2, v1_neighbors = [], v2_neighbors
     :param precedes: precedes[i, j] <=> vertex i precedes vertex j
     :param v1: the index of the first vertex
     :param v2: the index of the second vertex
+    :param v1_neighbors: list that contains the neighbors of the v1 vertex
+    :param v2_neighbors: list that contains the neighbors of the v2 vertex
     :return: the generated clauses
         """
     # If v1 is first then v2 cannot be last.

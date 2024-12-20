@@ -152,6 +152,7 @@ $("#cancelledNotificationDialog").dialog({
 			$("#nrOfEdges").empty()
 			$("#isPlanar").empty()
 			$("#isConnected").empty()
+			//$("#is3Connected").empty()
 			$("#isAcyclic").empty()
 			$("#isTree").empty()
 			$("#isBipartite").empty()

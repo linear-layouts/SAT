@@ -2050,7 +2050,31 @@ addDefaultColor();*/
 				mindegree = v.edges.size;
 			}
 		}
-		//console.log(maxdegree)nsole.log(maxdegree)
+		//console.log(maxdegree)
+
+		/*var is3Connected = true;
+			if (nrOfVertices < 4) {
+				is3Connected = false;
+			} else {
+				for (let i = 0; i < nrOfVertices; i++) {
+					for (let j = i + 1; j < nrOfVertices; j++) {
+						
+						var gc = new yfiles.view.GraphComponent();
+						var graphCopy = gc.graph;
+						const copier = new yfiles.graph.GraphCopier();
+						copier.copy(graph, graphCopy);
+						var nodes = graphCopy.nodes.toArray();
+						graphCopy.remove(nodes[i]);
+						graphCopy.remove(nodes[j]);
+						const adapter = new yfiles.layout.YGraphAdapter(graphCopy);
+						var ygraphCopy = adapter.yGraph;
+						if (!yfiles.algorithms.GraphChecker.isConnected(ygraphCopy)) {							
+							is3Connected = false;
+							break;
+						}
+					}
+				}
+			}*/
 
 		document.getElementById("nrOfVertices").innerHTML =  nrOfVertices;
 		document.getElementById("nrOfEdges").innerHTML = nrOfEdges;
@@ -2058,6 +2082,8 @@ addDefaultColor();*/
 		if (isPlanar) {document.getElementById("isPlanar").style.color = "green"} else {document.getElementById("isPlanar").style.color = "red"}
 		document.getElementById("isConnected").innerHTML = isConnected;
 		if (isConnected) {document.getElementById("isConnected").style.color = "green"} else {document.getElementById("isConnected").style.color = "red"}
+		//document.getElementById("is3Connected").innerHTML = is3Connected;
+		//if (is3Connected) {document.getElementById("is3Connected").style.color = "green"} else {document.getElementById("is3Connected").style.color = "red"}
 		document.getElementById("isAcyclic").innerHTML = isAcyclic;
 		if (isAcyclic) {document.getElementById("isAcyclic").style.color = "green"} else {document.getElementById("isAcyclic").style.color = "red"}
 		document.getElementById("isTree").innerHTML = isTree;
@@ -2065,8 +2091,8 @@ addDefaultColor();*/
 		document.getElementById("isBipartite").innerHTML = isBipartite;
 		if (isBipartite) {document.getElementById("isBipartite").style.color = "green"} else {document.getElementById("isBipartite").style.color = "red"}
 		
-		document.getElementById("maxDegree").innerHTML = maxdegree
-		document.getElementById("minDegree").innerHTML = mindegree
+		document.getElementById("maxDegree").innerHTML = maxdegree;
+		document.getElementById("minDegree").innerHTML = mindegree;
 
 		if(treatEdgesAsDirected){
 			document.getElementById("reducedTr").style.display = "table-row";

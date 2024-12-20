@@ -85,7 +85,6 @@ function disablePages() {
 }
 
 
-
 function findRelatedConstraints(name) {
 	var tags = $("#constraintTags").tagit("assignedTags");
 

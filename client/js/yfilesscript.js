@@ -2363,20 +2363,11 @@ require([
 					var x = 0;
 					var y = 0;
 
-					var stellate = graphComponent.graph.createNode({
-						layout: new yfiles.geometry.Rect(0, 0, 20, 20),
-						tag: getNextTag()
-					});
-					graphComponent.graph.addLabel(stellate, getNextLabel("node").toString());
+					var stellate = createNode(graphComponent, x, y, 20, 20);
 
 					face.forEach(dart => {
 						const source = adapter.getOriginalNode(dart.reversed ? dart.associatedEdge.source : dart.associatedEdge.target);
-						const e = graphComponent.graph.createEdge({
-							source: source,
-							target: stellate,
-							tag: source.tag + "-(0)-" + stellate.tag
-						});
-						graphComponent.graph.addLabel(e, getNextLabel("edge").toString())
+						createEdge(graphComponent, source, stellate);
 						x = x + source.layout.center.x;
 						y = y + source.layout.center.y;
 					});
@@ -2391,22 +2382,13 @@ require([
 				var x = 0;
 				var y = 0;
 
-				var stellate = graphComponent.graph.createNode({
-					layout: new yfiles.geometry.Rect(0, 0, 20, 20),
-					tag: getNextTag()
-				});
-				graphComponent.graph.addLabel(stellate, getNextLabel("node").toString());
+				var stellate = createNode(graphComponent, 0, 0, 20, 20);
 
 				selectedNodes.forEach(node => {
 					x = x + node.layout.center.x;
 					y = y + node.layout.center.y;
 
-					const e = graphComponent.graph.createEdge({
-						source: node,
-						target: stellate,
-						tag: node.tag + "-" + stellate.tag
-					});
-					graphComponent.graph.addLabel(e, getNextLabel("edge").toString())
+					createEdge(graphComponent, node, stellate);
 				})
 				x = x / selectedNodes.length;
 				y = y / selectedNodes.length;
@@ -2417,184 +2399,119 @@ require([
 		document.querySelector("#BarnetteOne").addEventListener("click", () => {
 
 			var selectedEdges = graphComponent.selection.selectedEdges.toArray();
-			
-			//var selectedNodes = graphComponents.selection.selectedNodes.toArray();
-			
-			if (selectedEdges.length == 2) {
-				var e1 = selectedEdges[0];
-				var e2 = selectedEdges[1];
-				console.log(e1.sourceNode);
-				console.log(e1.targetNode);
-				console.log(e2.sourceNode);
-				console.log(e2.targetNode);
 
-				var v11 = e1.sourceNode;
-				var v12 = e1.targetNode;
-				var v21 = e2.sourceNode;
-				var v22 = e2.targetNode;
-				//var len1 = e1.length;
-				//var len2 = e2.length;
+			if ((selectedEdges.length == 0 || selectedEdges.length == 2)) {
 
-				// delete the selected edges
-				graphComponent.inputMode.deleteSelection();
+				if (selectedEdges.length == 0) 
+				{
+					alert("Barnette One cannot be applied. Choose two edges.")
+					return
+				}
+				
+				if (selectedEdges.length == 2) 
+				{
+					var e1 = selectedEdges[0];
+					var e2 = selectedEdges[1];
+
+					var v11 = e1.sourceNode;
+					var v12 = e1.targetNode;
+					var v21 = e2.sourceNode;
+					var v22 = e2.targetNode;
+
+					// delete the selected edges
+					graphComponent.inputMode.deleteSelection();
+					//graphComponent.graph.remove(e1);
+					//graphComponent.graph.remove(e2);
 	
-				var x11 = v11.layout.center.x;
-				var y11 = v11.layout.center.y;
-				var x12 = v12.layout.center.x;
-				var y12 = v12.layout.center.y;
-				var x21 = v21.layout.center.x;
-				var y21 = v21.layout.center.y;
-				var x22 = v22.layout.center.x;
-				var y22 = v22.layout.center.y;
+					var x11 = v11.layout.center.x;
+					var y11 = v11.layout.center.y;
+					var x12 = v12.layout.center.x;
+					var y12 = v12.layout.center.y;
+					var x21 = v21.layout.center.x;
+					var y21 = v21.layout.center.y;
+					var x22 = v22.layout.center.x;
+					var y22 = v22.layout.center.y;
 
-				var x1 = (2*x11 + x12)/3;
-				var y1 = (2*y11+ y12)/3;
-				var x2 = (x11  + 2*x12)/3;
-				var y2 = (y11 + 2*y12)/3;
-				var x3 = (2*x21 + x22)/3;
-				var y3 = (2*y21 + y22)/3;
-				var x4 = (x21 + 2*x22)/3;
-				var y4 = (y21 + 2*y22)/3;
+					var x1 = (2*x11 + x12)/3;
+					var y1 = (2*y11+ y12)/3;
+					var x2 = (x11  + 2*x12)/3;
+					var y2 = (y11 + 2*y12)/3;
+					var x3 = (2*x21 + x22)/3;
+					var y3 = (2*y21 + y22)/3;
+					var x4 = (x21 + 2*x22)/3;
+					var y4 = (y21 + 2*y22)/3;
 
-				// create 4 new nodes
-				var node1 = graphComponent.graph.createNode({
-					layout: new yfiles.geometry.Rect(x1, y1, 20, 20),
-					tag: getNextTag()
-				})
-				graphComponent.graph.addLabel(node1, getNextLabel("node").toString());
-				graphComponent.graph.setNodeCenter(node1, new yfiles.geometry.Point(x1, y1));
+					// create 4 new nodes
+					var node1 = createNode(graphComponent, x1, y1, 20, 20);
+					var node2 = createNode(graphComponent, x2, y2, 20, 20);
+					var node3 = createNode(graphComponent, x3, y3, 20, 20);
+					var node4 = createNode(graphComponent, x4, y4, 20, 20);
 
-				var node2 = graphComponent.graph.createNode({
-					layout: new yfiles.geometry.Rect(x2, y2, 20, 20),
-					tag: getNextTag()
-				})
-				graphComponent.graph.addLabel(node2, getNextLabel("node").toString());
-				graphComponent.graph.setNodeCenter(node2, new yfiles.geometry.Point(x2, y2));
+					// create new edges
+					createEdge(graphComponent, node1, node2);
+					createEdge(graphComponent, node3, node4);
+						
+					if (Math.sqrt(Math.pow(x11-x1,2) +  Math.pow(y11-y1,2))  < Math.sqrt(Math.pow(x11-x2,2) +  Math.pow(y11-y2,2))) {
+						
+						createEdge(graphComponent, v11, node1);
+						createEdge(graphComponent, node2, v12);
+					}
+					else {
+						createEdge(graphComponent, v11, node2);
+						createEdge(graphComponent, node1, v12);
+					}
 
-				var node3 = graphComponent.graph.createNode({
-					layout: new yfiles.geometry.Rect(x3, y3, 20, 20),
-					tag: getNextTag()
-				})
-				graphComponent.graph.addLabel(node3, getNextLabel("node").toString());
-				graphComponent.graph.setNodeCenter(node3, new yfiles.geometry.Point(x3, y3));
-
-				var node4 = graphComponent.graph.createNode({
-					layout: new yfiles.geometry.Rect(x4, y4, 20, 20),
-					tag: getNextTag()
-				})
-				graphComponent.graph.addLabel(node4, getNextLabel("node").toString());
-				graphComponent.graph.setNodeCenter(node4, new yfiles.geometry.Point(x4, y4));
-
-				// create new edges
-				var edge1 = graphComponent.graph.createEdge({
-					source: node1,
-					target: node2,
-					tag: node1.tag + "-" + node2.tag
-				})
-				graphComponent.graph.addLabel(edge1, getNextLabel("edge").toString())
+					if (Math.sqrt(Math.pow(x21-x3,2) +  Math.pow(y21-y3,2)) < Math.sqrt(Math.pow(x21-x4,2) +  Math.pow(y21-y4,2))) {
+						createEdge(graphComponent, v21, node3);
+						createEdge(graphComponent, node4, v22);
+					}
+					else {
+						createEdge(graphComponent, v21, node4);
+						createEdge(graphComponent, node3, v22);
+					}
 				
-				var edge2 = graphComponent.graph.createEdge({
-					source: node3,
-					target: node4,
-					tag: node3.tag + "-" + node4.tag
-				})
-				graphComponent.graph.addLabel(edge2, getNextLabel("edge").toString())
-
-				if (Math.sqrt(Math.pow(x11-x1,2) +  Math.pow(y11-y1,2))  < Math.sqrt(Math.pow(x11-x2,2) +  Math.pow(y11-y2,2))) {
-					var edge3 = graphComponent.graph.createEdge({
-						source: v11,
-						target: node1,
-						tag: v11.tag + "-" + node1.tag
-					})
-					graphComponent.graph.addLabel(edge3, getNextLabel("edge").toString())
-
-					var edge4 = graphComponent.graph.createEdge({
-						source: node2,
-						target: v12,
-						tag: node2.tag + "-" + v12.tag
-					})
-					graphComponent.graph.addLabel(edge4, getNextLabel("edge").toString())
+					if (Math.sqrt(Math.pow(x1-x3,2) +  Math.pow(y1-y3,2)) + Math.sqrt(Math.pow(x2-x4,2) +  Math.pow(y2-y4,2)) < Math.sqrt(Math.pow(x1-x4,2) +  Math.pow(y1-y4,2)) + Math.sqrt(Math.pow(x2-x3,2) +  Math.pow(y2-y3,2))) {
+						createEdge(graphComponent, node1, node3);
+						createEdge(graphComponent, node2, node4);
+					}
+					else {
+						createEdge(graphComponent, node1, node4);
+						createEdge(graphComponent, node2, node3);
+					}
 				}
-				else {
-					var edge3 = graphComponent.graph.createEdge({
-						source: v11,
-						target: node2,
-						tag: v11.tag + "-" + node2.tag
-					})
-					graphComponent.graph.addLabel(edge3, getNextLabel("edge").toString())
+			}
+		})
 
-					var edge4 = graphComponent.graph.createEdge({
-						source: node1,
-						target: v12,
-						tag: node1.tag + "-" + v12.tag
-					})
-					graphComponent.graph.addLabel(edge4, getNextLabel("edge").toString())
+		document.querySelector("#BarnetteTwo").addEventListener("click", () => {
+			var selectedNodes = graphComponent.selection.selectedNodes.toArray();
+			console.log(selectedNodes);
+
+			if (selectedNodes.length == 1) {
+				const adapter = new yfiles.layout.YGraphAdapter(graphComponent.graph);
+				var ygraph = adapter.yGraph;
+
+				if (!yfiles.algorithms.PlanarEmbedding.isPlanar(ygraph)) {
+					alert("Barnette Two cannot be applied to the input graph as it is not planar.");
+					return
 				}
+				var outgoingEdges = [];
+				var incomingEdges = [];
 
-				if (Math.sqrt(Math.pow(x21-x3,2) +  Math.pow(y21-y3,2)) < Math.sqrt(Math.pow(x21-x4,2) +  Math.pow(y21-y4,2))) {
-					var edge5 = graphComponent.graph.createEdge({
-						source: v21,
-						target: node3,
-						tag: v21.tag + "-" + node3.tag
-					})
-					graphComponent.graph.addLabel(edge5, getNextLabel("edge").toString())
+				/*selectedNodes.forEach(function(node) {
+					var outgoing = outEdges(node);
+					outgoing.forEach(function(edge) {
+						outgoingEdges.push(edge);
+					});
+					var incoming = inEdges(node);
+					incoming.forEach(function(edge) {
+						incomingEdges.push(edge);
+					});
+				});*/
+			}
+		})
 
-					var edge6 = graphComponent.graph.createEdge({
-						source: node4,
-						target: v22,
-						tag: node4.tag + "-" + v22.tag
-					})
-					graphComponent.graph.addLabel(edge6, getNextLabel("edge").toString())
-				}
-				else {
-					var edge5 = graphComponent.graph.createEdge({
-						source: v21,
-						target: node4,
-						tag: v21.tag + "-" + node4.tag
-					})
-					graphComponent.graph.addLabel(edge5, getNextLabel("edge").toString())
 
-					var edge6 = graphComponent.graph.createEdge({
-						source: node3,
-						target: v22,
-						tag: node3.tag + "-" + v22.tag
-					})
-					graphComponent.graph.addLabel(edge6, getNextLabel("edge").toString())
-				}
-				
-				if (Math.sqrt(Math.pow(x1-x3,2) +  Math.pow(y1-y3,2)) + Math.sqrt(Math.pow(x2-x4,2) +  Math.pow(y2-y4,2)) < Math.sqrt(Math.pow(x1-x4,2) +  Math.pow(y1-y4,2)) + Math.sqrt(Math.pow(x2-x3,2) +  Math.pow(y2-y3,2))) {
-					var edge7 = graphComponent.graph.createEdge({
-						source: node1,
-						target: node3,
-						tag: node1.tag + "-" + node3.tag
-					})
-					graphComponent.graph.addLabel(edge7, getNextLabel("edge").toString())
 
-					var edge8 = graphComponent.graph.createEdge({
-						source: node2,
-						target: node4,
-						tag: node2.tag + "-" + node4.tag
-					})
-					graphComponent.graph.addLabel(edge8, getNextLabel("edge").toString())
-				}
-				else {
-					var edge7 = graphComponent.graph.createEdge({
-						source: node1,
-						target: node4,
-						tag: node1.tag + "-" + node4.tag
-					})
-					graphComponent.graph.addLabel(edge7, getNextLabel("edge").toString())
-
-					var edge8 = graphComponent.graph.createEdge({
-						source: node2,
-						target: node3,
-						tag: node2.tag + "-" + node3.tag
-					})
-					graphComponent.graph.addLabel(edge8, getNextLabel("edge").toString())
-				}
-			} 
-			
-		}) 
 
 		document.querySelector("#threeStellation").addEventListener("click", () => {
 			var selectedNodes = graphComponent.selection.selectedNodes.toArray();
@@ -2625,47 +2542,14 @@ require([
 						y = y / face.size
 
 						// create 3 new nodes
-						var s1 = graphComponent.graph.createNode({
-							layout: new yfiles.geometry.Rect(x, y, 20, 20),
-							tag: getNextTag()
-						})
-						graphComponent.graph.addLabel(s1, getNextLabel("node").toString());
-
-						var s2 = graphComponent.graph.createNode({
-							layout: new yfiles.geometry.Rect(x, y, 20, 20),
-							tag: getNextTag()
-						})
-						graphComponent.graph.addLabel(s2, getNextLabel("node").toString());
-
-						var s3 = graphComponent.graph.createNode({
-							layout: new yfiles.geometry.Rect(x, y, 20, 20),
-							tag: getNextTag()
-						})
-						graphComponent.graph.addLabel(s3, getNextLabel("node").toString());
-
+						var s1 = createNode(graphComponent, x, y, 20, 20);
+						var s2 = createNode(graphComponent, x, y, 20, 20);
+						var s3 = createNode(graphComponent, x, y, 20, 20);
 
 						// create 3 new edges
-						var e1 = graphComponent.graph.createEdge({
-							source: s1,
-							target: s2,
-							tag: s1.tag + "-" + s2.tag
-						})
-						graphComponent.graph.addLabel(e1, getNextLabel("edge").toString())
-
-						var e2 = graphComponent.graph.createEdge({
-							source: s2,
-							target: s3,
-							tag: s2.tag + "-" + s3.tag
-						})
-						graphComponent.graph.addLabel(e2, getNextLabel("edge").toString())
-
-						var e3 = graphComponent.graph.createEdge({
-							source: s1,
-							target: s3,
-							tag: s1.tag + "-" + s3.tag
-						})
-						graphComponent.graph.addLabel(e3, getNextLabel("edge").toString())
-
+						createEdge(graphComponent, s1, s2);
+						createEdge(graphComponent, s2, s3);
+						createEdge(graphComponent, s1, s3);
 
 						// create 6 new edges,2 for each dart
 						var edgesToNewNodes = [[s1, s2], [s3, s1], [s2, s3]]
@@ -2673,19 +2557,8 @@ require([
 
 						face.forEach(function (dart) {
 							const source = adapter.getOriginalNode(dart.reversed ? dart.associatedEdge.source : dart.associatedEdge.target);
-							var ea = graphComponent.graph.createEdge({
-								source: source,
-								target: edgesToNewNodes[i][0],
-								tag: source.tag + "-(0)-" + edgesToNewNodes[i][0].tag,
-							})
-							graphComponent.graph.addLabel(ea, getNextLabel("edge").toString())
-
-							var eb = graphComponent.graph.createEdge({
-								source: source,
-								target: edgesToNewNodes[i][1],
-								tag: source.tag + "-(0)-" + edgesToNewNodes[i][1].tag
-							})
-							graphComponent.graph.addLabel(eb, getNextLabel("edge").toString())
+							createEdge(graphComponent, source, edgesToNewNodes[i][0]);
+							createEdge(graphComponent, source, edgesToNewNodes[i][1]);
 							i++;
 						})
 
@@ -2704,66 +2577,22 @@ require([
 				y = y / selectedNodes.length
 
 				// create 3 new nodes
-				var s1 = graphComponent.graph.createNode({
-					layout: new yfiles.geometry.Rect(x, y, 20, 20),
-					tag: getNextTag()
-				})
-				graphComponent.graph.addLabel(s1, getNextLabel("node").toString());
-
-				var s2 = graphComponent.graph.createNode({
-					layout: new yfiles.geometry.Rect(x, y, 20, 20),
-					tag: getNextTag()
-				})
-				graphComponent.graph.addLabel(s2, getNextLabel("node").toString());
-
-				var s3 = graphComponent.graph.createNode({
-					layout: new yfiles.geometry.Rect(x, y, 20, 20),
-					tag: getNextTag()
-				})
-				graphComponent.graph.addLabel(s3, getNextLabel("node").toString());
+				var s1 = createNode(graphComponent, x, y, 20, 20);
+				var s2 = createNode(graphComponent, x, y, 20, 20);
+				var s3 = createNode(graphComponent, x, y, 20, 20);
 
 				// create 3 new edges
-				var e1 = graphComponent.graph.createEdge({
-					source: s1,
-					target: s2,
-					tag: s1.tag + "-" + s2.tag
-				})
-				graphComponent.graph.addLabel(e1, getNextLabel("edge").toString())
-
-				var e2 = graphComponent.graph.createEdge({
-					source: s2,
-					target: s3,
-					tag: s2.tag + "-" + s3.tag
-				})
-				graphComponent.graph.addLabel(e2, getNextLabel("edge").toString())
-
-				var e3 = graphComponent.graph.createEdge({
-					source: s1,
-					target: s3,
-					tag: s1.tag + "-" + s3.tag
-				})
-				graphComponent.graph.addLabel(e3, getNextLabel("edge").toString())
+				createEdge(graphComponent, s1, s2);
+				createEdge(graphComponent, s2, s3);
+				createEdge(graphComponent, s1, s3);
 
 				// create 6 new edges,2 for each dart
 				var edgesToNewNodes = [[s1, s2], [s3, s1], [s2, s3]]
 				var i = 0;
 
 				selectedNodes.forEach(function (n) {
-					var ea = graphComponent.graph.createEdge({
-						source: n,
-						target: edgesToNewNodes[i][0],
-						tag: n.tag + "-(0)-" + edgesToNewNodes[i][0].tag,
-					})
-					graphComponent.graph.addLabel(ea, getNextLabel("edge").toString())
-
-					var eb = graphComponent.graph.createEdge({
-						source: n,
-						target: edgesToNewNodes[i][1],
-						tag: n.tag + "-(0)-" + edgesToNewNodes[i][1].tag
-					})
-					graphComponent.graph.addLabel(eb, getNextLabel("edge").toString())
-
-
+					createEdge(graphComponent, n, edgesToNewNodes[i][0]);
+					createEdge(graphComponent, n, edgesToNewNodes[i][1]);
 					i++;
 				})
 
@@ -2813,7 +2642,7 @@ require([
 		//if the selected type of graph changes, some options may get en/disabled
 		document.getElementById("graphType").onchange = function() {
 			var option = document.getElementById("graphType").value;
-			if (option=="tree"|option=="complete"|option=="maximalPlanar"|option=="planar3Tree") {
+			if (option=="tree"|option=="complete"|option=="maximalPlanar"|option=="planar3Tree"|option=="Barnette") {
 				document.getElementById("divVertices").hidden = false;
 				document.getElementById("divEdges").hidden = true;
 				document.getElementById("divBipartiteVerticesM").hidden = true;
@@ -3065,6 +2894,30 @@ require([
 				}
 			}
 			//console.log(maxdegree)
+
+			/*var is3Connected = true;
+			if (nrOfVertices < 4 || nrOfVertices > 50) {
+				is3Connected = false;
+			} else {
+				for (let i = 0; i < nrOfVertices; i++) {
+					for (let j = i + 1; j < nrOfVertices; j++) {
+						
+						var gc = new yfiles.view.GraphComponent();
+						var graphCopy = gc.graph;
+						const copier = new yfiles.graph.GraphCopier();
+						copier.copy(graph, graphCopy);
+						var nodes = graphCopy.nodes.toArray();
+						graphCopy.remove(nodes[i]);
+						graphCopy.remove(nodes[j]);
+						const adapter = new yfiles.layout.YGraphAdapter(graphCopy);
+						var ygraphCopy = adapter.yGraph;
+						if (!yfiles.algorithms.GraphChecker.isConnected(ygraphCopy)) {							
+							is3Connected = false;
+							break;
+						}
+					}
+				}
+			}*/
 	
 			document.getElementById("nrOfVertices").innerHTML = nrOfVertices
 			document.getElementById("nrOfEdges").innerHTML = nrOfEdges
@@ -3072,6 +2925,8 @@ require([
 			if (isPlanar) { document.getElementById("isPlanar").style.color = "green" } else { document.getElementById("isPlanar").style.color = "red" }
 			document.getElementById("isConnected").innerHTML = isConnected
 			if (isConnected) { document.getElementById("isConnected").style.color = "green" } else { document.getElementById("isConnected").style.color = "red" }
+			//document.getElementById("is3Connected").innerHTML = is3Connected
+			//if (is3Connected) { document.getElementById("is3Connected").style.color = "green" } else { document.getElementById("is3Connected").style.color = "red" }
 			document.getElementById("isAcyclic").innerHTML = isAcyclic
 			if (isAcyclic) { document.getElementById("isAcyclic").style.color = "green" } else { document.getElementById("isAcyclic").style.color = "red" }
 			document.getElementById("isTree").innerHTML = isTree
@@ -3390,6 +3245,26 @@ require([
 		return false;
 	}
 
+	function createNode(graphComponent, x, y, w=20, h=20) {
+		var node = graphComponent.graph.createNode({
+			layout: new yfiles.geometry.Rect(x, y, w, h),
+			tag: getNextTag()
+		});			
+		graphComponent.graph.addLabel(node, getNextLabel("node").toString());		
+		graphComponent.graph.setNodeCenter(node, new yfiles.geometry.Point(x, y));	
+		return node;
+	}
+
+	function createEdge(graphComponent, s, t) {
+		var edge = graphComponent.graph.createEdge({
+			source: s,
+			target: t,
+			tag: s.tag + "-" + t.tag
+		});
+		graphComponent.graph.addLabel(edge, getNextLabel("edge").toString());
+		return edge;
+	}
+
 	//returns two random vertices: source and target for an edge
 	function computeRandomVerticesForEdge(numberOfVertices, vertices) {
 		var randomNr1 = Math.floor(Math.random() * numberOfVertices);
@@ -3452,7 +3327,7 @@ require([
 			return randomFace;
 		}
 	}
-
+	
 	//shuffles an array
 	function shuffle(array) {
 		var j, x, i;
@@ -3498,25 +3373,12 @@ require([
 		var edges = [];
 		for(var i = 0; i <= numberOfVertices-1; i++) {
 			var newVertex = computeRandomVertex(vertices, widthCanvas);
-			var x = newVertex.x;
-			var y = newVertex.y;
-			vertices[i] = graphComponent.graph.createNode({
-				layout: new yfiles.geometry.Rect(x,y,nodeSize,nodeSize),
-				tag: getNextTag()
-			})
-			graphComponent.graph.addLabel(vertices[i], getNextLabel("node").toString());
+			vertices[i] = createNode(graphComponent, newVertex.x, newVertex.y, nodeSize, nodeSize);
 		}
 		//draw edges
 		for(var j=0; j<=numberOfEdges-1; j++) {
 			var sourceAndTarget = computeRandomEdge(numberOfEdges, numberOfVertices, edges, vertices);
-			var source = sourceAndTarget[0];
-			var target = sourceAndTarget[1];
-			edges[j] = graphComponent.graph.createEdge({
-				source: source,
-				target: target,
-				tag: source.tag+"-"+target.tag
-			})
-			graphComponent.graph.addLabel(edges[j], getNextLabel("edge").toString());
+			edges[j] = createEdge(graphComponent, sourceAndTarget[0], sourceAndTarget[1]);
 		}
 		graphComponent.morphLayout(new yfiles.organic.OrganicLayout());
 		//zoom to see all vertices and edges
@@ -3569,87 +3431,37 @@ require([
 			typeTree();
 		} else {
 			//build the start triangle (equilateral triangle, so the height is (sqrt(2)/3)*side)
-			var vertexStartTriangle1 = {x:0, y:0};
-			var x = vertexStartTriangle1.x;
-			var y = vertexStartTriangle1.y;
-			vertices[0] = graphComponent.graph.createNode({
-				layout: new yfiles.geometry.Rect(x,y,nodeSize,nodeSize),
-				tag: getNextTag()
-			})
-			graphComponent.graph.addLabel(vertices[0], getNextLabel("node").toString());
-			var vertexStartTriangle2 = {x:sideOuterTriangle, y:0};
-			var x = vertexStartTriangle2.x;
-			var y = vertexStartTriangle2.y;
-			vertices[1] = graphComponent.graph.createNode({
-				layout: new yfiles.geometry.Rect(x,y,nodeSize,nodeSize),
-				tag: getNextTag()
-			})
-			graphComponent.graph.addLabel(vertices[1], getNextLabel("node").toString());
-			var vertexStartTriangle3 = {x:halfSideOuterTriangle, y:heightOuterTriangle};
-			var x = vertexStartTriangle3.x;
-			var y = vertexStartTriangle3.y;
-			vertices[2] = graphComponent.graph.createNode({
-				layout: new yfiles.geometry.Rect(x,y,nodeSize,nodeSize),
-				tag: getNextTag()
-			})
-			graphComponent.graph.addLabel(vertices[2], getNextLabel("node").toString());
-			var source = vertices[0];
-			var target = vertices[1];
-			edges[0] = graphComponent.graph.createEdge({
-				source: source,
-				target: target,
-				tag: source.tag+"-"+target.tag
-			})
-			graphComponent.graph.addLabel(edges[0], getNextLabel("edge").toString());
-			var source = vertices[1];
-			var target = vertices[2];
-			edges[1] = graphComponent.graph.createEdge({
-				source: source,
-				target: target,
-				tag: source.tag+"-"+target.tag
-			})
-			graphComponent.graph.addLabel(edges[1], getNextLabel("edge").toString());
-			var source = vertices[2];
-			var target = vertices[0];
-			edges[2] = graphComponent.graph.createEdge({
-				source: source,
-				target: target,
-				tag: source.tag+"-"+target.tag
-			})
-			graphComponent.graph.addLabel(edges[2], getNextLabel("edge").toString());
+			vertices[0] = createNode(graphComponent, 0, 0, nodeSize, nodeSize);
+			vertices[1] = createNode(graphComponent, sideOuterTriangle, 0, nodeSize, nodeSize);
+			vertices[2] = createNode(graphComponent, halfSideOuterTriangle, heightOuterTriangle, nodeSize, nodeSize);
 
+			createEdge(graphComponent, vertices[0], vertices[1]);
+			createEdge(graphComponent, vertices[1], vertices[2]);
+			createEdge(graphComponent, vertices[2], vertices[0]);
 
 			//add every vertex randomly in one of the existing faces and connect it to every node at this face
 			var leftVertices = numberOfVerticesInt-3;
 			for (var i = 0; i < leftVertices; i++) {
-			var adapter = new yfiles.layout.YGraphAdapter(graphComponent.graph);
-			var ygraph = adapter.yGraph;
-			var planarEmbedding = new yfiles.algorithms.PlanarEmbedding(ygraph);
-			var outerFace = planarEmbedding.outerFace;
-			var numberOfFaces = planarEmbedding.faces.size;
+				var adapter = new yfiles.layout.YGraphAdapter(graphComponent.graph);
+				var ygraph = adapter.yGraph;
+				var planarEmbedding = new yfiles.algorithms.PlanarEmbedding(ygraph);
+				var outerFace = planarEmbedding.outerFace;
+				var numberOfFaces = planarEmbedding.faces.size;
 
-			var randomFace = getRandomFace(numberOfFaces, planarEmbedding, outerFace);
+				var randomFace = getRandomFace(numberOfFaces, planarEmbedding, outerFace);
 
-			var x = 0;
-			var y = 0;
+				var x = 0;
+				var y = 0;
 
-			vertices[i+3] = graphComponent.graph.createNode({
-				layout: new yfiles.geometry.Rect(x,y,nodeSize,nodeSize),
-				tag: getNextTag()
-			});
-			graphComponent.graph.addLabel(vertices[i+3], getNextLabel("node").toString());
-			randomFace.forEach(dart => {
-				var source =  adapter.getOriginalNode(dart.reversed ? dart.associatedEdge.source : dart.associatedEdge.target);
-				//alert("round i: "+i+". source: "+source.toString());
-				var e = graphComponent.graph.createEdge({
-					source: source,
-					target: vertices[i+3],
-					tag: source.tag+"-(0)-"+vertices[i+3].tag
+				vertices[i+3] = createNode(graphComponent, x, y, nodeSize, nodeSize);
+
+				randomFace.forEach(dart => {
+					var source =  adapter.getOriginalNode(dart.reversed ? dart.associatedEdge.source : dart.associatedEdge.target);
+					//alert("round i: "+i+". source: "+source.toString());
+					createEdge(graphComponent, source, vertices[i+3]);
+					x = x + source.layout.center.x;
+					y = y + source.layout.center.y;
 				});
-				graphComponent.graph.addLabel(e, getNextLabel("edge").toString())
-				x = x + source.layout.center.x;
-				y = y + source.layout.center.y;
-			});
 				x = x / randomFace.size;
 				y = y / randomFace.size;
 				graphComponent.graph.setNodeCenter(vertices[i+3], new yfiles.geometry.Point(x, y));
@@ -3691,10 +3503,6 @@ require([
 		ynodes = ygraph.getNodeArray();
 		yedges = ygraph.getEdgeArray();
 
-
-
-
-
 		for (var i = 0; i <= ynodes.length-1; i++) {
 			var ynode = nodeMap.get(ynodes[i]);
 			var x = ynode.x;
@@ -3727,12 +3535,7 @@ require([
 			}
 
 			if (boolCreateEdge) {
-				var edge = graphComponent.graph.createEdge({
-					source: source,
-					target: target,
-					tag: source.tag+"-"+target.tag
-				})
-				graphComponent.graph.addLabel(edge, getNextLabel("edge").toString());
+				var edge = createEdge(graphComponent, source, target);
 				edges.push(edge);
 			}
 		}
@@ -3749,24 +3552,15 @@ require([
 		var edges = [];
 		for(var i = 0; i <= numberOfVertices-1; i++) {
 			var newVertex = computeRandomVertex(vertices, widthCanvas);
-			var x = newVertex.x;
-			var y = newVertex.y;
-			vertices[i] = graphComponent.graph.createNode({
-				layout: new yfiles.geometry.Rect(x,y,nodeSize,nodeSize),
-				tag: getNextTag()
-			})
+			vertices[i] = createNode(graphComponent, newVertex.x, newVertex.y, nodeSize, nodeSize);
+				
 			graphComponent.graph.addLabel(vertices[i], getNextLabel("node").toString());
 			//if there is more than one vertex, create an edge to a random previous vertex
 			if (i>=1) {
 				var sourceAndTarget = computeRandomVerticesForEdge(i, vertices);
 				var source = vertices[i];
 				var target = sourceAndTarget[1];
-				edges[i-1] = graphComponent.graph.createEdge({
-					source: source,
-					target: target,
-					tag: source.tag+"-"+target.tag
-				})
-				graphComponent.graph.addLabel(edges[i-1], getNextLabel("edge").toString());
+				edges[i-1] = createEdge(graphComponent, source, target);
 			}
 		}
 		graphComponent.morphLayout(new yfiles.tree.BalloonLayout());
@@ -3783,22 +3577,9 @@ require([
 		var edges = [];
 		for(var i = 0; i <= numberOfVertices-1; i++) {
 			var newVertex = computeRandomVertex(vertices, widthCanvas);
-			var x = newVertex.x;
-			var y = newVertex.y;
-			vertices[i] = graphComponent.graph.createNode({
-				layout: new yfiles.geometry.Rect(x,y,nodeSize,nodeSize),
-				tag: getNextTag()
-			})
-			graphComponent.graph.addLabel(vertices[i], getNextLabel("node").toString());
+			vertices[i] = createNode(graphComponent, newVertex.x, newVertex.y, nodeSize, nodeSize);
 			for (var j = 0; j <= i-1; j++) {
-				var source = vertices[i];
-				var target = vertices[j];
-				edges[j] = graphComponent.graph.createEdge({
-					source: source,
-					target: target,
-					tag: source.tag+"-"+target.tag
-				})
-				graphComponent.graph.addLabel(edges[j], getNextLabel("edge").toString());
+				edges[j] = createEdge(graphComponent, vertices[i], vertices[j]);
 			}
 		}
 		graphComponent.morphLayout(new yfiles.circular.CircularLayout());
@@ -3819,13 +3600,7 @@ require([
 		vertices = computeBipartiteVertices(m, n);
 		//draw vertices
 		for (var i = 0; i < numberOfVertices; i++) {
-			var x = vertices[i].x;
-			var y = vertices[i].y;
-			vertices[i] = graphComponent.graph.createNode({
-				layout: new yfiles.geometry.Rect(x,y,nodeSize,nodeSize),
-				tag: getNextTag()
-			})
-			graphComponent.graph.addLabel(vertices[i], getNextLabel("node").toString());
+			vertices[i] = createNode(graphComponent, vertices[i].x, vertices[i].y, nodeSize, nodeSize);				
 		}
 		//draw edges
 		if (mInt < nInt) {
@@ -3833,12 +3608,7 @@ require([
 				for (var k = 0; k <= m-1; k++) {
 					var source = vertices[mInt+j];
 					var target = vertices[k];
-					edges[j+k] = graphComponent.graph.createEdge({
-						source: source,
-						target: target,
-						tag: source.tag+"-"+target.tag
-					})
-					graphComponent.graph.addLabel(edges[j+k], getNextLabel("edge").toString());
+					edges[j+k] = createEdge(graphComponent, source, target);
 				}
 			}
 		} else {
@@ -3846,12 +3616,7 @@ require([
 				for (var k = 0; k <= n-1; k++) {
 					var source = vertices[j];
 					var target = vertices[mInt+k];
-					edges[j+k] = graphComponent.graph.createEdge({
-						source: source,
-						target: target,
-						tag: source.tag+"-"+target.tag
-					})
-					graphComponent.graph.addLabel(edges[j+k], getNextLabel("edge").toString());
+					edges[j+k] = createEdge(graphComponent, source, target);
 				}
 			}
 		}
@@ -3859,6 +3624,128 @@ require([
 		graphComponent.fitGraphBounds();
 	}
 
+	function typeBarnette() {
+		var numberOfVertices = document.getElementById("numberOfVertices").value;
+		var numberOfVerticesInt = parseInt(numberOfVertices);
+		var nodeSize = 30;
+		var sideOuterSquare = numberOfVerticesInt*nodeSize;
+		var sideOuterSquare1 = numberOfVerticesInt*nodeSize/2;
+		var heightOuterSquare = (Math.sqrt(1)/2)*sideOuterSquare;
+		var heightOuterSquare1 = (Math.sqrt(2)/3)*sideOuterSquare1;
+		var vertices = []; //n
+		var edges = []; //(3*n)/2
+		if (numberOfVertices <= 7) {
+			typeTree();
+		}
+		else {
+			//creates vertices for outer square
+			vertices[0] = createNode(graphComponent, 0, 0);
+			vertices[1] = createNode(graphComponent, sideOuterSquare, 0);
+			vertices[2] = createNode(graphComponent, sideOuterSquare, heightOuterSquare);
+			vertices[3] = createNode(graphComponent, 0, heightOuterSquare);
+
+			//create edges for outer square
+			createEdge(graphComponent, vertices[0], vertices[1]);
+			createEdge(graphComponent, vertices[1], vertices[2]);
+			createEdge(graphComponent, vertices[2], vertices[3]);
+			createEdge(graphComponent, vertices[3], vertices[0]);
+
+			//creates vertices for inner square
+			vertices[4] = createNode(graphComponent, 150, 100);
+			vertices[5] = createNode(graphComponent, sideOuterSquare1, 100);
+			vertices[6] = createNode(graphComponent, sideOuterSquare1, heightOuterSquare1);
+			vertices[7] = createNode(graphComponent, 150, heightOuterSquare1);
+
+			//create edges for inner square
+			createEdge(graphComponent, vertices[4], vertices[5]);
+			createEdge(graphComponent, vertices[5], vertices[6]);
+			createEdge(graphComponent, vertices[6], vertices[7]);
+			createEdge(graphComponent, vertices[7], vertices[4]);
+
+			//create edges between squares
+			createEdge(graphComponent, vertices[0], vertices[4]);
+			createEdge(graphComponent, vertices[1], vertices[5]);
+			createEdge(graphComponent, vertices[2], vertices[6]);
+			createEdge(graphComponent, vertices[3], vertices[7]);
+
+			var noOfVertices = numberOfVertices - 12;
+			for(var i = 0; i <= noOfVertices/4; i++) {
+
+				const adapter = new yfiles.layout.YGraphAdapter(graphComponent.graph);
+				var ygraph = adapter.yGraph;
+				
+				var planarEmbedding = new yfiles.algorithms.PlanarEmbedding(ygraph);
+				var arrayOfFaces = planarEmbedding.faces.toArray();
+
+				var randomFaceIndex = Math.floor(Math.random() * arrayOfFaces.length);
+				var randomFace = arrayOfFaces[randomFaceIndex];	
+				var faceEdges = [];
+				var faceDarts = [];
+				var faceLength = 0;
+
+				randomFace.forEach(dart => {
+					const source = adapter.getOriginalNode(dart.reversed ? dart.associatedEdge.source : dart.associatedEdge.target);
+					const target = adapter.getOriginalNode(dart.reversed ? dart.associatedEdge.target : dart.associatedEdge.source);
+					faceEdges[faceLength] = adapter.getOriginalEdge(dart.associatedEdge);
+					faceDarts[faceLength] = dart;
+					faceLength++;
+					})	
+
+				do {
+					var randomNumber1 = Math.floor(Math.random() * faceLength);
+					var randomNumber2 = Math.floor(Math.random() * faceLength);
+
+				}
+				while ((randomNumber1%2 == 0 && randomNumber2%2 == 1) || (randomNumber1%2 == 1 && randomNumber2%2 == 0) || (randomNumber1 == randomNumber2));
+
+				var e1 = faceEdges[randomNumber1];
+				var e2 = faceEdges[randomNumber2];
+				
+				var n11 = adapter.getOriginalNode(!faceDarts[randomNumber1].reversed ? faceDarts[randomNumber1].associatedEdge.source : faceDarts[randomNumber1].associatedEdge.target);
+				var n12 = adapter.getOriginalNode(!faceDarts[randomNumber1].reversed ? faceDarts[randomNumber1].associatedEdge.target : faceDarts[randomNumber1].associatedEdge.source);
+				var n21 = adapter.getOriginalNode(!faceDarts[randomNumber2].reversed ? faceDarts[randomNumber2].associatedEdge.source : faceDarts[randomNumber2].associatedEdge.target);
+				var n22 = adapter.getOriginalNode(!faceDarts[randomNumber2].reversed ? faceDarts[randomNumber2].associatedEdge.target : faceDarts[randomNumber2].associatedEdge.source);
+
+				// delete the selected edges
+				graphComponent.graph.remove(e1);
+				graphComponent.graph.remove(e2);
+	
+				var x11 = n11.layout.center.x;
+				var y11 = n11.layout.center.y;
+				var x12 = n12.layout.center.x;
+				var y12 = n12.layout.center.y;
+				var x21 = n21.layout.center.x;
+				var y21 = n21.layout.center.y;
+				var x22 = n22.layout.center.x;
+				var y22 = n22.layout.center.y;
+
+				var x1 = (2*x11 + x12)/3;
+				var y1 = (2*y11+ y12)/3;
+				var x2 = (x11  + 2*x12)/3;
+				var y2 = (y11 + 2*y12)/3;
+				var x3 = (2*x21 + x22)/3;
+				var y3 = (2*y21 + y22)/3;
+				var x4 = (x21 + 2*x22)/3;
+				var y4 = (y21 + 2*y22)/3;
+
+				// create 4 new nodes
+				var node1 = createNode(graphComponent, x1, y1, 20, 20);
+				var node2 = createNode(graphComponent, x2, y2, 20, 20);
+				var node3 = createNode(graphComponent, x3, y3, 20, 20);
+				var node4 = createNode(graphComponent, x4, y4, 20, 20);
+
+				// create new edges
+				createEdge(graphComponent, node1, node2);
+				createEdge(graphComponent, node3, node4);
+				createEdge(graphComponent, n11, node1);
+				createEdge(graphComponent, node2, n12);
+				createEdge(graphComponent, n21, node3);
+				createEdge(graphComponent, node4, n22);
+				createEdge(graphComponent, node1, node4);
+				createEdge(graphComponent, node2, node3);	
+			}
+		}	
+	}
 
 	//Select the right type of graph
 	function computeRandomGraph() {
@@ -3872,6 +3759,9 @@ require([
 				break;
 			case "planar3Tree":
 				typePlanar3Tree();
+				break;
+			case "Barnette":
+				typeBarnette();
 				break;
 			case "maximalPlanar":
 				typeMaximalPlanar();
@@ -3906,23 +3796,10 @@ require([
 
 		var width = e.sourceNode.layout.width
 		var height = e.sourceNode.layout.height
-
-		var newNode = graphComponent.graph.createNodeAt(new yfiles.geometry.Point(xnew + 30, ynew + 30))
-		var edge1 = graphComponent.graph.createEdge(newNode, e.sourceNode)
-		var edge2 = graphComponent.graph.createEdge(newNode, e.targetNode)
-
-		// adding labels and tags
-		var nodeLabel = getNextLabel("node");
-		graphComponent.graph.addLabel(newNode, nodeLabel.toString())
-		newNode.tag = getNextTag();
-
-		var edge1Label = getNextLabel("edge");
-		graphComponent.graph.addLabel(edge1, edge1Label.toString())
-		edge1.tag = edge1.sourceNode.tag + "-(0)-" + edge1.targetNode.tag
-
-		var edge2Label = getNextLabel("edge");
-		graphComponent.graph.addLabel(edge2, edge2Label.toString())
-		edge2.tag = edge2.sourceNode.tag + "-(0)-" + edge2.targetNode.tag
+		
+		var newNode = createNode(graphComponent, xnew + 30, ynew + 30);
+		createEdge(graphComponent, newNode, e.sourceNode);
+		createEdge(graphComponent, newNode, e.targetNode);
 	}
 
 	/*
@@ -4145,11 +4022,7 @@ require([
 
 			// swapping source and target of edge in order to make them all go in the right direction if necessary
 			if (orderedNodes.indexOf(e.sourceNode.tag.toString()) > orderedNodes.indexOf(e.targetNode.tag.toString())) {
-				var newEdge = graphComponent.graph.createEdge({
-					source: e.targetNode,
-					target: e.sourceNode,
-					tag: e.tag
-				})
+				var newEdge = createEdge(graphComponent, e.targetNode, e.sourceNode);				
 
 				// assign label of old edge to new edge
 				var oldLabel = e.labels.toArray()[0].text
@@ -4381,7 +4254,7 @@ require([
 							const thickness = 1
 							let factor = 1
 							if (e.sourceNode.tag == predecessors.get(e.targetNode.tag+"") || e.targetNode.tag == predecessors.get(e.sourceNode.tag+"")) {
-								factor *= 2; 
+								factor *= 4; 
 							}
 							var polyStyle = new yfiles.styles.PolylineEdgeStyle({
 								stroke: `${factor*thickness}px ${colors[i]}`,
@@ -4398,7 +4271,7 @@ require([
 							let factor = 1
 							//console.log(e.sourceNode.tag + " " + e.targetNode.tag + " " + predecessors.get(e.targetNode.tag+"") + " " + predecessors.get(e.sourceNode.tag+""))
 							if (e.sourceNode.tag == predecessors.get(e.targetNode.tag+"") || e.targetNode.tag == predecessors.get(e.sourceNode.tag+"")) {
-								factor *= 2; 
+								factor *= 4; 
 							}
 							var polyStyle = new yfiles.styles.PolylineEdgeStyle({
 								stroke: `${factor*thickness}px ${colors[i]}`,
