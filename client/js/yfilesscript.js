@@ -797,6 +797,7 @@ require([
 		} else if (graphComponent.selection.selectedEdges.size == 1) {
 			selEdges = graphComponent.selection.selectedEdges.toArray();
 			contextMenu.addMenuItem('Assign to...', () => {
+				$("#pageDialog").empty()
 				$("#pageDialog").dialog("open"), fillAssignDialog()
 			});
 			for (i=1; i<numberOfPages+1; i++) {
