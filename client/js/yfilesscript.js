@@ -2534,6 +2534,11 @@ require([
 				createEdge(graphComponent, x5, v2);
 				createEdge(graphComponent, x6, v3);
 
+				const organicLayout = new yfiles.organic.OrganicLayout();
+				organicLayout.scope = yfiles.organic.Scope.SUBSET;
+				const organicLayoutData = new yfiles.organic.OrganicLayoutData();
+				organicLayoutData.affectedNodes = [x1, x2, x3, x4, x5, x6, x7];
+				graphComponent.morphLayout(organicLayout, "0.5s", organicLayoutData);
 			}
 		})
 
