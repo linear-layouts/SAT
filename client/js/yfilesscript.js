@@ -2539,11 +2539,11 @@ require([
 				const organicLayoutData = new yfiles.organic.OrganicLayoutData();
 				organicLayoutData.affectedNodes = [x1, x2, x3, x4, x5, x6, x7];
 				graphComponent.morphLayout(organicLayout, "0.5s", organicLayoutData);
+			} else {
+				alert("Barnette Two is applied to one vertex. Choose a vertex.");
+				return
 			}
 		})
-
-
-
 
 		document.querySelector("#threeStellation").addEventListener("click", () => {
 			var selectedNodes = graphComponent.selection.selectedNodes.toArray();
@@ -2663,10 +2663,13 @@ require([
 		})
 
 		document.querySelector("#computeRandomGraph").addEventListener("click", () => {
-			graphComponent.graph.clear();
-			deleteAllConstraints();
-			disableFollowingPages(2);
-			deselectPage(2);
+			var barnetteType = document.getElementById("BarnetteCreator").value;
+			if (barnetteType != "BarnetteD") {
+				graphComponent.graph.clear();
+				deleteAllConstraints();
+				disableFollowingPages(2);
+				deselectPage(2);
+			}
 			$("#computeRandomDialog").dialog("close")
 			computeRandomGraph();
 		})
@@ -2674,23 +2677,42 @@ require([
 		//if the selected type of graph changes, some options may get en/disabled
 		document.getElementById("graphType").onchange = function() {
 			var option = document.getElementById("graphType").value;
-			if (option=="tree"|option=="complete"|option=="maximalPlanar"|option=="planar3Tree"|option=="Barnette") {
+			if (option=="tree"|option=="complete"|option=="maximalPlanar"|option=="planar3Tree") {
 				document.getElementById("divVertices").hidden = false;
 				document.getElementById("divEdges").hidden = true;
 				document.getElementById("divBipartiteVerticesM").hidden = true;
 				document.getElementById("divBipartiteVerticesN").hidden = true;
+				document.getElementById("divNumberOfB1").hidden = true;
+				document.getElementById("divNumberOfB2").hidden = true;
+				document.getElementById("BarnetteType").hidden = true;
+				
+			}
+			else if (option=="Barnette") {
+				document.getElementById("divVertices").hidden = true;
+				document.getElementById("divEdges").hidden = true;
+				document.getElementById("divBipartiteVerticesM").hidden = true;
+				document.getElementById("divBipartiteVerticesN").hidden = true;
+				document.getElementById("divNumberOfB1").hidden = false;
+				document.getElementById("divNumberOfB2").hidden = false;
+				document.getElementById("BarnetteType").hidden = false;
 			}
 			else if (option=="completeBipartite") {
 				document.getElementById("divBipartiteVerticesM").hidden = false;
 				document.getElementById("divBipartiteVerticesN").hidden = false;
 				document.getElementById("divVertices").hidden = true;
 				document.getElementById("divEdges").hidden = true;
+				document.getElementById("divNumberOfB1").hidden = true;
+				document.getElementById("divNumberOfB2").hidden = true;
+				document.getElementById("BarnetteType").hidden = true;
 			}
 			else {
 				document.getElementById("divVertices").hidden = false;
 				document.getElementById("divEdges").hidden = false;
 				document.getElementById("divBipartiteVerticesM").hidden = true;
 				document.getElementById("divBipartiteVerticesN").hidden = true;
+				document.getElementById("divNumberOfB1").hidden = true;
+				document.getElementById("divNumberOfB2").hidden = true;
+				document.getElementById("BarnetteType").hidden = true;
 			}
 		}
 
@@ -2902,6 +2924,19 @@ require([
 			var nrOfVertices = graph.nodes.size
 			var nrOfEdges = graph.edges.size
 			var isPlanar = yfiles.algorithms.PlanarEmbedding.isPlanar(ygraph)
+			var faceSizes = "";
+			if (isPlanar) {
+				var planarEmbedding = new yfiles.algorithms.PlanarEmbedding(ygraph);
+				var arrayOfFaces = planarEmbedding.faces.toArray();	//An array of the faces of the graph.
+				for (i=3; i<=20; i++) {
+					var longFaces = arrayOfFaces.filter(face => face.size == i);
+					if (longFaces.length > 0)
+						faceSizes += i + "(" + longFaces.length + ") ";
+				}
+			}
+			else {
+				faceSizes = "-";
+			}
 			var isConnected = yfiles.algorithms.GraphChecker.isConnected(ygraph)
 
 			var cyclePath = yfiles.algorithms.Cycles.findCycle(ygraph, treatEdgesAsDirected)
@@ -2952,6 +2987,7 @@ require([
 			document.getElementById("nrOfEdges").innerHTML = nrOfEdges
 			document.getElementById("isPlanar").innerHTML = isPlanar
 			if (isPlanar) { document.getElementById("isPlanar").style.color = "green" } else { document.getElementById("isPlanar").style.color = "red" }
+			document.getElementById("faceSizes").innerHTML = faceSizes
 			document.getElementById("isConnected").innerHTML = isConnected
 			if (isConnected) { document.getElementById("isConnected").style.color = "green" } else { document.getElementById("isConnected").style.color = "red" }
 			document.getElementById("is2Connected").innerHTML = is2Connected;
@@ -3095,8 +3131,6 @@ require([
 		$("#deletePageDialog").dialog("close");
 	})
 
-
-
 	/*Create random graphs functions*/
 	//returns the coordinates of a new random vertex
 	function computeRandomVertex(vertices, widthCanvas) {
@@ -3110,7 +3144,6 @@ require([
 			return computeRandomVertex(vertices, widthCanvas);
 		}
 	}
-
 
 	//
 	function computeRandomVertexWithProjection(vertices, widthCanvas){
@@ -3218,7 +3251,6 @@ require([
 		}
 	}
 
-
 	//returns a structured view of bipartite vertices
 	function computeBipartiteVertices(numberOfVerticesM, numberOfVerticesN) {
 		var bipartiteVertices = [];
@@ -3294,6 +3326,142 @@ require([
 		});
 		graphComponent.graph.addLabel(edge, getNextLabel("edge").toString());
 		return edge;
+	}
+
+	function createCube(graphComponent) {
+		var vertices = [];
+		
+		//creates vertices for outer square
+		vertices[0] = createNode(graphComponent, 0, 0);
+		vertices[1] = createNode(graphComponent, 600, 0);
+		vertices[2] = createNode(graphComponent, 600, 600);
+		vertices[3] = createNode(graphComponent, 0, 600);
+
+		//create edges for outer square
+		createEdge(graphComponent, vertices[0], vertices[1]);
+		createEdge(graphComponent, vertices[1], vertices[2]);
+		createEdge(graphComponent, vertices[2], vertices[3]);
+		createEdge(graphComponent, vertices[3], vertices[0]);
+		
+		//creates vertices for inner square
+		vertices[4] = createNode(graphComponent, 200, 200);
+		vertices[5] = createNode(graphComponent, 400, 200);
+		vertices[6] = createNode(graphComponent, 400, 400);
+		vertices[7] = createNode(graphComponent, 200, 400);
+
+		//create edges for inner square
+		createEdge(graphComponent, vertices[4], vertices[5]);
+		createEdge(graphComponent, vertices[5], vertices[6]);
+		createEdge(graphComponent, vertices[6], vertices[7]);
+		createEdge(graphComponent, vertices[7], vertices[4]);
+
+		//create edges between squares
+		createEdge(graphComponent, vertices[0], vertices[4]);
+		createEdge(graphComponent, vertices[1], vertices[5]);
+		createEdge(graphComponent, vertices[2], vertices[6]);
+		createEdge(graphComponent, vertices[3], vertices[7]);
+
+		return vertices;
+	}
+
+
+	function createBarnetteOne(graphComponent, edge1, edge2, n11, n12, n21, n22) {
+
+		// delete the selected edges
+		graphComponent.graph.remove(edge1);
+		graphComponent.graph.remove(edge2);
+
+		var x11 = n11.layout.center.x;
+		var y11 = n11.layout.center.y;
+		var x12 = n12.layout.center.x;
+		var y12 = n12.layout.center.y;
+		var x21 = n21.layout.center.x;
+		var y21 = n21.layout.center.y;
+		var x22 = n22.layout.center.x;
+		var y22 = n22.layout.center.y;
+
+		var x1 = (2*x11 + x12)/3;
+		var y1 = (2*y11+ y12)/3;
+		var x2 = (x11  + 2*x12)/3;
+		var y2 = (y11 + 2*y12)/3;
+		var x3 = (2*x21 + x22)/3;
+		var y3 = (2*y21 + y22)/3;
+		var x4 = (x21 + 2*x22)/3;
+		var y4 = (y21 + 2*y22)/3;
+
+		// create 4 new nodes
+		var node1 = createNode(graphComponent, x1, y1, 20, 20);
+		var node2 = createNode(graphComponent, x2, y2, 20, 20);
+		var node3 = createNode(graphComponent, x3, y3, 20, 20);
+		var node4 = createNode(graphComponent, x4, y4, 20, 20);
+
+		// create new edges
+		createEdge(graphComponent, node1, node2);
+		createEdge(graphComponent, node3, node4);
+		createEdge(graphComponent, n11, node1);
+		createEdge(graphComponent, node2, n12);
+		createEdge(graphComponent, n21, node3);
+		createEdge(graphComponent, node4, n22);
+		createEdge(graphComponent, node1, node4);
+		createEdge(graphComponent, node2, node3);
+
+		var newVertices = [node1, node2, node3, node4];
+
+		return newVertices;
+
+	}
+
+	function createBarnetteTwo(graphComponent, node, x, y) {
+		const adapter = new yfiles.layout.YGraphAdapter(graphComponent.graph);
+		var ygraph = adapter.yGraph;
+
+		var x = node.layout.center.x;
+		var y = node.layout.center.y;
+
+		var neighbors = graphComponent.graph.neighbors(node).toArray();	
+
+		var v1 = neighbors[0];
+		var v2 = neighbors[1];
+		var v3 = neighbors[2];
+
+		graphComponent.graph.remove(node);
+		if (!yfiles.algorithms.PlanarEmbedding.isPlanar(ygraph)) {
+			return;
+		} else {
+			var x1 = createNode(graphComponent, x, y);
+			var x2 = createNode(graphComponent, x, y);
+			var x3 = createNode(graphComponent, x, y);
+			var x4 = createNode(graphComponent, x, y);
+			var x5 = createNode(graphComponent, x, y);
+			var x6 = createNode(graphComponent, x, y);
+			var x7 = createNode(graphComponent, x, y);
+
+			createEdge(graphComponent, x1, x2);
+			createEdge(graphComponent, x1, x3);
+			createEdge(graphComponent, x2, x4);
+			createEdge(graphComponent, x3, x4);
+			createEdge(graphComponent, x2, x5);
+			createEdge(graphComponent, x4, x7);
+			createEdge(graphComponent, x3, x6);
+			createEdge(graphComponent, x5, x7);
+			createEdge(graphComponent, x6, x7);
+			createEdge(graphComponent, x1, v1);
+			createEdge(graphComponent, x5, v2);
+			createEdge(graphComponent, x6, v3);	
+
+			var newNodes = [x1, x2, x3, x4, x5, x6, x7];
+
+			/*const organicLayout = new yfiles.organic.OrganicLayout();
+			organicLayout.scope = yfiles.organic.Scope.SUBSET;
+			const organicLayoutData = new yfiles.organic.OrganicLayoutData();
+			organicLayoutData.affectedNodes = [x1, x2, x3, x4, x5, x6, x7];
+			graphComponent.morphLayout(organicLayout, "0.5s", organicLayoutData);*/
+			graphComponent.fitGraphBounds();
+
+			return newNodes;
+
+		}
+
 	}
 
 	//returns two random vertices: source and target for an edge
@@ -3389,7 +3557,6 @@ require([
 		var newYPoint = new yfiles.algorithms.YPoint(x,y);
 		allYPoints.push(newYPoint);
 	}
-
 
 
 	/*Different Types of random graphs*/
@@ -3655,53 +3822,34 @@ require([
 		graphComponent.fitGraphBounds();
 	}
 
-	function typeBarnette() {
-		var numberOfVertices = document.getElementById("numberOfVertices").value;	
-		var vertices = []; //n
-		var edges = []; //(3*n)/2
-		if (numberOfVertices <= 7) {
-			typeTree();
-		}
-		else {
-			//creates vertices for outer square
-			vertices[0] = createNode(graphComponent, 0, 0);
-			vertices[1] = createNode(graphComponent, 600, 0);
-			vertices[2] = createNode(graphComponent, 600, 600);
-			vertices[3] = createNode(graphComponent, 0, 600);
+	function typeBarnetteA() {
+		var numberOfBarnette1 = document.getElementById("numberOfBarnette1").value;	
+		var numberOfBarnette2 = document.getElementById("numberOfBarnette2").value;	
 
-			//create edges for outer square
-			createEdge(graphComponent, vertices[0], vertices[1]);
-			createEdge(graphComponent, vertices[1], vertices[2]);
-			createEdge(graphComponent, vertices[2], vertices[3]);
-			createEdge(graphComponent, vertices[3], vertices[0]);
+		createCube(graphComponent);
 
-			//creates vertices for inner square
-			vertices[4] = createNode(graphComponent, 200, 200);
-			vertices[5] = createNode(graphComponent, 400, 200);
-			vertices[6] = createNode(graphComponent, 400, 400);
-			vertices[7] = createNode(graphComponent, 200, 400);
-
-			//create edges for inner square
-			createEdge(graphComponent, vertices[4], vertices[5]);
-			createEdge(graphComponent, vertices[5], vertices[6]);
-			createEdge(graphComponent, vertices[6], vertices[7]);
-			createEdge(graphComponent, vertices[7], vertices[4]);
-
-			//create edges between squares
-			createEdge(graphComponent, vertices[0], vertices[4]);
-			createEdge(graphComponent, vertices[1], vertices[5]);
-			createEdge(graphComponent, vertices[2], vertices[6]);
-			createEdge(graphComponent, vertices[3], vertices[7]);
-
-			var noOfVertices = numberOfVertices - 12;
-			for(var i = 0; i <= noOfVertices/4; i++) {
-
+		for (let i = 1; i <= (numberOfBarnette1 + numberOfBarnette2); i++) {
+			if ((i%4 == 0) && (numberOfBarnette2 > 0)) {	
+				const adapter = new yfiles.layout.YGraphAdapter(graphComponent.graph);
+				var ygraph = adapter.yGraph;
+	
+				var nodes = graphComponent.graph.nodes.toArray();
+				var randomNodeIndex = Math.floor(Math.random()*nodes.length);
+				var randomNode = nodes[randomNodeIndex];	
+				console.log(randomNode);
+	
+				var x = randomNode.layout.center.x;
+				var y = randomNode.layout.center.y;
+				createBarnetteTwo(graphComponent, randomNode, x, y);
+				numberOfBarnette2--;				
+			} 
+			if ((i%4 != 0) && (numberOfBarnette1 > 0)) {
 				const adapter = new yfiles.layout.YGraphAdapter(graphComponent.graph);
 				var ygraph = adapter.yGraph;
 				
 				var planarEmbedding = new yfiles.algorithms.PlanarEmbedding(ygraph);
 				var arrayOfFaces = planarEmbedding.faces.toArray();
-
+	
 				var randomFaceIndex = Math.floor(Math.random() * arrayOfFaces.length);
 				var randomFace = arrayOfFaces[randomFaceIndex];	
 				var faceEdges = [];
@@ -3714,7 +3862,7 @@ require([
 					faceEdges[faceLength] = adapter.getOriginalEdge(dart.associatedEdge);
 					faceDarts[faceLength] = dart;
 					faceLength++;
-					})	
+				})	
 
 				do {
 					var randomNumber1 = Math.floor(Math.random() * faceLength);
@@ -3725,51 +3873,236 @@ require([
 
 				var e1 = faceEdges[randomNumber1];
 				var e2 = faceEdges[randomNumber2];
-				
+
 				var n11 = adapter.getOriginalNode(!faceDarts[randomNumber1].reversed ? faceDarts[randomNumber1].associatedEdge.source : faceDarts[randomNumber1].associatedEdge.target);
 				var n12 = adapter.getOriginalNode(!faceDarts[randomNumber1].reversed ? faceDarts[randomNumber1].associatedEdge.target : faceDarts[randomNumber1].associatedEdge.source);
 				var n21 = adapter.getOriginalNode(!faceDarts[randomNumber2].reversed ? faceDarts[randomNumber2].associatedEdge.source : faceDarts[randomNumber2].associatedEdge.target);
 				var n22 = adapter.getOriginalNode(!faceDarts[randomNumber2].reversed ? faceDarts[randomNumber2].associatedEdge.target : faceDarts[randomNumber2].associatedEdge.source);
 
-				// delete the selected edges
-				graphComponent.graph.remove(e1);
-				graphComponent.graph.remove(e2);
-	
-				var x11 = n11.layout.center.x;
-				var y11 = n11.layout.center.y;
-				var x12 = n12.layout.center.x;
-				var y12 = n12.layout.center.y;
-				var x21 = n21.layout.center.x;
-				var y21 = n21.layout.center.y;
-				var x22 = n22.layout.center.x;
-				var y22 = n22.layout.center.y;
-
-				var x1 = (2*x11 + x12)/3;
-				var y1 = (2*y11+ y12)/3;
-				var x2 = (x11  + 2*x12)/3;
-				var y2 = (y11 + 2*y12)/3;
-				var x3 = (2*x21 + x22)/3;
-				var y3 = (2*y21 + y22)/3;
-				var x4 = (x21 + 2*x22)/3;
-				var y4 = (y21 + 2*y22)/3;
-
-				// create 4 new nodes
-				var node1 = createNode(graphComponent, x1, y1, 20, 20);
-				var node2 = createNode(graphComponent, x2, y2, 20, 20);
-				var node3 = createNode(graphComponent, x3, y3, 20, 20);
-				var node4 = createNode(graphComponent, x4, y4, 20, 20);
-
-				// create new edges
-				createEdge(graphComponent, node1, node2);
-				createEdge(graphComponent, node3, node4);
-				createEdge(graphComponent, n11, node1);
-				createEdge(graphComponent, node2, n12);
-				createEdge(graphComponent, n21, node3);
-				createEdge(graphComponent, node4, n22);
-				createEdge(graphComponent, node1, node4);
-				createEdge(graphComponent, node2, node3);	
+				createBarnetteOne(graphComponent, e1, e2, n11, n12, n21, n22);
+				numberOfBarnette1--;
 			}
+		}
+
+		graphComponent.fitGraphBounds();
+	}
+
+	function typeBarnetteB() {
+		var numberOfBarnette1 = document.getElementById("numberOfBarnette1").value;	
+		var numberOfBarnette2 = document.getElementById("numberOfBarnette2").value;
+
+		createCube(graphComponent);
+
+		for (var i = 1; i <= numberOfBarnette2; i++) {
+			const adapter = new yfiles.layout.YGraphAdapter(graphComponent.graph);
+			var ygraph = adapter.yGraph;
+
+			var nodes = graphComponent.graph.nodes.toArray();
+			var randomNodeIndex = Math.floor(Math.random()*nodes.length);
+			var randomNode = nodes[randomNodeIndex];	
+			var x = randomNode.layout.center.x;
+			var y = randomNode.layout.center.y;
+
+			createBarnetteTwo(graphComponent, randomNode, x, y);
+		}
+			
+		for (var i = 1; i <= numberOfBarnette1; i++) {
+			const adapter = new yfiles.layout.YGraphAdapter(graphComponent.graph);
+			var ygraph = adapter.yGraph;
+
+			var planarEmbedding = new yfiles.algorithms.PlanarEmbedding(ygraph);
+			var arrayOfFaces = planarEmbedding.faces.toArray();	//An array of the faces of the graph.
+
+			//var faces = planarEmbedding.faces.size;	//The number of faces.
+
+			var longFaces = arrayOfFaces.filter(face => face.size >= 8);	//Distinguishes the faces with length >= 8.
+	
+			var randomFaceIndex = Math.floor(Math.random() * longFaces.length);
+			var randomFace = longFaces[randomFaceIndex];	
+	
+			var faceEdges = [];
+			var faceDarts = [];
+			var faceLength = 0;
+			randomFace.forEach(dart => {
+				const source = adapter.getOriginalNode(dart.reversed ? dart.associatedEdge.source : dart.associatedEdge.target);
+				const target = adapter.getOriginalNode(dart.reversed ? dart.associatedEdge.target : dart.associatedEdge.source);
+				faceEdges[faceLength] = adapter.getOriginalEdge(dart.associatedEdge);
+				faceDarts[faceLength] = dart;
+				faceLength++;
+				})	
+			do {
+				var randomNumber1 = Math.floor(Math.random() * faceLength);
+				var randomNumber2 = Math.floor(Math.random() * faceLength);
+
+			}
+			while ((randomNumber1%2 == 0 && randomNumber2%2 == 1) || (randomNumber1%2 == 1 && randomNumber2%2 == 0) || (randomNumber1 == randomNumber2) || (Math.min(Math.abs(randomNumber1 - randomNumber2), randomNumber1 + randomNumber2) < 4));
+			
+			var e1 = faceEdges[randomNumber1];
+			var e2 = faceEdges[randomNumber2];
+
+			var n11 = adapter.getOriginalNode(!faceDarts[randomNumber1].reversed ? faceDarts[randomNumber1].associatedEdge.source : faceDarts[randomNumber1].associatedEdge.target);
+			var n12 = adapter.getOriginalNode(!faceDarts[randomNumber1].reversed ? faceDarts[randomNumber1].associatedEdge.target : faceDarts[randomNumber1].associatedEdge.source);
+			var n21 = adapter.getOriginalNode(!faceDarts[randomNumber2].reversed ? faceDarts[randomNumber2].associatedEdge.source : faceDarts[randomNumber2].associatedEdge.target);
+			var n22 = adapter.getOriginalNode(!faceDarts[randomNumber2].reversed ? faceDarts[randomNumber2].associatedEdge.target : faceDarts[randomNumber2].associatedEdge.source);
+
+			createBarnetteOne(graphComponent, e1, e2, n11, n12, n21, n22);
+		}
+			
+		graphComponent.fitGraphBounds();
+		
+	}
+
+	function typeBarnetteC() {
+		var numberOfBarnette1 = document.getElementById("numberOfBarnette1").value;	
+		var numberOfBarnette2 = document.getElementById("numberOfBarnette2").value;
+		var vertices = createCube(graphComponent);
+
+		for (var i = 1; i <= numberOfBarnette2; i+=5) {
+			const adapter = new yfiles.layout.YGraphAdapter(graphComponent.graph);
+			var ygraph = adapter.yGraph;
+	
+			var randomNodeIndex = Math.floor(Math.random()*vertices.length);
+			var randomNode = vertices[randomNodeIndex];	
+
+			var x = randomNode.layout.center.x;
+			var y = randomNode.layout.center.y;	
+			
+			var newNodes = createBarnetteTwo(graphComponent, randomNode, x, y);
+
+			vertices = vertices.concat(newNodes);
+			vertices = vertices.concat(createBarnetteTwo(graphComponent, newNodes[1], x, y));
+			vertices = vertices.concat(createBarnetteTwo(graphComponent, newNodes[2], x, y));
+			vertices = vertices.concat(createBarnetteTwo(graphComponent, newNodes[3], x, y));
+			vertices = vertices.concat(createBarnetteTwo(graphComponent, newNodes[6], x, y));
+
+			vertices.splice(vertices.indexOf(randomNode), 1);  //Removes the randomNode from the array of vertices.
+			vertices.splice(vertices.indexOf(newNodes[1]),1);
+			vertices.splice(vertices.indexOf(newNodes[2]),1);
+			vertices.splice(vertices.indexOf(newNodes[3]),1);
+			vertices.splice(vertices.indexOf(newNodes[6]),1);
+		}
+		for (var i = 1; i <= numberOfBarnette1; i++) {
+			const adapter = new yfiles.layout.YGraphAdapter(graphComponent.graph);
+			var ygraph = adapter.yGraph;
+
+			var planarEmbedding = new yfiles.algorithms.PlanarEmbedding(ygraph);
+			var arrayOfFaces = planarEmbedding.faces.toArray();	//An array of the faces of the graph.
+
+			var longFaces = arrayOfFaces.filter(face => face.size >= 8);
+			//console.log(longFaces.size);
+			var randomFaceIndex = Math.floor(Math.random() * longFaces.length);
+			var randomFace = longFaces[randomFaceIndex];	
+			//console.log(randomFace);
+
+			var faceEdges = [];
+			var faceDarts = [];
+			var faceLength = 0;
+			randomFace.forEach(dart => {
+				const source = adapter.getOriginalNode(dart.reversed ? dart.associatedEdge.source : dart.associatedEdge.target);
+				const target = adapter.getOriginalNode(dart.reversed ? dart.associatedEdge.target : dart.associatedEdge.source);
+				faceEdges[faceLength] = adapter.getOriginalEdge(dart.associatedEdge);
+				faceDarts[faceLength] = dart;
+				faceLength++;
+				})	
+
+			do {
+				var randomNumber1 = Math.floor(Math.random() * faceLength);
+				var randomNumber2 = Math.floor(Math.random() * faceLength);
+
+			}
+			while ((randomNumber1%2 == 0 && randomNumber2%2 == 1) || (randomNumber1%2 == 1 && randomNumber2%2 == 0) || (randomNumber1 == randomNumber2) || (Math.min(Math.abs(randomNumber1 - randomNumber2), randomNumber1 + randomNumber2) < 4));
+			
+			var e1 = faceEdges[randomNumber1];
+			var e2 = faceEdges[randomNumber2];
+			var n11 = adapter.getOriginalNode(!faceDarts[randomNumber1].reversed ? faceDarts[randomNumber1].associatedEdge.source : faceDarts[randomNumber1].associatedEdge.target);
+			var n12 = adapter.getOriginalNode(!faceDarts[randomNumber1].reversed ? faceDarts[randomNumber1].associatedEdge.target : faceDarts[randomNumber1].associatedEdge.source);
+			var n21 = adapter.getOriginalNode(!faceDarts[randomNumber2].reversed ? faceDarts[randomNumber2].associatedEdge.source : faceDarts[randomNumber2].associatedEdge.target);
+			var n22 = adapter.getOriginalNode(!faceDarts[randomNumber2].reversed ? faceDarts[randomNumber2].associatedEdge.target : faceDarts[randomNumber2].associatedEdge.source);
+
+			createBarnetteOne(graphComponent, e1, e2, n11, n12, n21, n22);
+		}
+
+		graphComponent.fitGraphBounds();
+
+	}
+
+	function typeBarnetteOne(startFromCube = true, onlyOnLargeFaces = false) {
+		var numberOfBarnette1 = document.getElementById("numberOfBarnette1").value;
+		var numberOfBarnette2 = document.getElementById("numberOfBarnette2").value;
+
+		if (startFromCube) {
+		
+			createCube(graphComponent);
+		}
+
+		for (var i = 1; i <= numberOfBarnette1; i++) {
+
+			const adapter = new yfiles.layout.YGraphAdapter(graphComponent.graph);
+			var ygraph = adapter.yGraph;
+			
+			var planarEmbedding = new yfiles.algorithms.PlanarEmbedding(ygraph);
+			var arrayOfFaces = planarEmbedding.faces.toArray();
+
+			if (onlyOnLargeFaces) {
+				arrayOfFaces = arrayOfFaces.filter(face => face.size >= 8);
+			}
+
+			var randomFaceIndex = Math.floor(Math.random() * arrayOfFaces.length);
+			var randomFace = arrayOfFaces[randomFaceIndex];	
+			var faceEdges = [];
+			var faceDarts = [];
+			var faceLength = 0;
+
+			randomFace.forEach(dart => {
+				const source = adapter.getOriginalNode(dart.reversed ? dart.associatedEdge.source : dart.associatedEdge.target);
+				const target = adapter.getOriginalNode(dart.reversed ? dart.associatedEdge.target : dart.associatedEdge.source);
+				faceEdges[faceLength] = adapter.getOriginalEdge(dart.associatedEdge);
+				faceDarts[faceLength] = dart;
+				faceLength++;
+				})	
+
+			do {
+				var randomNumber1 = Math.floor(Math.random() * faceLength);
+				var randomNumber2 = Math.floor(Math.random() * faceLength);
+
+			}
+			while ((randomNumber1%2 == 0 && randomNumber2%2 == 1) || (randomNumber1%2 == 1 && randomNumber2%2 == 0) || (randomNumber1 == randomNumber2));
+
+			var e1 = faceEdges[randomNumber1];
+			var e2 = faceEdges[randomNumber2];
+			
+			var n11 = adapter.getOriginalNode(!faceDarts[randomNumber1].reversed ? faceDarts[randomNumber1].associatedEdge.source : faceDarts[randomNumber1].associatedEdge.target);
+			var n12 = adapter.getOriginalNode(!faceDarts[randomNumber1].reversed ? faceDarts[randomNumber1].associatedEdge.target : faceDarts[randomNumber1].associatedEdge.source);
+			var n21 = adapter.getOriginalNode(!faceDarts[randomNumber2].reversed ? faceDarts[randomNumber2].associatedEdge.source : faceDarts[randomNumber2].associatedEdge.target);
+			var n22 = adapter.getOriginalNode(!faceDarts[randomNumber2].reversed ? faceDarts[randomNumber2].associatedEdge.target : faceDarts[randomNumber2].associatedEdge.source);
+
+			createBarnetteOne(graphComponent, e1, e2, n11, n12, n21, n22);	
 		}	
+		graphComponent.fitGraphBounds();
+	}
+
+	function typeBarnetteTwo(startFromCube = true) {
+		var numberOfBarnette1 = document.getElementById("numberOfBarnette1").value;	
+		var numberOfBarnette2 = document.getElementById("numberOfBarnette2").value;	
+		
+		if (startFromCube) {
+
+			createCube(graphComponent);
+		}
+
+		for(var i = 0; i <= numberOfBarnette2; i++) {
+			const adapter = new yfiles.layout.YGraphAdapter(graphComponent.graph);
+			var ygraph = adapter.yGraph;
+
+			var nodes = graphComponent.graph.nodes.toArray();
+			var randomNodeIndex = Math.floor(Math.random()*nodes.length);
+			var randomNode = nodes[randomNodeIndex];	
+			//console.log(randomNode);
+			var x = randomNode.layout.center.x;
+			var y = randomNode.layout.center.y;
+
+			createBarnetteTwo(graphComponent, randomNode, x, y);
+		}
 		graphComponent.fitGraphBounds();
 	}
 
@@ -3787,7 +4120,57 @@ require([
 				typePlanar3Tree();
 				break;
 			case "Barnette":
-				typeBarnette();
+				var barnetteType = document.getElementById("BarnetteCreator").value;
+				switch (barnetteType) {
+					case "BarnetteA":
+						typeBarnetteA();
+						break;
+					case "BarnetteB":
+						typeBarnetteB();
+						break;
+					case "BarnetteC":
+						typeBarnetteC();
+						break;
+					case "BarnetteD":
+						var graph = graphComponent.graph
+						const adapter = new yfiles.layout.YGraphAdapter(graphComponent.graph);
+						var ygraph = adapter.yGraph
+						var maxdegree = 0
+						var mindegree = graph.nodes.size
+						for (const v of ygraph.nodes) {				
+							if (v.edges.size > maxdegree) {
+								maxdegree = v.edges.size;
+							}				
+							if (v.edges.size < mindegree) {
+								mindegree = v.edges.size;
+							}
+						}
+						var is3Connected = true;
+						if (graph.nodes.size < 4) {
+							is3Connected = false;
+						} else {
+							for (const node of graph.nodes) {
+								const bc = new yfiles.analysis.BiconnectedComponents();
+								bc.subgraphNodes.excludes = node;
+								const result = bc.run(graph);
+								if (result.components.size != 1) {
+									is3Connected = false;
+									break;
+								}
+							}
+						}
+						if (maxdegree == 3 && mindegree == 3 && yfiles.algorithms.PlanarEmbedding.isPlanar(ygraph) && yfiles.algorithms.GraphChecker.isBipartite(ygraph) && is3Connected) {
+							typeBarnetteTwo(false);
+							typeBarnetteOne(false, true);
+						}					
+						break;
+					case "Barnette1":
+						typeBarnetteOne();
+						break;
+					case "Barnette2":
+						typeBarnetteTwo();
+						break;
+				}
 				break;
 			case "maximalPlanar":
 				typeMaximalPlanar();

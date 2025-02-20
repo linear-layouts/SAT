@@ -2032,6 +2032,19 @@ addDefaultColor();*/
 		let nrOfVertices = graph.nodes.size;
 		let nrOfEdges = graph.edges.size;
 		let isPlanar = yfiles.algorithms.PlanarEmbedding.isPlanar(ygraph);
+		var faceSizes = "";
+			if (isPlanar) {
+				var planarEmbedding = new yfiles.algorithms.PlanarEmbedding(ygraph);
+				var arrayOfFaces = planarEmbedding.faces.toArray();	//An array of the faces of the graph.
+				for (i=3; i<=20; i++) {
+					var longFaces = arrayOfFaces.filter(face => face.size == i);
+					if (longFaces.length > 0)
+						faceSizes += i + "(" + longFaces.length + ") ";
+				}
+			}
+			else {
+				faceSizes = "-";
+			}
 		let isConnected = yfiles.algorithms.GraphChecker.isConnected(ygraph);
 		let cyclePath = yfiles.algorithms.Cycles.findCycle(ygraph, treatEdgesAsDirected);
 		let isAcyclic = cyclePath.size === 0;
@@ -2078,6 +2091,7 @@ addDefaultColor();*/
 		document.getElementById("nrOfEdges").innerHTML = nrOfEdges;
 		document.getElementById("isPlanar").innerHTML = isPlanar;
 		if (isPlanar) {document.getElementById("isPlanar").style.color = "green"} else {document.getElementById("isPlanar").style.color = "red"}
+		document.getElementById("faceSizes").innerHTML = faceSizes;
 		document.getElementById("isConnected").innerHTML = isConnected;
 		if (isConnected) {document.getElementById("isConnected").style.color = "green"} else {document.getElementById("isConnected").style.color = "red"}
 		document.getElementById("is2Connected").innerHTML = is2Connected;

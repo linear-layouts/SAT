@@ -300,6 +300,22 @@
   <div id="divEdges">Number of edges:
   <input type="number" id="numberOfEdges" name="numberOfEdges" min="0" placeholder="30" value="30" required><br>
   </div>
+  <div id="BarnetteType" hidden> Creation Type: 
+    <select name="BarnetteCreator" id="BarnetteCreator"  style="width: 270px">
+      <option value="Barnette1">Only B.1 operations</option>
+      <option value="Barnette2">Only B.2 operations</option>
+      <option value="BarnetteB">Random B.2 and then B.1</option>
+      <option value="BarnetteC">Nested B.2 and then B.1</option> 
+      <option value="BarnetteA">Every 4th operation is B.2</option>   
+      <option value="BarnetteD">Extend the current graph</option>
+    </select>      
+  </div>
+  <div id="divNumberOfB1" hidden>Barnette One (B.1) operations:
+  <input type="number" id="numberOfBarnette1" name="numberOfBarnette1" style="width: 270px" min="0" placeholder="3" value="3" required><br>
+  </div>
+  <div id="divNumberOfB2" hidden>Barnette Two (B.2) operations:
+  <input type="number" id="numberOfBarnette2" name="numberOfBarnette2" style="width: 270px" min="0" placeholder="3" value="3" required><br>
+  </div>
   <div id="divBipartiteVerticesM" hidden>Number of vertices in partition A:
   <input type="number" id="numberOfBipartiteVerticesM" name="numberOfBipartiteVerticesM" min="0" placeholder="5" value="5" required><br>
   </div>
@@ -355,12 +371,13 @@
 </div>
 
 <div id="statsDialog" title="Stats">
-  <table style="font-weight: bold">
-  <tr><td width="200px">Vertices:</td><td id="nrOfVertices"></td></tr>
+  <table style="font-weight: bold; width:340px;">
+  <tr><td width="170px">Vertices:</td><td id="nrOfVertices"></td></tr>
   <tr><td>Edges:</td><td id="nrOfEdges"></td></tr>
   <tr><td>Min degree:</td><td id="minDegree"></td></tr>
   <tr><td>Max degree:</td><td id="maxDegree"></td></tr>
   <tr><td>Planar:</td><td id="isPlanar"></td></tr>
+  <tr><td>Face sizes:</td><td id="faceSizes"></td></tr>
   <tr><td>1-Connected:</td><td id="isConnected"></td></tr>
   <tr><td>2-Connected:</td><td id="is2Connected"></td></tr>
   <tr><td>3-Connected:</td><td id="is3Connected"></td></tr>
