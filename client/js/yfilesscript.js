@@ -3826,9 +3826,11 @@ require([
 		var numberOfBarnette1 = document.getElementById("numberOfBarnette1").value;	
 		var numberOfBarnette2 = document.getElementById("numberOfBarnette2").value;	
 
+		var totalBarnette = numberOfBarnette1 + numberOfBarnette2;
+
 		createCube(graphComponent);
 
-		for (let i = 1; i <= (numberOfBarnette1 + numberOfBarnette2); i++) {
+		for (let i = 1; i <= totalBarnette; i++) {
 			if ((i%4 == 0) && (numberOfBarnette2 > 0)) {	
 				const adapter = new yfiles.layout.YGraphAdapter(graphComponent.graph);
 				var ygraph = adapter.yGraph;
