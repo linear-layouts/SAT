@@ -3885,7 +3885,7 @@ require([
 				numberOfBarnette1--;
 			}
 		}
-
+		graphComponent.morphLayout(new yfiles.orthogonal.OrthogonalLayout());
 		graphComponent.fitGraphBounds();
 	}
 
@@ -3949,7 +3949,7 @@ require([
 
 			createBarnetteOne(graphComponent, e1, e2, n11, n12, n21, n22);
 		}
-			
+		graphComponent.morphLayout(new yfiles.orthogonal.OrthogonalLayout());
 		graphComponent.fitGraphBounds();
 		
 	}
@@ -4023,7 +4023,7 @@ require([
 
 			createBarnetteOne(graphComponent, e1, e2, n11, n12, n21, n22);
 		}
-
+		graphComponent.morphLayout(new yfiles.orthogonal.OrthogonalLayout());
 		graphComponent.fitGraphBounds();
 
 	}
@@ -4080,6 +4080,7 @@ require([
 
 			createBarnetteOne(graphComponent, e1, e2, n11, n12, n21, n22);	
 		}	
+		graphComponent.morphLayout(new yfiles.orthogonal.OrthogonalLayout());
 		graphComponent.fitGraphBounds();
 	}
 
@@ -4105,6 +4106,7 @@ require([
 
 			createBarnetteTwo(graphComponent, randomNode, x, y);
 		}
+		graphComponent.morphLayout(new yfiles.orthogonal.OrthogonalLayout());
 		graphComponent.fitGraphBounds();
 	}
 
@@ -4742,6 +4744,13 @@ require([
 
 					document.getElementById('Hamiltonian').click();
 					window.sessionStorage.setItem("Hamiltonian", document.getElementById('Hamiltonian').checked);
+
+				break;
+
+				case "HAMILTONIAN_PATH":
+
+					document.getElementById('HamiltonianP').click();
+					window.sessionStorage.setItem("HamiltonianP", document.getElementById('HamiltonianP').checked);
 
 				break;
 

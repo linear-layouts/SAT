@@ -1440,6 +1440,33 @@ class SatModel(object):
                 for e in self.edges:
                     neighbors[e.source].append(self._node_id_to_idx[e.target])
                     neighbors[e.target].append(self._node_id_to_idx[e.source])
+                
+                first_page = 0
+                first_type = 0
+                for page in self.pages:
+                    if page['type'] == 'STACK':
+                        first_page = self._page_id_to_idx[page['id']]
+                        first_type = page['type']
+                        break
+                
+                if first_type != 0:
+                    for e in self.edges:
+                        x = self._node_id_to_idx[e.source]
+                        y = self._node_id_to_idx[e.target]
+                        #print(x)
+                        #print(y)
+                        clause = []
+                        clause.extend([self._edge_to_page[first_page, self._edge_id_to_idx[e.id]]])
+                        for z in neighbors[e.source]:
+                            if z != y:
+                                clause.extend([self._inbetween[x,z,y]])
+                                clause.extend([self._inbetween[y,z,x]])
+
+                        for z in neighbors[e.target]:
+                            if z != x:
+                                clause.extend([self._inbetween[x,z,y]])
+                                clause.extend([self._inbetween[y,z,x]])
+                        clauses.extend([clause])
 
                 # If (v1, v2) is not an edge then neighbor of v1  must be in between 
                 for v1 in self.vertices:
@@ -1447,8 +1474,10 @@ class SatModel(object):
                         if v1 == v2 or v2 < v1:
                             continue
                         if self._node_id_to_idx[v2] not in neighbors[v1]:
+
                             #non_edges.append((v1,v2))
                             if constraint['type'] == 'HAMILTONIAN_CYCLE':
+                                
                                 clauses.extend(static_encode_non_extremes(self._precedes,
                                                                         self._node_id_to_idx[v1],
                                                                         self._node_id_to_idx[v2], neighbors[v1], neighbors[v2]))
