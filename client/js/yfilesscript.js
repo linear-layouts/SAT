@@ -2397,6 +2397,82 @@ require([
 				graphComponent.graph.setNodeCenter(stellate, new yfiles.geometry.Point(x, y));
 			}
 		})
+		
+		document.querySelector("#Dual").addEventListener("click", () => {
+
+			const adapter = new yfiles.layout.YGraphAdapter(graphComponent.graph);
+			const ygraph = adapter.yGraph;
+
+			const originalNodes =  graphComponent.graph.nodes.toArray();
+
+			if (!yfiles.algorithms.PlanarEmbedding.isPlanar(ygraph)) {
+			alert("The input graph is not planar, so the dual graph cannot be computed.");
+			return;
+			}
+
+			const planarEmbedding = new yfiles.algorithms.PlanarEmbedding(ygraph);
+			const faceToNode = new Map(); // faceIndex → new dual node
+			const edgeToFaces = new Map(); // associatedEdge (object) → Set of face indices
+
+			// Create dual nodes for each face
+			planarEmbedding.faces.forEach((face, faceIndex) => {
+			let x = 0;
+			let y = 0;
+			const counted = new Set();
+
+			face.forEach(dart => {
+				const source = adapter.getOriginalNode(
+				dart.reversed ? dart.associatedEdge.source : dart.associatedEdge.target
+				);
+
+				// Average the position of unique nodes
+				if (!counted.has(source)) {
+				x += source.layout.center.x;
+				y += source.layout.center.y;
+				counted.add(source);
+				}
+
+				// Track which edge belongs to which faces
+				const edgeObj = dart.associatedEdge;
+				if (!edgeToFaces.has(edgeObj)) {
+				edgeToFaces.set(edgeObj, new Set());
+				}
+				edgeToFaces.get(edgeObj).add(faceIndex);
+			});
+
+			const cx = x / counted.size;
+			const cy = y / counted.size;
+			const faceNode = createNode(graphComponent, cx, cy, 20, 20);
+			faceToNode.set(faceIndex, faceNode);
+			});
+
+			// Connect dual nodes for shared edges (neighboring faces)
+			const connected = new Set();
+			for (const [edgeObj, faceSet] of edgeToFaces.entries()) {
+				const faceList = Array.from(faceSet);
+				if (faceList.length === 2) {
+					const [f1, f2] = faceList;
+					const n1 = faceToNode.get(f1);
+					const n2 = faceToNode.get(f2);
+
+					const key = [n1, n2].sort((a, b) => a.layout.x - b.layout.x || a.layout.y - b.layout.y).join("-");
+					if (!connected.has(key)) {
+						createEdge(graphComponent, n1, n2);
+						connected.add(key);
+					}
+				}
+			}
+
+			//Delete all original nodes and edges
+			originalNodes.forEach(function (n) {
+					graphComponent.graph.remove(n);
+				})
+			//graphComponent.graph.remove(originalNodes);
+
+			graphComponent.fitGraphBounds();
+
+			});
+
 
 		document.querySelector("#BarnetteOne").addEventListener("click", () => {
 
@@ -2685,7 +2761,6 @@ require([
 				document.getElementById("divNumberOfB1").hidden = true;
 				document.getElementById("divNumberOfB2").hidden = true;
 				document.getElementById("BarnetteType").hidden = true;
-				
 			}
 			else if (option=="Barnette") {
 				document.getElementById("divVertices").hidden = true;
@@ -3364,7 +3439,6 @@ require([
 		return vertices;
 	}
 
-
 	function createBarnetteOne(graphComponent, edge1, edge2, n11, n12, n21, n22) {
 
 		// delete the selected edges
@@ -3463,6 +3537,7 @@ require([
 		}
 
 	}
+
 
 	//returns two random vertices: source and target for an edge
 	function computeRandomVerticesForEdge(numberOfVertices, vertices) {
