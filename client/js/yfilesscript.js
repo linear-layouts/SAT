@@ -35,7 +35,7 @@ require([
 
 	let graph = null;
 
-	var standardServer = "http://alice.cs.uni-tuebingen.de:5555"
+	var standardServer = "http://algosrv.math.uoi.gr:5555"
 	//var standardServer = "http://0.0.0.0:5555/embeddings"
 
 	var numberOfPages = parseInt(window.localStorage.getItem("numberOfPages"));
@@ -306,7 +306,6 @@ require([
 			// checking if there is a preferred server in the local storage, if not use the standard server
 			var currentServer = window.localStorage.getItem("currentServer")
 			if (currentServer == null) {
-				//document.getElementById("displayCurrentServer").innerHTML = "http://sofa.fsi.uni-tuebingen.de:5555/embeddings/"
 				link = standardServer + "/embeddings/" + embeddingID 
 			} else {
 				//document.getElementById("displayCurrentServer").innerHTML = currentServer
